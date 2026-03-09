@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: scoutbase-postgresql
+    environment:
+      POSTGRES_DB: scoutbase-db
+      POSTGRES_USER: scoutbadmin
+      POSTGRES_PASSWORD: grup5ioc
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  app:
+    image: eclipse-temurin:24-jdk
+    container_name: scoutbase-api
+    ports:
+      - "8080:8080"
+    volumes:
+      # This maps your local target folder into the container
+      - ./target:/app
+    working_dir: /app
+    command: java -jar scoutbase-backend-0.0.1-SNAPSHOT.jar
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5431/scoutbase-db
+      DATABASE_USERNAME: scoutbadmin
+      DATABASE_PASSWORD: grup5ioc
+
+volumes:
+  postgres_data:
