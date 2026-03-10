@@ -1,12 +1,9 @@
 package es.dimecresalessis.scoutbase.player.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.Id;
 
 import java.util.UUID;
 
@@ -14,6 +11,7 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "player")
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
