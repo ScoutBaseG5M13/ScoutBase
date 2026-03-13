@@ -1,22 +1,22 @@
-package es.dimecresalessis.scoutbase.player.domain;
+package es.dimecresalessis.scoutbase.player.domain.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Getter
-@Entity
 @AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "player")
 public class Player {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     private String name;
     private String team;
     private String email;
+
+    public static Player getNewInstance(String name, String team, String email) {
+        return new Player(UUID.randomUUID(), name, team, email);
+    }
 }

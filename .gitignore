@@ -14,7 +14,7 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea <- Lo guardamos
+*.idea <- Lo guardamos
 !.idea/runConfigurations
 *.iws
 *.iml
@@ -32,3 +32,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# ---------------------------- #
+
+### Backend specific files ###

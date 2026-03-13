@@ -7,11 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class ScoutbaseApplication {
-
-	private static final Logger logger = LoggerFactory.getLogger(ScoutbaseApplication.class);
-
 	public static void main(String[] args) {
-		logger.info("--- APPLICATION STARTING LOGGER OUCH! 14:47h---");
 		SpringApplication.run(ScoutbaseApplication.class, args);
 	}
 }
