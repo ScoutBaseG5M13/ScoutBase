@@ -2,8 +2,6 @@ package es.dimecresalessis.scoutbase.player.application.usecases;
 
 import es.dimecresalessis.scoutbase.player.domain.model.Player;
 import es.dimecresalessis.scoutbase.player.domain.repository.PlayerRepository;
-import es.dimecresalessis.scoutbase.player.infrastructure.web.dto.PlayerDto;
-import es.dimecresalessis.scoutbase.player.domain.exception.PlayerException;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

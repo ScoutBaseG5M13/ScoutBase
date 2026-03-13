@@ -1,7 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.web;
 
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
-import es.dimecresalessis.scoutbase.shared.exception.ScoutbaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
