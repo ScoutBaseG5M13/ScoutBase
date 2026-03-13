@@ -19,7 +19,7 @@ public class HealthController {
 
     private static final Logger logger = LoggerFactory.getLogger(HealthController.class);
 
-    @GetMapping(value = Routes.IS_ALIVE_PATH)
+    @GetMapping
     public ApiResponse<Boolean> isAlive() throws ScoutbaseException {
         logger.info("[PING] Health check requested");
         return handleResponse(true).ok();
