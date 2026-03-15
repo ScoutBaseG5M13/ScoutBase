@@ -31,6 +31,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<User> findByUsername(String username) {
+        return jpaUserRepository.findByUsername(username);
+    }
+
+    @Override
     public User save(User user) {
         UserEntity entity = jpaUserRepository.findById(user.getId())
                 .orElse(new UserEntity());

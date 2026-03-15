@@ -9,21 +9,24 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public enum Role {
-    ADMIN("ADMIN", List.of(
+    ADMIN("ADMIN", "/admin", List.of(
             Permission.PLAYER_WRITE,
-            Permission.PLAYER_READ
+            Permission.PLAYER_READ,
+            Permission.USER_WRITE,
+            Permission.USER_READ
     )),
 
-    USER("USER", List.of(
+    USER("USER", "user", List.of(
             Permission.PLAYER_READ
     ));
 
     private final String name;
+    private final String apiPath;
     private final List<Permission> permissions;
 
     public static Role fromName(String name) {
         for (Role role : values()) {
-            if (TextUtils.normalizeToUpperCase(role.getName()).equals(name)) {
+            if (TextUtils.normalizeToUpperCase(role.getName()).equals(TextUtils.normalizeToUpperCase(name))) {
                 return role;
             }
         }

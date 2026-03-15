@@ -3,10 +3,12 @@ package es.dimecresalessis.scoutbase.user.domain.model;
 import es.dimecresalessis.scoutbase.infrastructure.web.persistence.CommonEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
 @Getter
+@Setter
 @AllArgsConstructor
 public class User extends CommonEntity {
     UUID id;
