@@ -22,7 +22,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @RestController
 @AllArgsConstructor
 @ApiCommonResponses
-@RequestMapping(Routes.API_BASE + Routes.PLAYERS)
+@RequestMapping(Routes.API_ROOT + Routes.PLAYERS)
 public class PlayerController {
 
     private final PlayerMapper playerMapper;

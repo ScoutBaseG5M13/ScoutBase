@@ -3,6 +3,7 @@ package es.dimecresalessis.scoutbase.infrastructure.web;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -32,6 +33,7 @@ public class GlobalExceptionHandler {
                 false,
                 message,
                 null,
+                MDC.get("sessionId"),
                 LocalDateTime.now()
         );
         return new ResponseEntity<>(response, status);

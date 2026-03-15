@@ -14,7 +14,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(Routes.API_BASE + Routes.HEALTH)
+@RequestMapping(Routes.API_ROOT + Routes.HEALTH)
 public class HealthController {
 
     private static final Logger logger = LoggerFactory.getLogger(HealthController.class);
