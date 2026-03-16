@@ -15,8 +15,9 @@ public class RegistrationService {
         this.userRepository = userRepository;
     }
 
-    public void createUser(User user) {
-        user = User.getNewInstance(user.getUsername(), passwordEncoder.encode(user.getPassword()), user.getRole());
-        userRepository.save(user);
+    public User createUser(User user) {
+        User encodedUser = User.getNewInstance(user.getUsername(), passwordEncoder.encode(user.getPassword()), user.getRole());
+        userRepository.save(new User(encodedUser.getId(), encodedUser.getUsername(), encodedUser.getPassword(), encodedUser.getRole()));
+        return new User(encodedUser.getId(), encodedUser.getUsername(), user.getPassword(), encodedUser.getRole());
     }
 }

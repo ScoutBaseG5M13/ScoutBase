@@ -19,8 +19,8 @@ public class CreateUserUseCase {
         if (user == null) {
             throw new UserException(ErrorEnum.USER_IS_NULL);
         }
-        registrationService.createUser(user);
-        logger.info("[CREATE] Created User with id '{}'", user.getId());
-        return user;
+        User savedUser = registrationService.createUser(user);
+        logger.info("[CREATE] Created User with id '{}'", savedUser.getId());
+        return savedUser;
     }
 }
