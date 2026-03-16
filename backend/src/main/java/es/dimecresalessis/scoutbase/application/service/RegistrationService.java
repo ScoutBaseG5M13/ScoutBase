@@ -1,7 +1,7 @@
 package es.dimecresalessis.scoutbase.application.service;
 
-import es.dimecresalessis.scoutbase.user.domain.model.User;
-import es.dimecresalessis.scoutbase.user.domain.repository.UserRepository;
+import es.dimecresalessis.scoutbase.domain.user.model.User;
+import es.dimecresalessis.scoutbase.domain.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ public class RegistrationService {
     }
 
     public void createUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user = User.getNewInstance(user.getUsername(), passwordEncoder.encode(user.getPassword()), user.getRole());
         userRepository.save(user);
     }
 }
