@@ -1,6 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.security.config;
 
-import es.dimecresalessis.scoutbase.infrastructure.security.SecurityHandlers;
+import es.dimecresalessis.scoutbase.infrastructure.security.handler.SecurityHandlers;
 import es.dimecresalessis.scoutbase.infrastructure.security.filter.SessionFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
