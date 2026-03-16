@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDateTime;
 
 @ControllerAdvice
@@ -17,22 +18,38 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(RuntimeException ex) {
-        logger.error("{}: {}", ex.getClass().getSimpleName() , ex.getMessage());
-        return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiResponse<String>> handleException(RuntimeException ex) {
+        logException(ex);
+        return buildErrorResponse(ex.getMessage(), ex, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(Exception ex) {
-        logger.error("Exception thrown: {}", ex.getMessage());
-        return buildErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ApiResponse<String>> handleException(Exception ex) {
+        logException(ex);
+        return buildErrorResponse(ex.getMessage(), ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private ResponseEntity<ApiResponse<Void>> buildErrorResponse(String message, HttpStatus status) {
-        ApiResponse<Void> response = new ApiResponse<>(
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<String>> handleAccessDenied(AccessDeniedException ex) {
+        logException(ex);
+        return buildErrorResponse(ex.getMessage(), ex, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<String>> handleException(AuthenticationException ex) {
+        logException(ex);
+        return buildErrorResponse(ex.getMessage(), ex, HttpStatus.UNAUTHORIZED);
+    }
+
+    private void logException(Exception ex) {
+        logger.error("Exception thrown: {}", ex.getMessage());
+    }
+
+    private ResponseEntity<ApiResponse<String>> buildErrorResponse(String message, Exception ex, HttpStatus status) {
+        ApiResponse<String> response = new ApiResponse<>(
                 false,
                 message,
-                null,
+                ex.getClass().getSimpleName(),
                 MDC.get("sessionId"),
                 LocalDateTime.now()
         );
