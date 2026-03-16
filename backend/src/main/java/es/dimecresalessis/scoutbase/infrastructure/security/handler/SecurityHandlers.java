@@ -1,5 +1,6 @@
-package es.dimecresalessis.scoutbase.infrastructure.security;
+package es.dimecresalessis.scoutbase.infrastructure.security.handler;
 
+import es.dimecresalessis.scoutbase.infrastructure.security.SecurityResponseBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

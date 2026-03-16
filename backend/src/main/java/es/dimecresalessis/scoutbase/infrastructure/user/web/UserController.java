@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web;
 
+import es.dimecresalessis.scoutbase.domain.user.model.Role;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
@@ -34,6 +35,19 @@ public class UserController {
                         findUserByIdUseCase.execute(id)
                 )
         ).ok();
+    }
+
+    @GetMapping("/new")
+    public ApiResponse<UserDto> newUser(@RequestParam(value = "role") String role) throws IllegalAccessException {
+        if (role == null) {
+            throw new IllegalAccessException("Must send a 'role' as path parameter for the request.");
+        }
+        if (Role.fromName(role) == null) {
+            throw new IllegalAccessException("Only roles ROLE_USER and ROLE_ADMIN are available.");
+        }
+        UserDto userDto = UserDto.getRandomInstance(role.toUpperCase());
+        User user = createUserUseCase.execute(userMapper.toDomain(userDto));
+        return handleResponse(userMapper.toDto(user)).ok();
     }
 
 
