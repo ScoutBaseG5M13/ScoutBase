@@ -1,5 +1,7 @@
 package es.dimecresalessis.scoutbase.infrastructure.web.dto;
 
+import org.slf4j.MDC;
+
 import java.time.LocalDateTime;
 
 public class ResponseHandler<T> {
@@ -10,6 +12,6 @@ public class ResponseHandler<T> {
     }
 
     public ApiResponse<T> ok() {
-        return new ApiResponse<>(true, "Success", data, LocalDateTime.now());
+        return new ApiResponse<>(true, "Success", data, MDC.get("sessionId"), LocalDateTime.now());
     }
 }

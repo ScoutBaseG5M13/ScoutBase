@@ -6,5 +6,6 @@ public record ApiResponse<T>(
     boolean success,
     String message,
     T data,
+    String sessionId,
     LocalDateTime timestamp
 ) {}
