@@ -1,4 +1,4 @@
-package es.dimecresalessis.scoutbase.application.service;
+package es.dimecresalessis.scoutbase.application.security;
 
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.domain.user.repository.UserRepository;

@@ -1,6 +1,6 @@
 package es.dimecresalessis.scoutbase.application.user;
 
-import es.dimecresalessis.scoutbase.application.service.RegistrationService;
+import es.dimecresalessis.scoutbase.application.security.RegistrationService;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
