@@ -1,5 +1,7 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web;
 
+import es.dimecresalessis.scoutbase.application.security.AuthService;
+import es.dimecresalessis.scoutbase.application.security.LoginRequest;
 import es.dimecresalessis.scoutbase.domain.user.model.Role;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
@@ -13,6 +15,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactory.handleResponse;
@@ -26,6 +29,7 @@ public class UserController {
     private final UserMapper userMapper;
     private final CreateUserUseCase createUserUseCase;
     private final FindUserByIdUseCase findUserByIdUseCase;
+    private final AuthService authService;
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -57,4 +61,16 @@ public class UserController {
         User user = createUserUseCase.execute(userMapper.toDomain(userDto));
         return handleResponse(userMapper.toDto(user)).ok();
     }
+
+    @PostMapping("/login")
+    public ApiResponse<Map<String, String>> login(@RequestBody LoginRequest loginRequest) {
+        String token = authService.authenticateAndGenerateToken(
+                loginRequest.getUsername(),
+                loginRequest.getPassword()
+        );
+
+        // Return the token as JSON
+        return handleResponse(Map.of("token", token)).ok();
+    }
+
 }
