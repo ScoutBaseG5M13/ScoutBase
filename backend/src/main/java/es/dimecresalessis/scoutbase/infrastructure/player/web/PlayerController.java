@@ -58,7 +58,7 @@ public class PlayerController {
         }
     }
 
-    @PostMapping("/create")
+    @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ApiResponse<PlayerDto> create(@Valid @RequestBody PlayerDto playerDto) throws PlayerException {
         Player player = playerMapper.toDomain(playerDto);
@@ -69,10 +69,13 @@ public class PlayerController {
         ).ok();
     }
 
-    @PutMapping("/update")
+    @PutMapping("{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ApiResponse<PlayerDto> update(@Valid @RequestBody PlayerDto playerDto) {
+    public ApiResponse<PlayerDto> update(@Valid @RequestBody PlayerDto playerDto, @PathVariable UUID id) {
         try {
+            if (findPlayerByIdUseCase.execute(id) == null) {
+                throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, playerDto.getId().toString());
+            }
             return handleResponse(
                     playerMapper.toDto(
                             updatePlayerUseCase.execute(
