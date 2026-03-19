@@ -54,8 +54,7 @@ public class UserController {
         return handleResponse(userMapper.toDto(user)).ok();
     }
 
-
-    @PostMapping("/create")
+    @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<UserDto> create(@RequestBody UserDto userDto) {
         User user = createUserUseCase.execute(userMapper.toDomain(userDto));

@@ -34,7 +34,10 @@ public class SecurityConfig {
                         .authenticationEntryPoint(securityHandlers)
                         .accessDeniedHandler(securityHandlers)
                 )
-                .httpBasic(basic -> basic.authenticationEntryPoint(securityHandlers))
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers(HttpMethod.POST, Routes.API_ROOT + Routes.USERS).permitAll()
+//                        .anyRequest().authenticated() // everything else needs authentication (JWT)
+//                )
                 .build();
     }
 
