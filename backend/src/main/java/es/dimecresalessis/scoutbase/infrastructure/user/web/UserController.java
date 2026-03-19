@@ -68,8 +68,6 @@ public class UserController {
                 loginRequest.getUsername(),
                 loginRequest.getPassword()
         );
-
-        // Return the token as JSON
         return handleResponse(Map.of("token", token)).ok();
     }
 

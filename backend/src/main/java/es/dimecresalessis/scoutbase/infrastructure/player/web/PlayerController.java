@@ -11,6 +11,7 @@ import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.application.player.*;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class PlayerController {
     private final DeletePlayerUseCase deletePlayerUseCase;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ApiResponse<List<PlayerDto>> findAll() {
         return handleResponse(
                 findAllPlayersUseCase.execute()
@@ -43,6 +45,7 @@ public class PlayerController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ApiResponse<PlayerDto> findById(@PathVariable UUID id) throws PlayerException {
         try {
             return handleResponse(
@@ -56,6 +59,7 @@ public class PlayerController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ApiResponse<PlayerDto> create(@Valid @RequestBody PlayerDto playerDto) throws PlayerException {
         Player player = playerMapper.toDomain(playerDto);
         return handleResponse(
@@ -66,6 +70,7 @@ public class PlayerController {
     }
 
     @PutMapping("/update")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ApiResponse<PlayerDto> update(@Valid @RequestBody PlayerDto playerDto) {
         try {
             return handleResponse(
@@ -81,6 +86,7 @@ public class PlayerController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ApiResponse<Boolean> delete(@PathVariable UUID id) {
         try {
             return handleResponse(
