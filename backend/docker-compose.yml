@@ -3,9 +3,9 @@ services:
     image: postgres:latest
     container_name: scoutbase-postgresql
     environment:
-      POSTGRES_DB: scoutbase-db
-      POSTGRES_USER: scoutbadmin
-      POSTGRES_PASSWORD: grup5ioc
+      POSTGRES_DB: scoutbase-local-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5431:5432"
     volumes:
@@ -24,7 +24,7 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: jdbc:postgresql://postgres:5431/scoutbase-db
+      DATABASE_URL: jdbc:postgresql://postgres:5431/scoutbase-local-db
       DATABASE_USERNAME: scoutbadmin
       DATABASE_PASSWORD: grup5ioc
 
