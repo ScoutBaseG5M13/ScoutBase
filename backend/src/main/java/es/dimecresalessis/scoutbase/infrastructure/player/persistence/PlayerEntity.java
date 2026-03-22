@@ -1,6 +1,5 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.persistence;
 
-import es.dimecresalessis.scoutbase.infrastructure.user.persistence.JpaUserRepository;
 import es.dimecresalessis.scoutbase.infrastructure.web.persistence.CommonEntity;
 import jakarta.persistence.*;
 import lombok.*;
