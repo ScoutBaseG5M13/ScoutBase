@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,7 +47,7 @@ public class PlayerController {
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find all players", description = "Retrieves all registered players in the DB")
-    public ApiResponse<List<PlayerDto>> findAll() {
+    public ResponseEntity<ApiResponse<List<PlayerDto>>> findAll() {
         return handleResponse(
                 findAllPlayersUseCase.execute()
                 .stream()
@@ -65,7 +66,7 @@ public class PlayerController {
     @GetMapping(Routes.ID_PATHVAR)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find player by ID", description = "Finds and returns a player by their ID")
-    public ApiResponse<PlayerDto> findById(@PathVariable UUID id) throws PlayerException {
+    public ResponseEntity<ApiResponse<PlayerDto>> findById(@PathVariable UUID id) throws PlayerException {
         try {
             return handleResponse(
                     playerMapper.toDto(
@@ -87,13 +88,13 @@ public class PlayerController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Create a new player", description = "Adds a new player to the DB")
-    public ApiResponse<PlayerDto> create(@Valid @RequestBody PlayerDto playerDto) throws PlayerException {
+    public ResponseEntity<ApiResponse<PlayerDto>> create(@Valid @RequestBody PlayerDto playerDto) throws PlayerException {
         Player player = playerMapper.toDomain(playerDto);
         return handleResponse(
                 playerMapper.toDto(
                         createPlayerUseCase.execute(player)
                 )
-        ).ok();
+        ).created();
     }
 
     /**
@@ -107,7 +108,7 @@ public class PlayerController {
     @PutMapping(value = Routes.ID_PATHVAR, consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Update player by ID", description = "Updates the data for a specific player")
-    public ApiResponse<PlayerDto> update(@Valid @RequestBody PlayerDto playerDto, @PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<PlayerDto>> update(@Valid @RequestBody PlayerDto playerDto, @PathVariable UUID id) {
         try {
             if (findPlayerByIdUseCase.execute(id) == null) {
                 throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, playerDto.getId().toString());
@@ -134,7 +135,7 @@ public class PlayerController {
     @DeleteMapping(Routes.ID_PATHVAR)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Delete player by ID", description = "Deletes a specific player by their ID")
-    public ApiResponse<Boolean> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
         try {
             return handleResponse(
                     deletePlayerUseCase.execute(id)

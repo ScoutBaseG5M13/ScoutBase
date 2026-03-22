@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web.dto;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 

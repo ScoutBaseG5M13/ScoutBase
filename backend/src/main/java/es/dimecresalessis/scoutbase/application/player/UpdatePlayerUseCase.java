@@ -20,7 +20,7 @@ public class UpdatePlayerUseCase {
     private final PlayerRepository playerRepository;
 
     /**
-     * Updates the details of a player identified by their unique ID.
+     * Updates the details of a {@link Player} identified by their unique ID.
      *
      * @param player The updated {@link Player} object with the new details.
      * @param id The ID of the player to be updated.
@@ -29,7 +29,7 @@ public class UpdatePlayerUseCase {
     public Player execute(Player player, UUID id) {
         Player idPlayer = playerRepository.findById(id).orElseThrow();
         Player bodyPlayer = playerRepository.findById(player.getId()).orElseThrow();
-        if (!idPlayer.equals(bodyPlayer)) {
+        if (!idPlayer.getId().toString().equals(bodyPlayer.getId().toString())) {
             throw new IllegalArgumentException("Player id does not match");
         }
         playerRepository.save(player);

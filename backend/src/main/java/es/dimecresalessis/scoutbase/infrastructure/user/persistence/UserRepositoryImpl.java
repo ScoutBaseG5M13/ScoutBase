@@ -60,9 +60,18 @@ public class UserRepositoryImpl implements UserRepository {
      */
     @Override
     public Optional<User> findByUsername(String username) {
-        // Note: Ensure JpaUserRepository returns Optional<UserEntity>
-        // to maintain the mapping flow here.
         return jpaUserRepository.findByUsername(username).map(mapper::toDomain);
+    }
+
+    /**
+     * Retrieves a user by their username, typically used for authentication.
+     * Keeps only the first result.
+     * @param username The unique username to search for.
+     * @return An {@link Optional} domain {@link User}.
+     */
+    @Override
+    public Optional<User> findFirstByUsername(String username) {
+        return jpaUserRepository.findByUsername(username).stream().findFirst().map(mapper::toDomain);
     }
 
     /**

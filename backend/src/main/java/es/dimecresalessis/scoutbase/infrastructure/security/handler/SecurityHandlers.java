@@ -53,8 +53,8 @@ public class SecurityHandlers implements AuthenticationEntryPoint, AccessDeniedH
      * identity is known, but they are restricted from the specific resource.
      * </p>
      *
-     * @param request               The current {@link HttpServletRequest}.
-     * @param response              The {@link HttpServletResponse} to be populated.
+     * @param request The current {@link HttpServletRequest}.
+     * @param response The {@link HttpServletResponse} to be populated.
      * @param accessDeniedException The specific exception representing the authorization failure.
      * @throws IOException If an input or output exception occurs while writing the response.
      */

@@ -35,6 +35,14 @@ public interface UserRepository {
     Optional<User> findByUsername(String username);
 
     /**
+     * Finds a user by their username, keeps only the first coincidence.
+     *
+     * @param username The username of the user.
+     * @return An {@link Optional} containing the user, if found.
+     */
+    Optional<User> findFirstByUsername(String username);
+
+    /**
      * Saves a user to the repository.
      *
      * @param user The {@link User} entity to be saved.
