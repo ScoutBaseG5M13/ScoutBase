@@ -1,4 +1,4 @@
-package es.dimecresalessis.scoutbase.infrastructure.web;
+package es.dimecresalessis.scoutbase.infrastructure.health.web;
 
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
