@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.web;
 
+import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import es.dimecresalessis.scoutbase.domain.exception.ScoutbaseException;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
@@ -10,13 +11,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactory.handleResponse;
-
 /**
  * Controller for handling application health checks.
  */
 @RestController
 @AllArgsConstructor
+@ApiCommonResponses
 @RequestMapping(Routes.API_ROOT + Routes.HEALTH)
 public class HealthController {
 
@@ -29,8 +29,9 @@ public class HealthController {
      * @throws ScoutbaseException If a failure occurs during the health check.
      */
     @GetMapping
-    public ApiResponse<Boolean> isAlive() throws ScoutbaseException {
-        logger.info("[PING] Health check requested");
-        return handleResponse(true).ok();
+    public ApiResponse<Boolean> isAlive() throws Exception {
+        throw new Exception("d");
+//        logger.info("[PING] Health check requested");
+//        return handleResponse(true).ok();
     }
 }
