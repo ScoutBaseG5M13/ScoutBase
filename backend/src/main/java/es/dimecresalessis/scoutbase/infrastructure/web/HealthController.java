@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactory.handleResponse;
 
+/**
+ * Controller for handling application health checks.
+ */
 @RestController
 @AllArgsConstructor
 @RequestMapping(Routes.API_ROOT + Routes.HEALTH)
@@ -19,6 +22,12 @@ public class HealthController {
 
     private static final Logger logger = LoggerFactory.getLogger(HealthController.class);
 
+    /**
+     * Checks the application status and returns a health report.
+     *
+     * @return {@link ApiResponse} containing {@code true}, indicating the system is operational.
+     * @throws ScoutbaseException If a failure occurs during the health check.
+     */
     @GetMapping
     public ApiResponse<Boolean> isAlive() throws ScoutbaseException {
         logger.info("[PING] Health check requested");

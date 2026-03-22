@@ -9,6 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+/**
+ * Use case for creating {@link Player} entities in the system.
+ */
 @Service
 @AllArgsConstructor
 public class CreatePlayerUseCase {
@@ -16,6 +19,13 @@ public class CreatePlayerUseCase {
     private static final Logger logger = LoggerFactory.getLogger(CreatePlayerUseCase.class);
     private final PlayerRepository playerRepository;
 
+    /**
+     * Executes the operation to save a new {@link Player} entity in the DB.
+     *
+     * @param player The {@link Player} object containing the player's details.
+     * @return The created {@link Player} object after being persisted.
+     * @throws PlayerException If the provided player object is null.
+     */
     public Player execute(Player player) throws PlayerException {
         if (player == null) {
             throw new PlayerException(ErrorEnum.PLAYER_IS_NULL);

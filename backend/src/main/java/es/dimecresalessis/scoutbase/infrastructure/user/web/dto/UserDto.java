@@ -7,21 +7,52 @@ import lombok.Data;
 import java.util.Random;
 import java.util.UUID;
 
+/**
+ * Data Transfer Object (DTO) for User entities.
+ */
 @Data
 @AllArgsConstructor
 public class UserDto {
+
+    /**
+     * ID for the user.
+     */
     private UUID id;
+
+    /**
+     * Username of the user.
+     */
     @NotBlank
     private String username;
+
+    /**
+     * Password of the user.
+     */
     @NotBlank
     private String password;
+
+    /**
+     * Role of the user, such as 'ADMIN' or 'USER'.
+     */
     @NotBlank
     private String role;
 
+    /**
+     * Generates a random instance for testing purposes.
+     *
+     * @param role The role to be assigned to the random user.
+     * @return A random {@link UserDto} instance.
+     */
     public static UserDto getRandomInstance(String role) {
         return new UserDto(UUID.randomUUID(), shuffleAndReturnRandomString(9), shuffleAndReturnRandomString(9), role);
     }
 
+    /**
+     * Utility method for generating random alphanumeric strings, for testing purposes.
+     *
+     * @param length Length of the string to generate.
+     * @return A randomly generated string of the specified length.
+     */
     private static String shuffleAndReturnRandomString(int length) {
         char[] chars = "abcdefghijklmnopqrstuvwxyz0123456789".toCharArray();
         StringBuilder str = new StringBuilder();
