@@ -34,8 +34,13 @@ public class RegistrationService {
      * @return A saved {@link User} object with its decoded password.
      */
     public User createUser(User user) {
-        User encodedUser = User.getNewInstance(user.getUsername(), passwordEncoder.encode(user.getPassword()), user.getRole());
-        userRepository.save(new User(encodedUser.getId(), encodedUser.getUsername(), encodedUser.getPassword(), encodedUser.getRole()));
+        User encodedUser;
+        if (user.getId() == null) {
+            encodedUser = User.getNewInstance(user.getUsername(), passwordEncoder.encode(user.getPassword()), user.getRole());
+        } else {
+            encodedUser = new User(user.getId(), user.getUsername(), passwordEncoder.encode(user.getPassword()), user.getRole());
+        }
+        userRepository.save(encodedUser);
         return new User(encodedUser.getId(), encodedUser.getUsername(), user.getPassword(), encodedUser.getRole());
     }
 }

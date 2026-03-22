@@ -15,8 +15,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Component
@@ -52,5 +51,13 @@ public class MockUsersIT {
         String jsonResponse = result.getResponse().getContentAsString();
         ApiResponse<Map<String, String>> response = objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<Map<String, String>>>() {});
         return response.data().get("token");
+    }
+
+    public void deleteUser(UserDto user, String jwtToken) throws Exception {
+        mockMvc.perform(delete(Routes.API_ROOT + Routes.USERS + "/" + user.getId().toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andReturn();
     }
 }

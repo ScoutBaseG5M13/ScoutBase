@@ -1,5 +1,7 @@
 package es.dimecresalessis.scoutbase.domain.exception;
 
+import lombok.Getter;
+
 /**
  * Application-Specific Errors.
  * <p>
@@ -7,7 +9,11 @@ package es.dimecresalessis.scoutbase.domain.exception;
  * dynamic message formatting.
  * </p>
  */
+@Getter
 public class ScoutbaseException extends RuntimeException {
+
+    private final ErrorEnum errorEnum;
+    private final String[] variables;
 
     /**
      * Constructs a new exception with the formatted message from {@link ErrorEnum}.
@@ -17,6 +23,8 @@ public class ScoutbaseException extends RuntimeException {
      */
     public ScoutbaseException(ErrorEnum errorEnum, String... variables) {
         super(formatMessage(errorEnum, variables));
+        this.errorEnum = errorEnum;
+        this.variables = variables;
     }
 
     /**

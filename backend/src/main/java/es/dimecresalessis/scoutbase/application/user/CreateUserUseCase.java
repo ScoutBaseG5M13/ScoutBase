@@ -4,6 +4,7 @@ import es.dimecresalessis.scoutbase.application.security.RegistrationService;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
+import es.dimecresalessis.scoutbase.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class CreateUserUseCase {
 
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(CreateUserUseCase.class);
     private final RegistrationService registrationService;
+    private final UserRepository userRepository;
 
     /**
      * Creates a new {@link User} in the DB.
@@ -28,6 +30,9 @@ public class CreateUserUseCase {
     public User execute(User user) {
         if (user == null) {
             throw new UserException(ErrorEnum.USER_IS_NULL);
+        }
+        if (user.getId() != null && userRepository.findById(user.getId()).isPresent()) {
+            throw new UserException(ErrorEnum.USER_ALREADY_EXISTS, user.getId().toString());
         }
         User savedUser = registrationService.createUser(user);
         logger.info("[CREATE] Created User with id '{}'", savedUser.getId());

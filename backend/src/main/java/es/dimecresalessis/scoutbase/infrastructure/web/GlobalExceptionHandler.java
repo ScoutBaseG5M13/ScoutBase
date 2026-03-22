@@ -1,11 +1,15 @@
 package es.dimecresalessis.scoutbase.infrastructure.web;
 
+import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
+import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
+import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.security.core.AuthenticationException;
@@ -23,6 +27,34 @@ import java.time.LocalDateTime;
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    /**
+     * Handles custom Scoutbase Player failures.
+     * @param ex The caught {@link PlayerException}.
+     * @return A response with serialized error details depending on the error.
+     */
+    @ExceptionHandler(PlayerException.class)
+    public ResponseEntity<ApiResponse<String>> handlePlayerException(PlayerException ex) {
+        logException(ex);
+        if (ex.getErrorEnum().equals(ErrorEnum.PLAYER_NOT_FOUND)) {
+            return buildErrorResponse(ex.getMessage(), ex, HttpStatus.NOT_FOUND);
+        }
+        return buildErrorResponse(ex.getMessage(), ex, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles custom Scoutbase User failures.
+     * @param ex The caught {@link UserException}.
+     * @return A response with serialized error details depending on the error.
+     */
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<ApiResponse<String>> handleUserException(UserException ex) {
+        logException(ex);
+        if (ex.getErrorEnum().equals(ErrorEnum.USER_NOT_FOUND)) {
+            return buildErrorResponse(ex.getMessage(), ex, HttpStatus.NOT_FOUND);
+        }
+        return buildErrorResponse(ex.getMessage(), ex, HttpStatus.BAD_REQUEST);
+    }
 
     /**
      * Handles general runtime logic failures.
@@ -66,6 +98,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<String>> handleException(AuthenticationException ex) {
         logException(ex);
         return buildErrorResponse(ex.getMessage(), ex, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+        logException(ex);
+        return buildErrorResponse(ex.getMessage(), ex, HttpStatus.NOT_FOUND);
     }
 
     /**
