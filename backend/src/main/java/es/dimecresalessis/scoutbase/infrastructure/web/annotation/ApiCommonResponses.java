@@ -15,14 +15,12 @@ import java.lang.annotation.Target;
  * ensuring that Swagger documentation remains consistent across all
  * controllers while reducing code duplication.
  * </p>
- * <p>
  * <b>Included Responses:</b>
  * <ul>
  * <li><b>200:</b> Success - The request was processed correctly.</li>
  * <li><b>404:</b> Resource not found - The requested entity does not exist.</li>
  * <li><b>500:</b> Internal server error - An unexpected failure occurred.</li>
  * </ul>
- * </p>
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
