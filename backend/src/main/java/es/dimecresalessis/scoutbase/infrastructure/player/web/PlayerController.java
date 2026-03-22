@@ -61,7 +61,7 @@ public class PlayerController {
      * @return {@link ApiResponse} containing the player details.
      * @throws PlayerException If the requested player does not exist.
      */
-    @GetMapping("/{id}")
+    @GetMapping(Routes.ID_PATHVAR)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find player by ID", description = "Finds and returns a player by their ID")
     public ApiResponse<PlayerDto> findById(@PathVariable UUID id) throws PlayerException {
@@ -103,7 +103,7 @@ public class PlayerController {
      * @return {@link ApiResponse} containing the updated player's details.
      * @throws PlayerException If the player is not found.
      */
-    @PutMapping("{id}")
+    @PutMapping(Routes.ID_PATHVAR)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Update player by ID", description = "Updates the data for a specific player")
     public ApiResponse<PlayerDto> update(@Valid @RequestBody PlayerDto playerDto, @PathVariable UUID id) {
@@ -130,7 +130,7 @@ public class PlayerController {
      * @return {@link ApiResponse} containing {@code true} if the player was deleted successfully.
      * @throws PlayerException If the player is not found.
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping(Routes.ID_PATHVAR)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Delete player by ID", description = "Deletes a specific player by their ID")
     public ApiResponse<Boolean> delete(@PathVariable UUID id) {

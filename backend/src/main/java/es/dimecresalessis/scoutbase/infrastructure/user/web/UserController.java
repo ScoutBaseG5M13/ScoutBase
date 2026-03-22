@@ -44,7 +44,7 @@ public class UserController {
      * @param id The ID of the user.
      * @return {@link ApiResponse} containing the user's information.
      */
-    @GetMapping("/{id}")
+    @GetMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Find user by id", description = "Returns a user through an path variable 'id'.")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
@@ -57,7 +57,7 @@ public class UserController {
     }
 
     /**
-     * Creates a random user with a specified role. Testing purposes.
+     * Creates a random user with a specified role. **Testing purposes**.
      *
      * @param role The role of the user to create (ROLE_USER, ROLE_ADMIN...).
      * @return {@link ApiResponse} containing the created user's details.

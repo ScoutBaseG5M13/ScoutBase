@@ -10,4 +10,5 @@ public class Routes {
     public static final String HEALTH = "/health";
 
     public static final String AUTH_LOGIN = "/auth/login";
+    public static final String ID_PATHVAR = "/{id}";
 }
