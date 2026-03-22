@@ -95,6 +95,7 @@
 				</annotationProcessorPaths>
 			</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -107,6 +108,21 @@
 							<goal>repackage</goal> </goals>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.12.0</version>
+				<configuration>
+					<additionalJOption>--no-module-directories</additionalJOption>
+
+					<doclint>none</doclint>
+					<failOnError>false</failOnError>
+					<quiet>true</quiet>
+
+					<detectJavaApiLink>false</detectJavaApiLink>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
