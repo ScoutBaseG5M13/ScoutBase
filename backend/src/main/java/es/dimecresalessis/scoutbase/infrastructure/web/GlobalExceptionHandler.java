@@ -9,13 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.access.AccessDeniedException;
-
-import java.security.SignatureException;
 import java.time.LocalDateTime;
 
 /**
@@ -70,12 +69,12 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles SignatureException failures.
-     * @param ex The caught {@link SignatureException}.
+     * Handles BadCredentialsException failures.
+     * @param ex The caught {@link BadCredentialsException}.
      * @return A {@code 401 Unauthorized} response with serialized error details.
      */
-    @ExceptionHandler(SignatureException.class)
-    public ResponseEntity<ApiResponse<String>> handlesignatureException(SignatureException ex) {
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponse<String>> handleBadCredentialsException(BadCredentialsException ex) {
         logException(ex);
         String userMessage = "Your session has expired or is invalid. Please, log in again";
         return buildErrorResponse(userMessage, ex, HttpStatus.UNAUTHORIZED);
