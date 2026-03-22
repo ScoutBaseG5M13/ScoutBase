@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +17,13 @@ public class UserDto {
 
     /**
      * ID for the user.
+     * If not provided during creation, a random UUID will be generated server-side.
      */
+    @Schema(
+            description = "Unique identifier. Optional for creation (server will generate one if null).",
+            example = "550e8400-e29b-41d4-a716-446655440000",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
     private UUID id;
 
     /**

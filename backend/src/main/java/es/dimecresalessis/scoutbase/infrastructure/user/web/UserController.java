@@ -87,9 +87,9 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a user", description = "Creates a user through a UserDto body.")
     @SecurityRequirement(name = "bearerAuth")
-    public ApiResponse<UserDto> create(@RequestBody UserDto userDto) {
-        User user = createUserUseCase.execute(userMapper.toDomain(userDto));
-        return handleResponse(userMapper.toDto(user)).ok();
+    public ApiResponse<Boolean> create(@RequestBody UserDto userDto) {
+        createUserUseCase.execute(userMapper.toDomain(userDto));
+        return handleResponse(true).ok();
     }
 
     /**
