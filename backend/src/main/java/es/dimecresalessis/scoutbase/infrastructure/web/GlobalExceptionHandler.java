@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.access.AccessDeniedException;
+
+import java.security.SignatureException;
 import java.time.LocalDateTime;
 
 /**
@@ -65,6 +67,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<String>> handleException(RuntimeException ex) {
         logException(ex);
         return buildErrorResponse(ex.getMessage(), ex, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles SignatureException failures.
+     * @param ex The caught {@link SignatureException}.
+     * @return A {@code 401 Unauthorized} response with serialized error details.
+     */
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<ApiResponse<String>> handlesignatureException(SignatureException ex) {
+        logException(ex);
+        String userMessage = "Your session has expired or is invalid. Please, log in again";
+        return buildErrorResponse(userMessage, ex, HttpStatus.UNAUTHORIZED);
     }
 
     /**
