@@ -12,6 +12,7 @@ import es.dimecresalessis.scoutbase.application.player.*;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -83,7 +84,7 @@ public class PlayerController {
      * @return {@link ApiResponse} containing the created player's details.
      * @throws PlayerException If an error occurs during player creation.
      */
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Create a new player", description = "Adds a new player to the DB")
     public ApiResponse<PlayerDto> create(@Valid @RequestBody PlayerDto playerDto) throws PlayerException {
@@ -103,7 +104,7 @@ public class PlayerController {
      * @return {@link ApiResponse} containing the updated player's details.
      * @throws PlayerException If the player is not found.
      */
-    @PutMapping(Routes.ID_PATHVAR)
+    @PutMapping(value = Routes.ID_PATHVAR, consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Update player by ID", description = "Updates the data for a specific player")
     public ApiResponse<PlayerDto> update(@Valid @RequestBody PlayerDto playerDto, @PathVariable UUID id) {
