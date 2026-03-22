@@ -20,7 +20,8 @@ public enum ErrorEnum {
 
     USER_NOT_FOUND("USER_NOT_FOUND", "The user with id '{}' could not be found"),
     USER_IS_NULL("USER_IS_NULL", "The user can't be null"),
-    USER_ALREADY_EXISTS("USER_ALREADY_EXISTS", "A user with id '{}' already exists"),
+    USER_ID_ALREADY_EXISTS("USER_ID_ALREADY_EXISTS", "A user with id '{}' already exists"),
+    USERNAME_ALREADY_EXISTS("USER_NAME_ALREADY_EXISTS", "Username '{}' is already taken"),
 
     ROLE_NOT_FOUND("ROLE_NOT_FOUND", "The role {} does not exist");
 

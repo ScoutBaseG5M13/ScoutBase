@@ -31,9 +31,16 @@ public class CreateUserUseCase {
         if (user == null) {
             throw new UserException(ErrorEnum.USER_IS_NULL);
         }
-        if (user.getId() != null && userRepository.findById(user.getId()).isPresent()) {
-            throw new UserException(ErrorEnum.USER_ALREADY_EXISTS, user.getId().toString());
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new UserException(ErrorEnum.USERNAME_ALREADY_EXISTS, user.getUsername());
         }
+        if (user.getId() != null) {
+            userRepository.findById(user.getId())
+                    .ifPresent(userDb -> {
+                        throw new UserException(ErrorEnum.USER_ID_ALREADY_EXISTS, userDb.getId().toString());
+                    });
+        }
+
         User savedUser = registrationService.createUser(user);
         logger.info("[CREATE] Created User with id '{}'", savedUser.getId());
         return savedUser;
