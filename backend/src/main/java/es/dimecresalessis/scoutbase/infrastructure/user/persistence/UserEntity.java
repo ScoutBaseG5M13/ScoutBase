@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.persistence;
 
+import es.dimecresalessis.scoutbase.infrastructure.web.persistence.CommonEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @Table(name = "users")
-public class UserEntity {
+public class UserEntity extends CommonEntity {
 
     /**
      * Primary key for the user, represented as a {@link UUID}.

@@ -2,6 +2,8 @@ package es.dimecresalessis.scoutbase.application.security;
 
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.domain.user.repository.UserRepository;
+import es.dimecresalessis.scoutbase.infrastructure.user.persistence.UserRepositoryImpl;
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,20 +14,18 @@ import org.springframework.stereotype.Service;
  * </p>
  */
 @Service
+@AllArgsConstructor
 public class RegistrationService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final UserRepositoryImpl userRepositoryImpl;
 
-    /**
-     * Constructor of the service with required dependencies.
-     *
-     * @param passwordEncoder The password encoder implementation to secure passwords.
-     * @param userRepository  The user repository for persistence.
-     */
-    public RegistrationService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
-        this.passwordEncoder = passwordEncoder;
-        this.userRepository = userRepository;
-    }
+//    /**
+//     * Constructor of the service with required dependencies.
+//     *
+//     * @param passwordEncoder The password encoder implementation to secure passwords.
+//     * @param userRepository The user repository for persistence.
+//     */
 
     /**
      * Creates a new {@link User} by encoding its password and saving it in the repository.
@@ -40,7 +40,7 @@ public class RegistrationService {
         } else {
             encodedUser = new User(user.getId(), user.getUsername(), passwordEncoder.encode(user.getPassword()), user.getRole());
         }
-        userRepository.save(encodedUser);
+        userRepository.save(userRepositoryImpl.save(encodedUser));
         return new User(encodedUser.getId(), encodedUser.getUsername(), user.getPassword(), encodedUser.getRole());
     }
 }
