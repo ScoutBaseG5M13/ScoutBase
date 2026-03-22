@@ -1,0 +1,44 @@
+name: Generate Multi-Branch Javadoc
+
+on:
+  push:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Generate Javadoc
+        run: mvn javadoc:javadoc
+
+      - name: Prepare Deployment Folders
+        run: |
+          # Create a staging directory
+          mkdir -p staging/${{ github.ref_name }}
+          # Move the generated docs into the branch-specific folder
+          cp -r target/site/apidocs/* staging/${{ github.ref_name }}/
+          # Optional: Create an index.html at the root to redirect to main
+          echo '<meta http-equiv="refresh" content="0; url=./main/">' > staging/index.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'staging'
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

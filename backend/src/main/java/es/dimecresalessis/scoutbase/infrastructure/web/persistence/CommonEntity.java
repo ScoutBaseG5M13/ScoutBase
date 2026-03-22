@@ -11,6 +11,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+/**
+ * Abstract superclass for entities that share common fields.
+ * <p>
+ * Provides audit-related fields (`createdAt`, `updatedAt`) and
+ * versioning support for optimistic locking.
+ * </p>
+ */
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)

@@ -3,6 +3,13 @@ package es.dimecresalessis.scoutbase.domain.exception;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * Enumeration for Application Error Codes and Messages.
+ * <p>
+ * Defines application-specific error types, each with a unique code and message.
+ * Messages support placeholder variables for dynamic error messaging.
+ * </p>
+ */
 @AllArgsConstructor
 @Getter
 public enum ErrorEnum {

@@ -9,6 +9,7 @@ import es.dimecresalessis.scoutbase.infrastructure.player.web.mapper.PlayerMappe
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.application.player.*;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +21,9 @@ import java.util.UUID;
 
 import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactory.handleResponse;
 
+/**
+ * REST Controller for managing player-related operations.
+ */
 @RestController
 @AllArgsConstructor
 @ApiCommonResponses
@@ -33,8 +37,14 @@ public class PlayerController {
     private final CreatePlayerUseCase createPlayerUseCase;
     private final DeletePlayerUseCase deletePlayerUseCase;
 
+    /**
+     * Finds all players.
+     *
+     * @return {@link ApiResponse} containing a list of all {@link Player}.
+     */
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Find all players", description = "Retrieves all registered players in the DB")
     public ApiResponse<List<PlayerDto>> findAll() {
         return handleResponse(
                 findAllPlayersUseCase.execute()
@@ -44,8 +54,16 @@ public class PlayerController {
         ).ok();
     }
 
-    @GetMapping("/{id}")
+    /**
+     * Fetches a single player record by ID.
+     *
+     * @param id The ID of the player.
+     * @return {@link ApiResponse} containing the player details.
+     * @throws PlayerException If the requested player does not exist.
+     */
+    @GetMapping(Routes.ID_PATHVAR)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Find player by ID", description = "Finds and returns a player by their ID")
     public ApiResponse<PlayerDto> findById(@PathVariable UUID id) throws PlayerException {
         try {
             return handleResponse(
@@ -58,8 +76,16 @@ public class PlayerController {
         }
     }
 
+    /**
+     * Creates a new player record.
+     *
+     * @param playerDto The player details submitted by the client.
+     * @return {@link ApiResponse} containing the created player's details.
+     * @throws PlayerException If an error occurs during player creation.
+     */
     @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Create a new player", description = "Adds a new player to the DB")
     public ApiResponse<PlayerDto> create(@Valid @RequestBody PlayerDto playerDto) throws PlayerException {
         Player player = playerMapper.toDomain(playerDto);
         return handleResponse(
@@ -69,8 +95,17 @@ public class PlayerController {
         ).ok();
     }
 
-    @PutMapping("{id}")
+    /**
+     * Updates an existing player record.
+     *
+     * @param playerDto The updated player details.
+     * @param id The ID of the player to be updated.
+     * @return {@link ApiResponse} containing the updated player's details.
+     * @throws PlayerException If the player is not found.
+     */
+    @PutMapping(Routes.ID_PATHVAR)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Update player by ID", description = "Updates the data for a specific player")
     public ApiResponse<PlayerDto> update(@Valid @RequestBody PlayerDto playerDto, @PathVariable UUID id) {
         try {
             if (findPlayerByIdUseCase.execute(id) == null) {
@@ -79,7 +114,7 @@ public class PlayerController {
             return handleResponse(
                     playerMapper.toDto(
                             updatePlayerUseCase.execute(
-                                    playerMapper.toDomain(playerDto)
+                                    playerMapper.toDomain(playerDto), id
                             )
                     )
             ).ok();
@@ -88,8 +123,16 @@ public class PlayerController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    /**
+     * Deletes a player record by ID.
+     *
+     * @param id The ID of the player to be deleted.
+     * @return {@link ApiResponse} containing {@code true} if the player was deleted successfully.
+     * @throws PlayerException If the player is not found.
+     */
+    @DeleteMapping(Routes.ID_PATHVAR)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Delete player by ID", description = "Deletes a specific player by their ID")
     public ApiResponse<Boolean> delete(@PathVariable UUID id) {
         try {
             return handleResponse(
