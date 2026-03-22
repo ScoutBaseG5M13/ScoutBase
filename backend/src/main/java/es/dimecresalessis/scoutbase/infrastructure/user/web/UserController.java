@@ -64,7 +64,7 @@ public class UserController {
      * @return {@link ApiResponse} containing the created user's details.
      * @throws IllegalAccessException If the role parameter is invalid or missing.
      */
-    @GetMapping("/new")
+    @GetMapping(Routes.NEW_PATH)
     @Operation(summary = "Create random user", description = "Creates a user with a specific role through the role query parameter ('ROLE_USER' or 'ROLE_ADMIN')")
     public ApiResponse<UserDto> newUser(@RequestParam(value = "role") String role) throws IllegalAccessException {
         if (role == null) {
@@ -108,5 +108,4 @@ public class UserController {
         );
         return handleResponse(Map.of("token", token)).ok();
     }
-
 }

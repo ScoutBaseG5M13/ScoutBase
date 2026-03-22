@@ -44,4 +44,19 @@ public class ResponseHandler<T> {
                 LocalDateTime.now()
         );
     }
+
+    /**
+     * Finalizes the response as a successful creation (HTTP 201).
+     *
+     * @return A fully populated {@link ApiResponse} marked as successful.
+     */
+    public ApiResponse<T> created() {
+        return new ApiResponse<>(
+                true,
+                "Created Successfully",
+                data,
+                MDC.get("sessionId"),
+                LocalDateTime.now()
+        );
+    }
 }

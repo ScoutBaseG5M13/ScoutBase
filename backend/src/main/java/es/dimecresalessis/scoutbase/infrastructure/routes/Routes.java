@@ -11,4 +11,5 @@ public class Routes {
 
     public static final String AUTH_LOGIN = "/auth/login";
     public static final String ID_PATHVAR = "/{id}";
+    public static final String NEW_PATH = "/new";
 }

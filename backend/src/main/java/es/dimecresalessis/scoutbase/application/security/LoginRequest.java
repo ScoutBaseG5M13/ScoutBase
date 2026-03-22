@@ -1,6 +1,7 @@
 package es.dimecresalessis.scoutbase.application.security;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -11,6 +12,7 @@ import lombok.Data;
  * </p>
  */
 @Data
+@AllArgsConstructor
 public class LoginRequest {
 
     /**

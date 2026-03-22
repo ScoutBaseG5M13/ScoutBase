@@ -93,7 +93,7 @@ public class PlayerController {
                 playerMapper.toDto(
                         createPlayerUseCase.execute(player)
                 )
-        ).ok();
+        ).created();
     }
 
     /**
