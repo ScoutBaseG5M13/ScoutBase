@@ -1,5 +1,7 @@
 package es.dimecresalessis.scoutbase.infrastructure.web.annotation;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
@@ -26,8 +28,29 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Success"),
-        @ApiResponse(responseCode = "404", description = "Resource not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
+        @ApiResponse(responseCode = "401", description = "Forbidden",
+                content = @Content(
+                        examples = @ExampleObject(
+                                value = "{\"success\":false," +
+                                        "\"message\":\"Access Denied\"," +
+                                        "\"data\":\"AuthorizationDeniedException\"," +
+                                        "\"sessionId\":\"UUID\"," +
+                                        "\"timestamp\":\"string\"}"))),
+        @ApiResponse(responseCode = "404", description = "Resource not found",
+                content = @Content(
+                        examples = @ExampleObject(
+                                value = "{\"success\":false," +
+                                        "\"message\":\"Exception message\"," +
+                                        "\"data\":\"Exception\"," +
+                                        "\"sessionId\":\"UUID\"," +
+                                        "\"timestamp\":\"string\"}"))),
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+                content = @Content(
+                        examples = @ExampleObject(
+                                value = "{\"timestamp\":\"string\"," +
+                                        "\"status\":500," +
+                                        "\"error\":\"Internal Server Error\"," +
+                                        "\"path\":\"string\"}")))
 })
 public @interface ApiCommonResponses {
 }

@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import jakarta.annotation.PostConstruct;
+import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -28,4 +30,17 @@ import org.springframework.context.annotation.Configuration;
         scheme = "bearer",
         bearerFormat = "JWT"
 )
-public class OpenApiConfig {}
+public class OpenApiConfig {
+
+        /**
+         * This stops Swagger from creating "ApiResponseObject", "ApiResponseBoolean", etc.
+         * It forces it to use the base ApiResponse schema and just swap the 'data' field.
+         */
+        @PostConstruct
+        public void init() {
+                SpringDocUtils.getConfig().replaceWithClass(
+                        es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse.class,
+                        es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse.class
+                );
+        }
+}
