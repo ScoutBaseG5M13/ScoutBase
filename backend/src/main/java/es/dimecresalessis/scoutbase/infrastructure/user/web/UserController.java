@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -83,7 +84,7 @@ public class UserController {
      * @param userDto The details of the user to create.
      * @return {@link ApiResponse} containing the user's information.
      */
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a user", description = "Creates a user through a UserDto body.")
     @SecurityRequirement(name = "bearerAuth")
@@ -98,7 +99,7 @@ public class UserController {
      * @param loginRequest The login credentials of the user.
      * @return {@link ApiResponse} containing an authentication token.
      */
-    @PostMapping(Routes.AUTH_LOGIN)
+    @PostMapping(value = Routes.AUTH_LOGIN, consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Login", description = "Returns an authentification token if a user and its password exists in the database.")
     public ApiResponse<Map<String, String>> login(@RequestBody LoginRequest loginRequest) {
         String token = authService.authenticateAndGenerateToken(
