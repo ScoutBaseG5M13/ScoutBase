@@ -50,14 +50,14 @@ public class SecurityResponseBuilder {
      * @param request The current {@link HttpServletRequest} to extract attributes from.
      * @param response The {@link HttpServletResponse} where the JSON will be written.
      * @param status The HTTP status code (e.g., 401, 403).
-     * @param message The localized error message to include in the response body.
+     * @param exception The Exception to include in the response body in the form of its simple name.
      * @throws IOException If an error occurs during JSON serialization or writing to the response stream.
      */
-    public void buildResponse(HttpServletRequest request, HttpServletResponse response, int status, String message) throws IOException {
+    public void buildResponse(HttpServletRequest request, HttpServletResponse response, int status, RuntimeException exception) throws IOException {
         String sessionId = (String) request.getAttribute("sessionId");
 
-        ApiResponse<Void> apiResponse = new ApiResponse<>(
-                false, message, null, sessionId, LocalDateTime.now()
+        ApiResponse<String> apiResponse = new ApiResponse<>(
+                false, exception.getMessage(), exception.getClass().getSimpleName(), sessionId, LocalDateTime.now()
         );
         response.setStatus(status);
         response.setContentType("application/json");

@@ -43,7 +43,7 @@ public class SecurityHandlers implements AuthenticationEntryPoint, AccessDeniedH
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-        responseBuilder.buildResponse(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Autenticación requerida.");
+        responseBuilder.buildResponse(request, response, HttpServletResponse.SC_UNAUTHORIZED, authException);
     }
 
     /**
@@ -61,6 +61,6 @@ public class SecurityHandlers implements AuthenticationEntryPoint, AccessDeniedH
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException {
-        responseBuilder.buildResponse(request, response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado.");
+        responseBuilder.buildResponse(request, response, HttpServletResponse.SC_FORBIDDEN, accessDeniedException);
     }
 }
