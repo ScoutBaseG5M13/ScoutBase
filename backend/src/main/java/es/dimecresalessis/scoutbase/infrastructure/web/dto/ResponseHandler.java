@@ -1,6 +1,9 @@
 package es.dimecresalessis.scoutbase.infrastructure.web.dto;
 
 import org.slf4j.MDC;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 import java.time.LocalDateTime;
 
 /**
@@ -35,13 +38,27 @@ public class ResponseHandler<T> {
      *
      * @return A fully populated {@link ApiResponse} marked as successful.
      */
-    public ApiResponse<T> ok() {
-        return new ApiResponse<>(
+    public ResponseEntity<ApiResponse<T>> ok() {
+        return buildResponse("Success", HttpStatus.OK);
+    }
+
+    /**
+     * Finalizes the response as a successful creation (HTTP 201).
+     *
+     * @return A fully populated {@link ApiResponse} marked as successful.
+     */
+    public ResponseEntity<ApiResponse<T>> created() {
+        return buildResponse("Created Successfully", HttpStatus.CREATED);
+    }
+
+    private ResponseEntity<ApiResponse<T>> buildResponse(String message, HttpStatus status) {
+        ApiResponse<T> response = new ApiResponse<>(
                 true,
-                "Success",
+                message,
                 data,
                 MDC.get("sessionId"),
                 LocalDateTime.now()
         );
+        return new ResponseEntity<>(response, status);
     }
 }

@@ -20,7 +20,7 @@ public class DeletePlayerUseCase {
     private final PlayerRepository playerRepository;
 
     /**
-     * Executes the operation to delete a player from the repository.
+     * Executes the operation to delete a {@link Player} from the repository.
      *
      * @param id The ID of the player to be deleted.
      * @return {@code true} if the player was successfully deleted, {@code false} otherwise.
