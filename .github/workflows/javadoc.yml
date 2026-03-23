@@ -24,15 +24,12 @@ jobs:
           cache: 'maven'
 
       - name: Generate Javadoc
-        run: mvn javadoc:javadoc
+        run: mvn -pl desktopFrontend -am javadoc:javadoc
 
       - name: Prepare Deployment Folders
         run: |
-          # Create a staging directory
           mkdir -p staging/${{ github.ref_name }}
-          # Move the generated docs into the branch-specific folder
-          cp -r target/site/apidocs/* staging/${{ github.ref_name }}/
-          # Optional: Create an index.html at the root to redirect to main
+          cp -r desktopFrontend/target/site/apidocs/* staging/${{ github.ref_name }}/
           echo '<meta http-equiv="refresh" content="0; url=./main/">' > staging/index.html
 
       - name: Upload artifact
