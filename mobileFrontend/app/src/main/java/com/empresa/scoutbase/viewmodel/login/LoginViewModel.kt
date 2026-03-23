@@ -10,14 +10,12 @@ import com.empresa.scoutbase.model.login.ApiResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 
 /**
  * ViewModel encargado de gestionar el proceso de login.
  * 1. Envía usuario/contraseña al backend.
  * 2. Recibe token si es correcto.
- * 3. Intenta obtener el rol real del usuario.
- * 4. Si el backend devuelve 403 → asumimos que es ROLE_USER.
+ * 3. Obtiene el rol real del usuario mediante el endpoint /users/role.
  */
 class LoginViewModel : ViewModel() {
 
@@ -43,8 +41,7 @@ class LoginViewModel : ViewModel() {
     /**
      * Función principal de login.
      * 1. /users/auth/login → token
-     * 2. /users/username/{username} → rol (solo admins)
-     * Si devuelve 403 → usuario normal.
+     * 2. /users/role → rol real del usuario
      */
     fun login(username: String, password: String) {
         _loading.value = true
@@ -64,28 +61,13 @@ class LoginViewModel : ViewModel() {
                     val token = response.data.token
                     _token.value = token
 
-                    // 2. Intentamos obtener el rol real del usuario
-                    try {
-                        val userResponse = api.getUserByUsername(
-                            token = "Bearer $token",
-                            username = username
-                        )
+                    // 2. Obtenemos el rol real del usuario usando el nuevo endpoint
+                    val roleResponse = api.getUserRole("Bearer $token")
 
-                        // Si funciona → es admin
-                        if (userResponse.success && userResponse.data != null) {
-                            _role.value = userResponse.data.role
-                        } else {
-                            // Si por alguna razón no devuelve datos, asumimos usuario normal
-                            _role.value = "ROLE_USER"
-                        }
-
-                    } catch (e: HttpException) {
-                        // Si el backend devuelve 403 → usuario normal
-                        if (e.code() == 403) {
-                            _role.value = "ROLE_USER"
-                        } else {
-                            throw e
-                        }
+                    if (roleResponse.success && roleResponse.data != null) {
+                        _role.value = roleResponse.data
+                    } else {
+                        _error.value = "No se pudo obtener el rol del usuario"
                     }
 
                 } else {
@@ -111,6 +93,7 @@ class LoginViewModel : ViewModel() {
         _error.value = msg
     }
 }
+
 
 
 
