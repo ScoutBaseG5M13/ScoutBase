@@ -62,6 +62,7 @@
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -88,8 +89,11 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <failOnError>false</failOnError>
+                    <legacyMode>true</legacyMode>
+                    <show>private</show>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>
