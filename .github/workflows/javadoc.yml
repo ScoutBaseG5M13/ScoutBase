@@ -30,24 +30,30 @@ jobs:
 
       - name: Check generated files
         run: |
-          echo "Contenido de target:"
+          echo "=== Buscando index.html de Javadoc ==="
+          find desktopFrontend -type f -name "index.html" | sort || true
+
+          echo "=== Contenido de target ==="
           ls -R desktopFrontend/target || true
 
       - name: Prepare Deployment Folders
         run: |
           mkdir -p staging/${{ github.ref_name }}
 
-          DOCS_DIR=$(find desktopFrontend -type f -path "*/apidocs/index.html" | head -n 1 | xargs dirname)
+          INDEX_FILE=$(find desktopFrontend -type f \( -path "*/apidocs/index.html" -o -path "*/site/index.html" -o -path "*/reports/apidocs/index.html" \) | head -n 1)
 
-          if [ -z "$DOCS_DIR" ]; then
-            echo "No se encontró ninguna carpeta de Javadoc"
-            find desktopFrontend -maxdepth 6 -type d | sort
+          if [ -z "$INDEX_FILE" ]; then
+            echo "No se encontró ninguna salida de Javadoc"
+            echo "Árbol de directorios disponible:"
+            find desktopFrontend/target -maxdepth 6 -print | sort || true
             exit 1
           fi
 
-          echo "Javadoc encontrado en: $DOCS_DIR"
+          DOCS_DIR=$(dirname "$INDEX_FILE")
 
-          cp -r "$DOCS_DIR"/* staging/${{ github.ref_name }}/
+          echo "Javadoc encontrada en: $DOCS_DIR"
+
+          cp -r "$DOCS_DIR"/. staging/${{ github.ref_name }}/
           echo '<meta http-equiv="refresh" content="0; url=./main/">' > staging/index.html
 
       - name: Upload artifact
