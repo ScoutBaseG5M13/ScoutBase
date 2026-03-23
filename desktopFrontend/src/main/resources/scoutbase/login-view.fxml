@@ -13,63 +13,50 @@
            fx:controller="scoutbase.LoginController"
            prefWidth="900.0"
            prefHeight="600.0"
-           style="-fx-background-color: #F2F5F7;">
+           stylesheets="@dark_theme.css"
+           styleClass="root-container">
 
     <children>
         <VBox alignment="CENTER"
-              spacing="16.0"
-              maxWidth="320.0"
-              prefWidth="320.0">
+              spacing="18.0"
+              maxWidth="380.0"
+              prefWidth="380.0"
+              maxHeight="420.0"
+              styleClass="login-card">
+
             <padding>
-                <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+                <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
             </padding>
 
             <Label text="Scoutbase"
-                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0A3D62;" />
+                   styleClass="app-title" />
 
             <Label text="Iniciar sesión"
-                   style="-fx-font-size: 16px; -fx-text-fill: #333333;" />
+                   styleClass="page-label" />
 
             <TextField fx:id="usernameField"
                        promptText="Usuario"
-                       prefWidth="270.0"
-                       prefHeight="40.0"
-                       maxWidth="270.0"
-                       style="-fx-background-color: white;
-                              -fx-background-radius: 10;
-                              -fx-border-color: #D9D9D9;
-                              -fx-border-radius: 10;
-                              -fx-padding: 0 12 0 12;
-                              -fx-font-size: 14px;" />
+                       prefWidth="300.0"
+                       prefHeight="44.0"
+                       maxWidth="300.0" />
 
             <PasswordField fx:id="passwordField"
                            promptText="Contraseña"
-                           prefWidth="270.0"
-                           prefHeight="40.0"
-                           maxWidth="270.0"
-                           style="-fx-background-color: white;
-                                  -fx-background-radius: 10;
-                                  -fx-border-color: #D9D9D9;
-                                  -fx-border-radius: 10;
-                                  -fx-padding: 0 12 0 12;
-                                  -fx-font-size: 14px;" />
+                           prefWidth="300.0"
+                           prefHeight="44.0"
+                           maxWidth="300.0" />
 
             <Button text="Entrar"
                     onAction="#onLoginButtonClick"
                     defaultButton="true"
-                    prefWidth="270.0"
-                    prefHeight="40.0"
-                    style="-fx-background-color: #0A3D62;
-                           -fx-text-fill: white;
-                           -fx-font-size: 14px;
-                           -fx-font-weight: bold;
-                           -fx-background-radius: 10;
-                           -fx-cursor: hand;" />
+                    prefWidth="300.0"
+                    prefHeight="44.0"
+                    styleClass="primary-button" />
 
             <Label fx:id="errorLabel"
                    wrapText="true"
-                   maxWidth="270.0"
-                   style="-fx-text-fill: #A94442; -fx-font-size: 13px;" />
+                   maxWidth="300.0"
+                   styleClass="error-label" />
         </VBox>
     </children>
 </StackPane>

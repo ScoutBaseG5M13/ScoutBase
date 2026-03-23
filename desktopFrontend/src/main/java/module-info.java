@@ -1,3 +1,10 @@
+/**
+ * Módulo del cliente de escritorio ScoutBase.
+ * Define las dependencias necesarias para:
+ * - Interfaz gráfica JavaFX
+ * - Comunicación HTTP con el backend
+ * - Procesamiento de JSON mediante Jackson
+ */
 module scoutbase {
 
     requires javafx.controls;

@@ -13,24 +13,55 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Controlador de la pantalla de inicio de sesión.
+ *
+ * <p>Se encarga de validar los datos introducidos por el usuario,
+ * realizar la autenticación contra el backend y abrir el dashboard
+ * cuando el login es correcto.</p>
+ */
 public class LoginController {
 
+    /**
+     * Campo de texto para el nombre de usuario.
+     */
     @FXML
     private TextField usernameField;
 
+    /**
+     * Campo de texto para la contraseña.
+     */
     @FXML
     private PasswordField passwordField;
 
+    /**
+     * Etiqueta usada para mostrar mensajes de error en pantalla.
+     */
     @FXML
     private Label errorLabel;
 
+    /**
+     * Servicio encargado de gestionar la autenticación.
+     */
     private final AuthService authService = new AuthService();
 
+    /**
+     * Inicializa la vista dejando vacía la zona de error.
+     */
     @FXML
     public void initialize() {
         errorLabel.setText("");
     }
 
+    /**
+     * Gestiona el intento de inicio de sesión del usuario.
+     *
+     * <p>Comprueba que los campos no estén vacíos, envía las credenciales
+     * al backend, guarda la sesión y abre el dashboard si la autenticación
+     * se realiza correctamente.</p>
+     *
+     * @param event evento generado al pulsar el botón de login
+     */
     @FXML
     private void onLoginButtonClick(ActionEvent event) {
         String username = usernameField.getText();
@@ -81,6 +112,12 @@ public class LoginController {
         }
     }
 
+    /**
+     * Abre la pantalla principal del dashboard tras un login correcto.
+     *
+     * @param event evento que origina el cambio de vista
+     * @throws IOException si ocurre un error al cargar el archivo FXML
+     */
     private void openDashboard(ActionEvent event) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("dashboard-view.fxml"));
         Parent root = loader.load();
