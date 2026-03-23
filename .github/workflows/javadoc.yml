@@ -29,12 +29,27 @@ jobs:
         run: mvn javadoc:javadoc
 
       - name: Check generated files
-        run: ls -R desktopFrontend/target/site || true
+        run: |
+          echo "Buscando carpetas apidocs..."
+          find . -type f -path "*/apidocs/index.html" || true
+          echo "Contenido de target..."
+          ls -R desktopFrontend/target || true
 
       - name: Prepare Deployment Folders
         run: |
           mkdir -p staging/${{ github.ref_name }}
-          cp -r desktopFrontend/target/site/apidocs/. staging/${{ github.ref_name }}/
+
+          DOCS_DIR=$(find . -type f -path "*/apidocs/index.html" | head -n 1 | xargs dirname)
+
+          if [ -z "$DOCS_DIR" ]; then
+            echo "No se encontró ninguna carpeta de Javadoc"
+            find . -maxdepth 6 -type d | sort
+            exit 1
+          fi
+
+          echo "Javadoc encontrado en: $DOCS_DIR"
+
+          cp -r "$DOCS_DIR"/* staging/${{ github.ref_name }}/
           echo '<meta http-equiv="refresh" content="0; url=./main/">' > staging/index.html
 
       - name: Upload artifact
