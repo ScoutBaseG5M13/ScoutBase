@@ -1,5 +1,7 @@
 package es.dimecresalessis.scoutbase.application.security;
 
+import es.dimecresalessis.scoutbase.application.user.FindUserByUsernameUseCase;
+import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.security.JwtService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
+    private final FindUserByUsernameUseCase findUserByUsernameUseCase;
 
     /**
      * Authenticates the user and generates a JWT token.
@@ -29,6 +32,7 @@ public class AuthService {
      */
     public String authenticateAndGenerateToken(String username, String password) {
         authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        return jwtService.createToken(username);
+        User user = findUserByUsernameUseCase.execute(username);
+        return jwtService.createToken(username, user.getRole());
     }
 }

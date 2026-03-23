@@ -40,12 +40,13 @@ public class JwtService {
      * @param username The username to associate with the token.
      * @return A signed JWT token as a string.
      */
-    public String createToken(String username) {
+    public String createToken(String username, String role) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.expirationMs()))
                 .signWith(key)
+                .claim("role", role)
                 .compact();
     }
 
@@ -65,9 +66,23 @@ public class JwtService {
     }
 
     /**
+     * Extracts the user role from the provided token.
+     * @param token The token to parse.
+     * @return The role stored in the custom "role" claim.
+     */
+    public String extractRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
+
+    /**
      * Checks if the provided JWT token is valid for the given user details.
      *
-     * @param token       The JWT token to validate.
+     * @param token The JWT token to validate.
      * @param userDetails The user details to verify.
      * @return {@code true} if the token matches the provided user details and is not expired.
      */

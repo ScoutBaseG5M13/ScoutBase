@@ -6,6 +6,7 @@ import es.dimecresalessis.scoutbase.application.user.*;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.Role;
+import es.dimecresalessis.scoutbase.infrastructure.security.JwtService;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
@@ -44,6 +45,7 @@ public class UserController {
     private final DeleteUserUseCase deleteUserUseCase;
     private final UpdateUserUseCase updateUserUseCase;
     private final FindUserByUsernameUseCase findUserByUsernameUseCase;
+    private final JwtService jwtService;
 
     /**
      * Finds a user by their ID.
@@ -186,5 +188,19 @@ public class UserController {
                 loginRequest.getPassword()
         );
         return handleResponse(Map.of("token", token)).ok();
+    }
+
+    /**
+     * Returns the role of the currently authenticated user.
+     *
+     * @param authHeader The current security context, passed as the header "Authentication".
+     * @return {@link ApiResponse} containing the user's role.
+     */
+    @GetMapping(value = Routes.ROLE_PATH)
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Get user role", description = "Returns the role of the user currently authorized.")
+    public ResponseEntity<ApiResponse<String>> getRole(@RequestHeader(value = "Authorization") String authHeader) {
+        String jwtKey = authHeader.substring("Bearer ".length());
+        return handleResponse(jwtService.extractRole(jwtKey)).ok();
     }
 }

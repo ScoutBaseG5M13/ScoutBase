@@ -157,6 +157,22 @@ public class UserControllerIT {
         }
     }
 
+    @Test
+    void shouldGetRoleFromToken() throws Exception {
+        String expectedRole = admin.getRole();
+
+        MvcResult result = mockMvc.perform(get(Routes.API_ROOT + Routes.USERS + Routes.ROLE_PATH)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andReturn();
+
+        String extractedRole = extractString(result);
+
+        assertNotNull(extractedRole);
+        assertEquals(expectedRole, extractedRole);
+    }
+
     private UserDto findUserById(String id, ResultMatcher status) {
         try {
             MvcResult result = mockMvc.perform(get(Routes.API_ROOT + Routes.USERS + "/" + id)
@@ -242,5 +258,10 @@ public class UserControllerIT {
     private Boolean extractBoolean(MvcResult result) throws Exception {
         String jsonResponse = result.getResponse().getContentAsString();
         return objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<Boolean>>() {}).data();
+    }
+
+    private String extractString(MvcResult result) throws Exception {
+        String jsonResponse = result.getResponse().getContentAsString();
+        return objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<String>>() {}).data();
     }
 }
