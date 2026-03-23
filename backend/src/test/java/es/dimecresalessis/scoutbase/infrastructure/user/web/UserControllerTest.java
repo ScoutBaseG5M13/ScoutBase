@@ -5,6 +5,7 @@ import es.dimecresalessis.scoutbase.application.security.LoginRequest;
 import es.dimecresalessis.scoutbase.application.user.*;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
+import es.dimecresalessis.scoutbase.infrastructure.security.JwtService;
 import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDto;
 import es.dimecresalessis.scoutbase.infrastructure.user.web.mapper.UserMapper;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
@@ -29,6 +30,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
+    @Mock
+    private JwtService jwtService;
     @Mock
     private UserMapper userMapper;
     @Mock
@@ -159,5 +162,23 @@ class UserControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(token, response.getBody().data().get("token"));
+    }
+
+    @Test
+    @DisplayName("getRole - Should return extracted role from token")
+    void getRole_ShouldReturnRole() {
+        String authHeader = "Bearer mysuperhipermegasecretjwttoken";
+        String token = "mysuperhipermegasecretjwttoken";
+        String expectedRole = "ROLE_ADMIN";
+
+        when(jwtService.extractRole(token)).thenReturn(expectedRole);
+
+        ResponseEntity<ApiResponse<String>> response = userController.getRole(authHeader);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(expectedRole, response.getBody().data());
+
+        verify(jwtService).extractRole(token);
     }
 }

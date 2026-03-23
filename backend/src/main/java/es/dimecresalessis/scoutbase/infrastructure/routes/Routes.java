@@ -14,4 +14,5 @@ public class Routes {
     public static final String USERNAME_PATH = "/username";
     public static final String USERNAME_PATHVAR = "/{username}";
     public static final String NEW_PATH = "/new";
+    public static final String ROLE_PATH = "/role";
 }
