@@ -31,6 +31,7 @@ fun HomeScreen(
         else -> AzulGrisaceo
     }
 
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = FondoClaro
