@@ -24,26 +24,24 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Generate Javadoc
+      - name: Generate Site (Javadoc)
         working-directory: ./desktopFrontend
-        run: mvn javadoc:javadoc
+        run: mvn site
 
       - name: Check generated files
         run: |
-          echo "Buscando carpetas apidocs..."
-          find . -type f -path "*/apidocs/index.html" || true
-          echo "Contenido de target..."
+          echo "Contenido de target:"
           ls -R desktopFrontend/target || true
 
       - name: Prepare Deployment Folders
         run: |
           mkdir -p staging/${{ github.ref_name }}
 
-          DOCS_DIR=$(find . -type f -path "*/apidocs/index.html" | head -n 1 | xargs dirname)
+          DOCS_DIR=$(find desktopFrontend -type f -path "*/apidocs/index.html" | head -n 1 | xargs dirname)
 
           if [ -z "$DOCS_DIR" ]; then
             echo "No se encontró ninguna carpeta de Javadoc"
-            find . -maxdepth 6 -type d | sort
+            find desktopFrontend -maxdepth 6 -type d | sort
             exit 1
           fi
 
