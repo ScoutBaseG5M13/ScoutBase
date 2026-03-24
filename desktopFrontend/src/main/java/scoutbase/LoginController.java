@@ -57,8 +57,9 @@ public class LoginController {
      * Gestiona el intento de inicio de sesión del usuario.
      *
      * <p>Comprueba que los campos no estén vacíos, envía las credenciales
-     * al backend, guarda la sesión y abre el dashboard si la autenticación
-     * se realiza correctamente.</p>
+     * al backend, extrae el token, obtiene el rol del usuario autenticado,
+     * guarda la sesión y abre el dashboard si la autenticación se realiza
+     * correctamente.</p>
      *
      * @param event evento generado al pulsar el botón de login
      */
@@ -88,8 +89,12 @@ public class LoginController {
 
             String token = authService.extractToken(response);
 
-            UserDto user = authService.getUserByUsername(username, token);
-            String role = user.getRole();
+            if (token == null || token.isBlank()) {
+                errorLabel.setText("No se pudo obtener el token de autenticación");
+                return;
+            }
+
+            String role = authService.getCurrentUserRole(token);
 
             SessionManager.saveSession(
                     token,

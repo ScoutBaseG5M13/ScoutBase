@@ -54,7 +54,10 @@ public class DashboardController {
 
         welcomeLabel.setText("Bienvenido, " + username);
 
-        String cleanRole = role != null ? role.replace("ROLE_", "") : "SIN ROL";
+        String cleanRole = (role != null && !role.isBlank())
+                ? role.replace("ROLE_", "")
+                : "SIN ROL";
+
         userInfoLabel.setText(username + " (" + cleanRole + ")");
     }
 

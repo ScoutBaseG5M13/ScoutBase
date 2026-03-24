@@ -38,10 +38,10 @@ public class SessionManager {
     /**
      * Guarda los datos de la sesión tras un login correcto.
      *
-     * @param token     token de autenticación
-     * @param session   identificador de sesión
-     * @param user      nombre de usuario
-     * @param userRole  rol del usuario
+     * @param token token de autenticación
+     * @param session identificador de sesión
+     * @param user nombre de usuario
+     * @param userRole rol del usuario
      */
     public static void saveSession(String token, String session, String user, String userRole) {
         authToken = token;
@@ -51,6 +51,8 @@ public class SessionManager {
     }
 
     /**
+     * Devuelve el token de autenticación actual.
+     *
      * @return token de autenticación actual
      */
     public static String getAuthToken() {
@@ -58,6 +60,8 @@ public class SessionManager {
     }
 
     /**
+     * Devuelve el identificador de sesión actual.
+     *
      * @return identificador de sesión actual
      */
     public static String getSessionId() {
@@ -65,6 +69,8 @@ public class SessionManager {
     }
 
     /**
+     * Devuelve el nombre de usuario de la sesión activa.
+     *
      * @return nombre de usuario de la sesión activa
      */
     public static String getUsername() {
@@ -72,6 +78,8 @@ public class SessionManager {
     }
 
     /**
+     * Devuelve el rol del usuario de la sesión activa.
+     *
      * @return rol del usuario de la sesión activa
      */
     public static String getRole() {
@@ -81,14 +89,17 @@ public class SessionManager {
     /**
      * Indica si existe una sesión válida.
      *
-     * @return true si hay un token almacenado, false en caso contrario
+     * @return {@code true} si hay un token almacenado; {@code false} en caso contrario
      */
     public static boolean isLoggedIn() {
         return authToken != null && !authToken.isBlank();
     }
 
     /**
-     * Elimina todos los datos de la sesión (logout).
+     * Elimina todos los datos de la sesión.
+     *
+     * <p>Debe llamarse al cerrar sesión para evitar conservar información
+     * del usuario autenticado en memoria.</p>
      */
     public static void clear() {
         authToken = null;

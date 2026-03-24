@@ -13,16 +13,28 @@ import java.time.Duration;
 /**
  * Servicio encargado de gestionar la autenticación contra el backend.
  *
- * <p>Permite iniciar sesión, obtener los datos del usuario autenticado
- * y extraer el token devuelto por la API.</p>
+ * <p>Permite iniciar sesión, obtener datos del usuario autenticado,
+ * recuperar el rol del usuario actual y extraer el token devuelto por la API.</p>
  */
 public class AuthService {
+
+    /**
+     * URL base de la API backend.
+     */
+    private static final String BASE_URL =
+            "https://scoutbase-dev.onrender.com/api/v1/users";
 
     /**
      * URL del endpoint de login del backend.
      */
     private static final String LOGIN_URL =
-            "https://scoutbase-dev.onrender.com/api/v1/users/auth/login";
+            BASE_URL + "/auth/login";
+
+    /**
+     * URL del endpoint para obtener el rol del usuario autenticado.
+     */
+    private static final String ROLE_URL =
+            BASE_URL + "/role";
 
     /**
      * Cliente HTTP usado para comunicarse con la API.
@@ -50,6 +62,9 @@ public class AuthService {
     /**
      * Obtiene los datos de un usuario a partir de su nombre de usuario.
      *
+     * <p>Este método puede requerir permisos específicos según la configuración
+     * del backend. No debe usarse como parte obligatoria del flujo de login.</p>
+     *
      * @param username nombre de usuario a consultar
      * @param token token de autenticación necesario para acceder al endpoint
      * @return objeto {@link UserDto} con los datos del usuario
@@ -58,7 +73,7 @@ public class AuthService {
      * @throws RuntimeException si la respuesta no contiene datos válidos o se produce un error HTTP
      */
     public UserDto getUserByUsername(String username, String token) throws IOException, InterruptedException {
-        String url = "https://scoutbase-dev.onrender.com/api/v1/users/username/" + username;
+        String url = BASE_URL + "/username/" + username;
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -84,6 +99,73 @@ public class AuthService {
         }
 
         throw new RuntimeException("Error obteniendo usuario: HTTP " + response.statusCode() + " -> " + response.body());
+    }
+
+    /**
+     * Obtiene el rol del usuario autenticado a partir del token JWT.
+     *
+     * <p>Este método utiliza el endpoint específico del backend destinado
+     * a recuperar el rol del usuario actual autenticado.</p>
+     *
+     * @param token token de autenticación
+     * @return rol del usuario autenticado
+     * @throws IOException si ocurre un error durante la comunicación
+     * @throws InterruptedException si la petición es interrumpida
+     * @throws RuntimeException si la respuesta no contiene un rol válido o se produce un error HTTP
+     */
+    public String getCurrentUserRole(String token) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(ROLE_URL))
+                .timeout(Duration.ofSeconds(10))
+                .header("Accept", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("GET ROLE URL: " + ROLE_URL);
+        System.out.println("GET ROLE STATUS: " + response.statusCode());
+        System.out.println("GET ROLE BODY: " + response.body());
+
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            ApiResponse apiResponse = objectMapper.readValue(response.body(), ApiResponse.class);
+            JsonNode data = apiResponse.getData();
+
+            if (data == null || data.isNull()) {
+                throw new RuntimeException("La respuesta no contiene el rol del usuario");
+            }
+
+            if (data.isTextual()) {
+                return data.asText();
+            }
+
+            if (data.isObject()) {
+                if (data.has("role") && !data.get("role").isNull()) {
+                    return data.get("role").asText();
+                }
+
+                if (data.has("authority") && !data.get("authority").isNull()) {
+                    return data.get("authority").asText();
+                }
+
+                if (data.has("name") && !data.get("name").isNull()) {
+                    return data.get("name").asText();
+                }
+            }
+
+            throw new RuntimeException("Formato de rol no reconocido: " + data.toPrettyString());
+        }
+
+        if (response.statusCode() == 401) {
+            throw new RuntimeException("No autorizado para obtener el rol del usuario");
+        }
+
+        if (response.statusCode() == 403) {
+            throw new RuntimeException("Acceso denegado al obtener el rol del usuario");
+        }
+
+        throw new RuntimeException("Error obteniendo rol: HTTP " + response.statusCode() + " -> " + response.body());
     }
 
     /**
