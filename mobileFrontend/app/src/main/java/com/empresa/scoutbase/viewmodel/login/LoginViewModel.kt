@@ -12,36 +12,45 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel encargado de gestionar el proceso de login.
- * 1. Envía usuario/contraseña al backend.
- * 2. Recibe token si es correcto.
- * 3. Obtiene el rol real del usuario mediante el endpoint /users/role.
+ * ViewModel responsable de gestionar el procés d'autenticació de l'usuari.
+ *
+ * Funcionalitats principals:
+ * - Enviar les credencials al backend.
+ * - Rebre i emmagatzemar el token si el login és correcte.
+ * - Obtenir el rol real de l'usuari mitjançant l'endpoint `/users/role`.
+ * - Gestionar l'estat de càrrega i els missatges d'error.
  */
 class LoginViewModel : ViewModel() {
 
-    // Instancia de Retrofit → LoginApi
+    /** Instància de Retrofit per accedir a les operacions de login. */
     private val api = ApiService.retrofit.create(LoginApi::class.java)
 
-    // Estado de carga (spinner)
+    /** Estat que indica si hi ha una operació de càrrega en curs. */
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
-    // Estado de error
+    /** Missatge d'error actual, si n'hi ha. */
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-    // Token recibido tras login
+    /** Token rebut després d'un login correcte. */
     private val _token = MutableStateFlow<String?>(null)
     val token: StateFlow<String?> = _token
 
-    // Rol del usuario (ROLE_ADMIN o ROLE_USER)
+    /** Rol real de l'usuari autenticat (ROLE_ADMIN o ROLE_USER). */
     private val _role = MutableStateFlow<String?>(null)
     val role: StateFlow<String?> = _role
 
     /**
-     * Función principal de login.
-     * 1. /users/auth/login → token
-     * 2. /users/role → rol real del usuario
+     * Realitza el procés complet de login.
+     *
+     * Passos:
+     * 1. Envia les credencials a `/users/auth/login`.
+     * 2. Si són correctes, rep un token i l'emmagatzema.
+     * 3. Amb el token, consulta el rol real de l'usuari a `/users/role`.
+     *
+     * @param username Nom d'usuari introduït.
+     * @param password Contrasenya introduïda.
      */
     fun login(username: String, password: String) {
         _loading.value = true
@@ -49,19 +58,13 @@ class LoginViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                // Construimos la petición de login
                 val request = LoginRequest(username, password)
-
-                // 1. Llamada al login
                 val response: ApiResponse<LoginResponse> = api.login(request)
 
                 if (response.success && response.data != null) {
-
-                    // Guardamos el token recibido
                     val token = response.data.token
                     _token.value = token
 
-                    // 2. Obtenemos el rol real del usuario usando el nuevo endpoint
                     val roleResponse = api.getUserRole("Bearer $token")
 
                     if (roleResponse.success && roleResponse.data != null) {
@@ -71,28 +74,56 @@ class LoginViewModel : ViewModel() {
                     }
 
                 } else {
-                    // Error del backend (credenciales incorrectas, etc.)
                     _error.value = response.message
                 }
 
             } catch (e: Exception) {
-                // Errores reales: red, SSL, JSON, etc.
                 e.printStackTrace()
                 _error.value = "Error real: ${e.message}"
             } finally {
-                // Quitamos el spinner
                 _loading.value = false
             }
         }
     }
 
     /**
-     * Permite a la UI establecer errores manualmente.
+     * Assigna un missatge d'error manualment.
+     *
+     * @param msg Missatge d'error que es vol mostrar.
      */
     fun setError(msg: String) {
         _error.value = msg
     }
+
+    /**
+     * Realitza el procés de logout.
+     *
+     * Accions:
+     * - Esborra el token de l'usuari.
+     * - Esborra el rol assignat.
+     * - Reinicia l'estat d'error.
+     *
+     * Aquesta funció no fa cap crida al backend; només neteja l'estat local.
+     */
+    fun logout() {
+        _token.value = null
+        _role.value = null
+        _error.value = null
+    }
+
+    /**
+     * Funció utilitzada exclusivament per a proves unitàries.
+     * Permet simular que l'usuari està autenticat assignant un token i un rol.
+     *
+     * @param token Token fictici per simular autenticació.
+     * @param role Rol fictici assignat a l'usuari.
+     */
+    fun setFakeAuth(token: String, role: String) {
+        _token.value = token
+        _role.value = role
+    }
 }
+
 
 
 
