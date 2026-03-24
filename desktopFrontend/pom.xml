@@ -4,7 +4,7 @@
          https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!--
-      POM del módulo desktopFrontend de ScoutBase.
+      POM autónomo del módulo desktopFrontend de ScoutBase.
 
       Define las dependencias y plugins necesarios para la aplicación
       cliente de escritorio basada en JavaFX, incluyendo soporte para
@@ -14,19 +14,19 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.scoutbase</groupId>
-        <artifactId>ScoutBase</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
-
+    <groupId>com.scoutbase</groupId>
     <artifactId>desktopFrontend</artifactId>
-    <name>desktopFrontend</name>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+    <name>desktopFrontend</name>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <javafx.version>21.0.2</javafx.version>
         <jackson.version>2.18.6</jackson.version>
-        <junit.version>5.10.1</junit.version>
+        <junit.version>5.12.1</junit.version>
     </properties>
 
     <dependencies>
@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.12.1</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -72,7 +72,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.12.1</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -87,6 +87,7 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
 
@@ -105,6 +106,9 @@
                 <version>3.12.0</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <docencoding>${project.build.sourceEncoding}</docencoding>
+                    <charset>${project.build.sourceEncoding}</charset>
                     <failOnError>false</failOnError>
                     <legacyMode>true</legacyMode>
                     <show>private</show>
