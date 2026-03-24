@@ -65,6 +65,8 @@ public class LoginController {
      */
     @FXML
     private void onLoginButtonClick(ActionEvent event) {
+        errorLabel.setText("");
+
         String username = usernameField.getText();
         String password = passwordField.getText();
 
@@ -79,11 +81,7 @@ public class LoginController {
             ApiResponse response = authService.login(username, password);
 
             if (!response.isSuccess()) {
-                errorLabel.setText(
-                        response.getMessage() != null
-                                ? response.getMessage()
-                                : "No se pudo iniciar sesión"
-                );
+                errorLabel.setText("Usuario o contraseña incorrectos");
                 return;
             }
 
@@ -94,7 +92,14 @@ public class LoginController {
                 return;
             }
 
-            String role = authService.getCurrentUserRole(token);
+            String role;
+            try {
+                role = authService.getCurrentUserRole(token);
+            } catch (Exception e) {
+                e.printStackTrace();
+                errorLabel.setText("No se pudo completar el inicio de sesión");
+                return;
+            }
 
             SessionManager.saveSession(
                     token,
@@ -113,7 +118,7 @@ public class LoginController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            errorLabel.setText("Error al iniciar sesión: " + e.getMessage());
+            errorLabel.setText("Usuario o contraseña incorrectos");
         }
     }
 
