@@ -29,7 +29,6 @@ public class AuthServiceIntegrationTest {
 
         AuthService authService = new AuthService();
 
-        // ⚠️ Usa credenciales válidas existentes en vuestro backend
         String username = "john_doe";
         String password = "password123";
 
