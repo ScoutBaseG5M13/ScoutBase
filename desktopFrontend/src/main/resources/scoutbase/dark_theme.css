@@ -1,0 +1,112 @@
+.root-container {
+    -fx-background-color: #0B0B0F;
+}
+
+.top-bar {
+    -fx-background-color: linear-gradient(to right, #1B1B1F, #202227);
+}
+
+.center-panel {
+    -fx-background-color: #0B0B0F;
+}
+
+.app-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A4F8A;
+}
+
+.user-info-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #F0F0F0;
+}
+
+.dashboard-title {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A4F8A;
+}
+
+.welcome-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #F0F0F0;
+}
+
+.page-label {
+    -fx-font-size: 15px;
+    -fx-text-fill: #E0E0E0;
+}
+
+.login-card {
+    -fx-background-color: #1A1A1F;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+}
+
+.text-field,
+.password-field {
+    -fx-background-color: #2A2A2F;
+    -fx-text-fill: #F0F0F0;
+    -fx-prompt-text-fill: #9A9A9A;
+    -fx-background-radius: 10;
+    -fx-border-color: #3C6382;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.2;
+    -fx-highlight-fill: #0A4F8A;
+}
+
+.primary-button {
+    -fx-background-color: #0A4F8A;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover {
+    -fx-background-color: #1261A0;
+}
+
+.menu-button-primary {
+    -fx-background-color: #0A4F8A;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.menu-button-primary:hover {
+    -fx-background-color: #1261A0;
+}
+
+.menu-button {
+    -fx-background-color: #1261A0;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.menu-button:hover {
+    -fx-background-color: #1261A0;
+}
+
+.logout-button {
+    -fx-background-color: #ba0000;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.logout-button:hover {
+    -fx-background-color: #D94A47;
+}
+
+.error-label {
+    -fx-text-fill: #FF7B7B;
+    -fx-font-size: 13px;
+}

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="scoutbase.LoginController"
+           prefWidth="900.0"
+           prefHeight="600.0"
+           stylesheets="@dark_theme.css"
+           styleClass="root-container">
+
+    <children>
+        <VBox alignment="CENTER"
+              spacing="18.0"
+              maxWidth="380.0"
+              prefWidth="380.0"
+              maxHeight="420.0"
+              styleClass="login-card">
+
+            <padding>
+                <Insets top="28.0" right="28.0" bottom="28.0" left="28.0"/>
+            </padding>
+
+            <Label text="Scoutbase"
+                   styleClass="app-title" />
+
+            <Label text="Iniciar sesión"
+                   styleClass="page-label" />
+
+            <TextField fx:id="usernameField"
+                       promptText="Usuario"
+                       prefWidth="300.0"
+                       prefHeight="44.0"
+                       maxWidth="300.0" />
+
+            <PasswordField fx:id="passwordField"
+                           promptText="Contraseña"
+                           prefWidth="300.0"
+                           prefHeight="44.0"
+                           maxWidth="300.0" />
+
+            <Button text="Entrar"
+                    onAction="#onLoginButtonClick"
+                    defaultButton="true"
+                    prefWidth="300.0"
+                    prefHeight="44.0"
+                    styleClass="primary-button" />
+
+            <Label fx:id="errorLabel"
+                   wrapText="true"
+                   maxWidth="300.0"
+                   styleClass="error-label" />
+        </VBox>
+    </children>
+</StackPane>

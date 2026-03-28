@@ -12,6 +12,7 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -23,22 +24,42 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Generate Javadoc
-        run: mvn javadoc:javadoc
+      - name: Generate Site (Javadoc)
+        working-directory: ./desktopFrontend
+        run: mvn site
+
+      - name: Check generated files
+        run: |
+          echo "=== Buscando index.html de Javadoc ==="
+          find desktopFrontend -type f -name "index.html" | sort || true
+
+          echo "=== Contenido de target ==="
+          ls -R desktopFrontend/target || true
 
       - name: Prepare Deployment Folders
         run: |
-          # Create a staging directory
           mkdir -p staging/${{ github.ref_name }}
-          # Move the generated docs into the branch-specific folder
-          cp -r target/site/apidocs/* staging/${{ github.ref_name }}/
-          # Optional: Create an index.html at the root to redirect to main
+
+          INDEX_FILE=$(find desktopFrontend -type f \( -path "*/apidocs/index.html" -o -path "*/site/index.html" -o -path "*/reports/apidocs/index.html" \) | head -n 1)
+
+          if [ -z "$INDEX_FILE" ]; then
+            echo "No se encontró ninguna salida de Javadoc"
+            echo "Árbol de directorios disponible:"
+            find desktopFrontend/target -maxdepth 6 -print | sort || true
+            exit 1
+          fi
+
+          DOCS_DIR=$(dirname "$INDEX_FILE")
+
+          echo "Javadoc encontrada en: $DOCS_DIR"
+
+          cp -r "$DOCS_DIR"/. staging/${{ github.ref_name }}/
           echo '<meta http-equiv="refresh" content="0; url=./main/">' > staging/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'staging'
+          path: staging
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
