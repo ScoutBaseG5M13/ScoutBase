@@ -37,3 +37,4 @@ build/
 ### Environment variables ###
 *.properties
 !*application.properties
+*.env

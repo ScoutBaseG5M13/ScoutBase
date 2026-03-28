@@ -123,19 +123,19 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.12.0</version>
+				<version>3.11.2</version>
 				<configuration>
-					<additionalJOption>--no-module-directories</additionalJOption>
+					<legacyMode>true</legacyMode>
 
-					<doclint>none</doclint>
-					<failOnError>false</failOnError>
-					<quiet>true</quiet>
-
-					<detectJavaApiLink>false</detectJavaApiLink>
+					<groups>
+						<group>
+							<title>Domain Layer</title>
+							<packages>es.dimecresalessis.scoutbase.domain*</packages>
+						</group>
+					</groups>
 				</configuration>
 			</plugin>
 		</plugins>

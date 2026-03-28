@@ -6,12 +6,12 @@ COPY pom.xml .
 RUN mvn dependency:go-offline
 COPY . .
 # Running the exact build command you requested
-RUN mvn clean install -DskipTests
+RUN mvn clean compile install -DskipTests
 
 
 # Stage 2: Create the final image
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 # Copy the jar from the build stage
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/scoutbase-backend-*.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
