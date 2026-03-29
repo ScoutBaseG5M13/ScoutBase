@@ -12,6 +12,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -62,9 +63,17 @@ public class JwtFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(auth);
                     }
                 }
-            } catch (SignatureException | ExpiredJwtException e) {
-                String userMessage = "Your session has expired or is invalid. Please, log in again";
-                securityHandlers.commence(request, response, new BadCredentialsException(userMessage, e));
+            } catch (SignatureException ex) {
+                String userMessage = "Your session token is invalid";
+                securityHandlers.commence(request, response, new BadCredentialsException(userMessage));
+                return;
+            } catch (ExpiredJwtException ex) {
+                String userMessage = "Your session token has expired";
+                securityHandlers.commence(request, response, new BadCredentialsException(userMessage));
+                return;
+            } catch (UsernameNotFoundException ex) {
+                String userMessage = "The user associated with this token does not exist";
+                securityHandlers.commence(request, response, new BadCredentialsException(userMessage));
                 return;
             }
         }
