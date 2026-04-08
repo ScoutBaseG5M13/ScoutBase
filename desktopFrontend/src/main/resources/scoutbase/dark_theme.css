@@ -1,5 +1,5 @@
 .root-container {
-    -fx-background-color: #0B0B0F;
+    -fx-background-color: #1A1A1F; /* 🔥 mismo gris que la card */
 }
 
 .top-bar {
@@ -7,13 +7,23 @@
 }
 
 .center-panel {
-    -fx-background-color: #0B0B0F;
+    -fx-background-color: #1A1A1F; /* 🔥 igual que root */
 }
+
+/* ---------------- TEXTOS ---------------- */
 
 .app-title {
     -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: #0A4F8A;
+}
+
+.app-title:hover {
+    -fx-text-fill: #1261A0;
+}
+
+.app-title:pressed {
+    -fx-text-fill: #083B66;
 }
 
 .user-info-label {
@@ -28,6 +38,11 @@
     -fx-text-fill: #0A4F8A;
 }
 
+.section-subtitle {
+    -fx-font-size: 18px;
+    -fx-text-fill: #F0F0F0;
+}
+
 .welcome-label {
     -fx-font-size: 16px;
     -fx-text-fill: #F0F0F0;
@@ -38,11 +53,60 @@
     -fx-text-fill: #E0E0E0;
 }
 
+/* ---------------- CARDS ---------------- */
+
+.card-title {
+    -fx-font-size: 14px;
+    -fx-text-fill: #F0F0F0;
+}
+
+.card-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A4F8A;
+}
+
+.panel-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #F0F0F0;
+}
+
+.panel-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #E0E0E0;
+}
+
+/* 🔥 LOGIN CARD MEJORADA */
+
 .login-card {
-    -fx-background-color: #1A1A1F;
+    -fx-background-color: #202027; /* un pelín más clara que el fondo */
     -fx-background-radius: 18;
     -fx-border-radius: 18;
+    -fx-border-color: #2E2E35;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 20, 0.3, 0, 5);
 }
+
+/* 🔥 DASHBOARD CARDS */
+
+.dashboard-card {
+    -fx-background-color: #111827;
+    -fx-background-radius: 10;
+    -fx-padding: 20;
+    -fx-border-color: #2A2F3A;
+    -fx-border-radius: 10;
+}
+
+.info-box {
+    -fx-background-color: #111827;
+    -fx-background-radius: 10;
+    -fx-padding: 20;
+    -fx-border-color: #2A2F3A;
+    -fx-border-radius: 10;
+}
+
+/* ---------------- INPUTS ---------------- */
 
 .text-field,
 .password-field {
@@ -53,8 +117,9 @@
     -fx-border-color: #3C6382;
     -fx-border-radius: 10;
     -fx-border-width: 1.2;
-    -fx-highlight-fill: #0A4F8A;
 }
+
+/* ---------------- BOTONES ---------------- */
 
 .primary-button {
     -fx-background-color: #0A4F8A;
@@ -68,21 +133,8 @@
     -fx-background-color: #1261A0;
 }
 
-.menu-button-primary {
-    -fx-background-color: #0A4F8A;
-    -fx-text-fill: white;
-    -fx-background-radius: 8;
-    -fx-cursor: hand;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-}
-
-.menu-button-primary:hover {
-    -fx-background-color: #1261A0;
-}
-
 .menu-button {
-    -fx-background-color: #1261A0;
+    -fx-background-color: #0A4F8A;
     -fx-text-fill: white;
     -fx-background-radius: 8;
     -fx-cursor: hand;
@@ -94,8 +146,31 @@
     -fx-background-color: #1261A0;
 }
 
+.menu-button-active {
+    -fx-background-color: #06365E;
+    -fx-text-fill: white;
+}
+
+.menu-button-active:hover {
+    -fx-background-color: #08497F;
+}
+
+.quick-action-button {
+    -fx-background-color: #0A4F8A;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.quick-action-button:hover {
+    -fx-background-color: #1261A0;
+}
+
+/* ---------------- LOGOUT ---------------- */
+
 .logout-button {
-    -fx-background-color: #ba0000;
+    -fx-background-color: #BA0000;
     -fx-text-fill: white;
     -fx-background-radius: 10;
     -fx-cursor: hand;
@@ -105,6 +180,8 @@
 .logout-button:hover {
     -fx-background-color: #D94A47;
 }
+
+/* ---------------- ERRORES ---------------- */
 
 .error-label {
     -fx-text-fill: #FF7B7B;

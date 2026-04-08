@@ -13,7 +13,6 @@
            fx:controller="scoutbase.LoginController"
            prefWidth="900.0"
            prefHeight="600.0"
-           stylesheets="@dark_theme.css"
            styleClass="root-container">
 
     <children>

@@ -1,1 +1,191 @@
-/* to_do
+.root-container {
+    -fx-background-color: #F4F6F8;
+}
+
+.top-bar {
+    -fx-background-color: linear-gradient(to right, #E9EEF3, #DCE5ED);
+}
+
+.center-panel {
+    -fx-background-color: #F4F6F8;
+}
+
+.app-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A4F8A;
+}
+
+.app-title:hover {
+    -fx-text-fill: #1261A0;
+}
+
+.app-title:pressed {
+    -fx-text-fill: #083B66;
+}
+
+.user-info-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1E293B;
+}
+
+.dashboard-title {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A4F8A;
+}
+
+.section-subtitle {
+    -fx-font-size: 18px;
+    -fx-text-fill: #334155;
+}
+
+.welcome-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #334155;
+}
+
+.page-label {
+    -fx-font-size: 15px;
+    -fx-text-fill: #334155;
+}
+
+.card-title {
+    -fx-font-size: 14px;
+    -fx-text-fill: #334155;
+}
+
+.card-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0A4F8A;
+}
+
+.panel-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1E293B;
+}
+
+.panel-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #334155;
+}
+
+.login-card {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: #D0D7DE;
+    -fx-border-width: 1;
+}
+
+.dashboard-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 20;
+    -fx-border-color: #D0D7DE;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.info-box {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 20;
+    -fx-border-color: #D0D7DE;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.text-field,
+.password-field {
+    -fx-background-color: white;
+    -fx-text-fill: #111827;
+    -fx-prompt-text-fill: #6B7280;
+    -fx-background-radius: 10;
+    -fx-border-color: #AFC4D6;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.2;
+    -fx-highlight-fill: #0A4F8A;
+}
+
+.primary-button {
+    -fx-background-color: #0A4F8A;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover {
+    -fx-background-color: #1261A0;
+}
+
+.menu-button-primary {
+    -fx-background-color: #0A4F8A;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.menu-button-primary:hover {
+    -fx-background-color: #1261A0;
+}
+
+.menu-button {
+    -fx-background-color: #0A4F8A;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.menu-button:hover {
+    -fx-background-color: #1261A0;
+}
+
+.menu-button-active {
+    -fx-background-color: #06365E;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.menu-button-active:hover {
+    -fx-background-color: #08497F;
+}
+
+.quick-action-button {
+    -fx-background-color: #0A4F8A;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.quick-action-button:hover {
+    -fx-background-color: #1261A0;
+}
+
+.logout-button {
+    -fx-background-color: #BA0000;
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.logout-button:hover {
+    -fx-background-color: #D94A47;
+}
+
+.error-label {
+    -fx-text-fill: #C62828;
+    -fx-font-size: 13px;
+}

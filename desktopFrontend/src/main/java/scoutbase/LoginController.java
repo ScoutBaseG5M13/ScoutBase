@@ -132,8 +132,13 @@ public class LoginController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("dashboard-view.fxml"));
         Parent root = loader.load();
 
+        Scene scene = new Scene(root, 900, 600);
+        scene.getStylesheets().add(
+                getClass().getResource("/scoutbase/dark_theme.css").toExternalForm()
+        );
+
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root, 900, 600));
+        stage.setScene(scene);
         stage.setTitle("Scoutbase - Dashboard");
         stage.show();
     }
