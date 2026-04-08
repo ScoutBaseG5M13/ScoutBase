@@ -9,7 +9,7 @@ import java.net.http.HttpResponse;
 /**
  * Clase encargada de realizar peticiones HTTP al backend.
  *
- * <p>Actualmente solo implementa peticiones GET autenticadas
+ * <p>Actualmente, solo implementa peticiones GET autenticadas
  * mediante el token almacenado en {@link SessionManager}.</p>
  */
 public class ApiClient {

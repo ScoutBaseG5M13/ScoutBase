@@ -22,7 +22,7 @@ public class AuthService {
      * URL base de la API backend.
      */
     private static final String BASE_URL =
-            "https://scoutbase-dev.onrender.com/api/v1/users";
+            "https://scoutbase-dev-6r6d.onrender.com/api/v1/users";
 
     /**
      * URL del endpoint de login del backend.
