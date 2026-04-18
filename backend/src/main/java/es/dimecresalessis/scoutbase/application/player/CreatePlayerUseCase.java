@@ -30,6 +30,9 @@ public class CreatePlayerUseCase {
         if (player == null) {
             throw new PlayerException(ErrorEnum.PLAYER_IS_NULL);
         }
+        if (player.getId() == null) {
+            throw new PlayerException(ErrorEnum.PLAYER_ID_IS_NULL);
+        }
         if (playerRepository.findById(player.getId()).isPresent()) {
             throw new PlayerException(ErrorEnum.PLAYER_ALREADY_EXISTS, player.getId().toString());
         }

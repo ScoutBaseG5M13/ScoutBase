@@ -1,6 +1,5 @@
 package es.dimecresalessis.scoutbase.application.user;
 
-import es.dimecresalessis.scoutbase.application.security.RegistrationService;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
@@ -17,7 +16,9 @@ import org.springframework.stereotype.Service;
 public class CreateUserUseCase {
 
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(CreateUserUseCase.class);
-    private final RegistrationService registrationService;
+
+    private final SaveUserUseCase saveUserUseCase;
+    private final GetEncodedUserPasswordUseCase getEncodedUserPasswordUseCase;
     private final UserRepository userRepository;
 
     /**
@@ -28,12 +29,20 @@ public class CreateUserUseCase {
      * @throws UserException If the provided user object is {@code null}.
      */
     public User execute(User user) {
+        validate(user);
+
+        user = getEncodedUserPasswordUseCase.execute(user);
+        User savedUser = saveUserUseCase.execute(user);
+
+        logger.info("[CREATE] Created User with id '{}'", savedUser.getId());
+        return savedUser;
+    }
+
+    private void validate(User user) {
         if (user == null) {
             throw new UserException(ErrorEnum.USER_IS_NULL);
         }
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new UserException(ErrorEnum.USERNAME_ALREADY_EXISTS, user.getUsername());
-        }
+
         if (user.getId() != null) {
             userRepository.findById(user.getId())
                     .ifPresent(userDb -> {
@@ -41,8 +50,8 @@ public class CreateUserUseCase {
                     });
         }
 
-        User savedUser = registrationService.createUser(user);
-        logger.info("[CREATE] Created User with id '{}'", savedUser.getId());
-        return savedUser;
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new UserException(ErrorEnum.USERNAME_ALREADY_EXISTS, user.getUsername());
+        }
     }
 }

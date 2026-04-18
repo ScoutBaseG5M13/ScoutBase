@@ -1,10 +1,10 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web.mapper;
 
 import es.dimecresalessis.scoutbase.domain.user.model.User;
-import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDto;
+import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 import java.util.UUID;
 
@@ -14,49 +14,76 @@ class UserMapperTest {
 
     private UserMapper userMapper;
     private UUID userId;
-    private String username;
-    private String password;
-    private String role;
+    private User userDomain;
+    private UserDTO userDto;
 
     @BeforeEach
     void setUp() {
-        userMapper = new UserMapper();
+        userMapper = Mappers.getMapper(UserMapper.class);
         userId = UUID.randomUUID();
-        username = "scout_admin";
-        password = "secretPassword";
-        role = "ROLE_ADMIN";
+
+        userDomain = User.builder()
+                .id(userId)
+                .username("scout_master")
+                .password("encoded_password")
+                .role("ADMIN")
+                .name("Alex")
+                .surname("Scout")
+                .email("alex@scoutbase.com")
+                .build();
+
+        userDto = new UserDTO(
+                userId,
+                "scout_user",
+                "raw_password",
+                "USER",
+                "John",
+                "Doe",
+                "john@doe.com"
+        );
     }
 
     @Test
-    @DisplayName("Should map UserDto to Domain User")
-    void shouldMapToDomain() {
-        UserDto dto = new UserDto(userId, username, password, role);
-
-        User result = userMapper.toDomain(dto);
+    void shouldMapToDomain_WithId() {
+        User result = userMapper.toDomain(userDto);
 
         assertNotNull(result);
-        assertEquals(userId, result.getId());
-        assertEquals(username, result.getUsername());
-        assertEquals(password, result.getPassword());
-        assertEquals(role, result.getRole());
+        assertEquals(userDto.getId(), result.getId());
+        assertEquals(userDto.getUsername(), result.getUsername());
+        assertEquals(userDto.getPassword(), result.getPassword());
+        assertEquals(userDto.getRole(), result.getRole());
+        assertEquals(userDto.getName(), result.getName());
+        assertEquals(userDto.getSurname(), result.getSurname());
+        assertEquals(userDto.getEmail(), result.getEmail());
     }
 
     @Test
-    @DisplayName("Should map Domain User to UserDto")
+    void shouldMapToDomain_WithoutId() {
+        userDto.setId(null);
+
+        User result = userMapper.toDomain(userDto);
+
+        assertNotNull(result);
+        assertNotNull(result.getId());
+        assertNotEquals(userId, result.getId());
+        assertEquals(userDto.getUsername(), result.getUsername());
+    }
+
+    @Test
     void shouldMapToDto() {
-        User domain = new User(userId, username, password, role);
-
-        UserDto result = userMapper.toDto(domain);
+        UserDTO result = userMapper.toDto(userDomain);
 
         assertNotNull(result);
-        assertEquals(userId, result.getId());
-        assertEquals(username, result.getUsername());
-        assertEquals(password, result.getPassword());
-        assertEquals(role, result.getRole());
+        assertEquals(userDomain.getId(), result.getId());
+        assertEquals(userDomain.getUsername(), result.getUsername());
+        assertEquals(userDomain.getPassword(), result.getPassword());
+        assertEquals(userDomain.getRole(), result.getRole());
+        assertEquals(userDomain.getName(), result.getName());
+        assertEquals(userDomain.getSurname(), result.getSurname());
+        assertEquals(userDomain.getEmail(), result.getEmail());
     }
 
     @Test
-    @DisplayName("Should return null when mapping null objects")
     void shouldReturnNull_WhenInputsAreNull() {
         assertNull(userMapper.toDomain(null));
         assertNull(userMapper.toDto(null));

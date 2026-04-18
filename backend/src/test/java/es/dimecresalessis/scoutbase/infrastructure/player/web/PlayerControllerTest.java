@@ -3,7 +3,7 @@ package es.dimecresalessis.scoutbase.infrastructure.player.web;
 import es.dimecresalessis.scoutbase.application.player.*;
 import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
-import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDto;
+import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.mapper.PlayerMapper;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,13 +45,13 @@ class PlayerControllerTest {
 
     private UUID playerId;
     private Player player;
-    private PlayerDto playerDto;
+    private PlayerDTO playerDto;
 
     @BeforeEach
     void setUp() {
         playerId = UUID.randomUUID();
         player = Player.builder().id(playerId).name("Ronald").build();
-        playerDto = new PlayerDto(playerId, "Ronald", "Scoutbase FC", "ronald@scoutbase.es");
+        playerDto = new PlayerDTO(playerId, UUID.randomUUID(), "Ronald", "Scoutbase FC", 25, "ronald@scoutbase.es", 15, "PORTERO", "ALEVIN");
     }
 
     @Test
@@ -60,7 +60,7 @@ class PlayerControllerTest {
         when(findAllPlayersUseCase.execute()).thenReturn(List.of(player));
         when(playerMapper.toDto(any())).thenReturn(playerDto);
 
-        ResponseEntity<ApiResponse<List<PlayerDto>>> response = playerController.findAll();
+        ResponseEntity<ApiResponse<List<PlayerDTO>>> response = playerController.findAll();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -74,7 +74,7 @@ class PlayerControllerTest {
         when(findPlayerByIdUseCase.execute(playerId)).thenReturn(player);
         when(playerMapper.toDto(player)).thenReturn(playerDto);
 
-        ResponseEntity<ApiResponse<PlayerDto>> response = playerController.findById(playerId);
+        ResponseEntity<ApiResponse<PlayerDTO>> response = playerController.findById(playerId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(playerId, response.getBody().data().getId());
@@ -95,7 +95,7 @@ class PlayerControllerTest {
         when(createPlayerUseCase.execute(player)).thenReturn(player);
         when(playerMapper.toDto(player)).thenReturn(playerDto);
 
-        ResponseEntity<ApiResponse<PlayerDto>> response = playerController.create(playerDto);
+        ResponseEntity<ApiResponse<PlayerDTO>> response = playerController.create(playerDto);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         verify(createPlayerUseCase).execute(any());
@@ -109,7 +109,7 @@ class PlayerControllerTest {
         when(updatePlayerUseCase.execute(player, playerId)).thenReturn(player);
         when(playerMapper.toDto(player)).thenReturn(playerDto);
 
-        ResponseEntity<ApiResponse<PlayerDto>> response = playerController.update(playerDto, playerId);
+        ResponseEntity<ApiResponse<PlayerDTO>> response = playerController.update(playerDto, playerId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(updatePlayerUseCase).execute(player, playerId);

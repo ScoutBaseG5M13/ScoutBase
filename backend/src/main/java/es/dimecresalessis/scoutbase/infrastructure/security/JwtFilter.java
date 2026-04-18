@@ -75,6 +75,9 @@ public class JwtFilter extends OncePerRequestFilter {
                 String userMessage = "The user associated with this token does not exist";
                 securityHandlers.commence(request, response, new BadCredentialsException(userMessage));
                 return;
+            } catch (Exception ex) {
+                String userMessage = "An error occurred while processing your request";
+                securityHandlers.commence(request, response, new BadCredentialsException(userMessage));
             }
         }
         filterChain.doFilter(request, response);

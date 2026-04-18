@@ -6,7 +6,7 @@ import es.dimecresalessis.scoutbase.application.user.*;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.security.JwtService;
-import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDto;
+import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
 import es.dimecresalessis.scoutbase.infrastructure.user.web.mapper.UserMapper;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,13 +52,30 @@ class UserControllerTest {
 
     private UUID userId;
     private User user;
-    private UserDto userDto;
+    private UserDTO userDto;
 
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        user = new User(userId, "admin", "pass", "ROLE_ADMIN");
-        userDto = new UserDto(userId, "admin", "pass", "ROLE_ADMIN");
+        user = User.builder()
+                .id(userId)
+                .username("scout_master")
+                .password("encoded_password")
+                .role("ADMIN")
+                .name("Alex")
+                .surname("Scout")
+                .email("alex@scoutbase.com")
+                .build();
+
+        userDto = new UserDTO(
+                userId,
+                "scout_user",
+                "raw_password",
+                "USER",
+                "John",
+                "Doe",
+                "john@doe.com"
+        );
     }
 
     @Test
@@ -67,7 +84,7 @@ class UserControllerTest {
         when(findUserByIdUseCase.execute(userId)).thenReturn(user);
         when(userMapper.toDto(user)).thenReturn(userDto);
 
-        ResponseEntity<ApiResponse<UserDto>> response = userController.findById(userId);
+        ResponseEntity<ApiResponse<UserDTO>> response = userController.findById(userId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(userId, response.getBody().data().getId());
@@ -88,7 +105,7 @@ class UserControllerTest {
         when(findUserByUsernameUseCase.execute(username)).thenReturn(user);
         when(userMapper.toDto(user)).thenReturn(userDto);
 
-        ResponseEntity<ApiResponse<UserDto>> response = userController.findByUsername(username);
+        ResponseEntity<ApiResponse<UserDTO>> response = userController.findByUsername(username);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(username, response.getBody().data().getUsername());
@@ -96,13 +113,13 @@ class UserControllerTest {
 
     @Test
     @DisplayName("newUser - Should return random user")
-    void newUser_ShouldReturnRandomUser() throws IllegalAccessException {
+    void newUser_ShouldReturnRandomRandomUser() throws IllegalAccessException {
         String role = "ROLE_ADMIN";
         when(userMapper.toDomain(any())).thenReturn(user);
         when(createUserUseCase.execute(any())).thenReturn(user);
         when(userMapper.toDto(any())).thenReturn(userDto);
 
-        ResponseEntity<ApiResponse<UserDto>> response = userController.newUser(role);
+        ResponseEntity<ApiResponse<UserDTO>> response = userController.newRandomUser(role);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().data());
@@ -110,8 +127,8 @@ class UserControllerTest {
 
     @Test
     @DisplayName("newUser - Should throw IllegalAccessException if role is invalid")
-    void newUser_ShouldThrowException_WhenRoleInvalid() {
-        assertThrows(IllegalAccessException.class, () -> userController.newUser("INVALID_ROLE"));
+    void newRandomUser_ShouldThrowException_WhenRoleInvalid() {
+        assertThrows(IllegalAccessException.class, () -> userController.newRandomUser("INVALID_ROLE"));
     }
 
     @Test
@@ -134,7 +151,7 @@ class UserControllerTest {
         when(updateUserUseCase.execute(user, userId)).thenReturn(user);
         when(userMapper.toDto(user)).thenReturn(userDto);
 
-        ResponseEntity<ApiResponse<UserDto>> response = userController.update(userDto, userId);
+        ResponseEntity<ApiResponse<UserDTO>> response = userController.update(userDto, userId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(updateUserUseCase).execute(user, userId);
