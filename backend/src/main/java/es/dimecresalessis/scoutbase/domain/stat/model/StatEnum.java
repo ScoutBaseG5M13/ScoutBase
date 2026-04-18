@@ -10,13 +10,13 @@ public enum StatEnum {
     POTENCIA("Potencia", "POT"),
     VELOCIDAD("Velocidad", "VEL");
 
-    String name;
-    String code;
+    String statName;
+    String statCode;
 
     public static StatEnum fromName(String name) {
         if (isValid(name, "name")) {
             for (StatEnum statEnum : StatEnum.values()) {
-                if (statEnum.name.equals(name)) {
+                if (statEnum.statName.equals(name)) {
                     return statEnum;
                 }
             }
@@ -27,7 +27,7 @@ public enum StatEnum {
     public static StatEnum fromCode(String code) {
         if (isValid(code, "code")) {
             for (StatEnum statEnum : StatEnum.values()) {
-                if (statEnum.code.equals(code)) {
+                if (statEnum.statCode.equals(code)) {
                     return statEnum;
                 }
             }
@@ -39,12 +39,12 @@ public enum StatEnum {
         for (StatEnum stat : StatEnum.values()) {
             switch (field) {
                 case "name":
-                    if (stat.name.equalsIgnoreCase(value)) {
+                    if (stat.statName.equalsIgnoreCase(value)) {
                         return true;
                     }
                     break;
                 case "code":
-                    if (stat.code.equalsIgnoreCase(value)) {
+                    if (stat.statCode.equalsIgnoreCase(value)) {
                         return true;
                     }
                     break;

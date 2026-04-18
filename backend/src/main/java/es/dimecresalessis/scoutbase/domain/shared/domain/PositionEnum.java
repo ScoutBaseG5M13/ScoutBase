@@ -1,38 +1,45 @@
 package es.dimecresalessis.scoutbase.domain.shared.domain;
 
-public enum PositionEnum {
-    PORTERO,
-    LATERAL_DERECHO,
-    LATERAL_IZQUIERDO,
-    DEFENSA_CENTRAL,
-    DEFENSA_CENTRAL_DERECHO,
-    DEFENSA_CENTRAL_IZQUIERDO,
-    CARRILERO_DERECHO,
-    CARRILERO_IZQUIERDO,
-    MEDIOCENTRO,
-    MEDIOCENTRO_DEFENSIVO,
-    MEDIOCENTRO_OFENSIVO,
-    INTERIOR_DERECHO,
-    INTERIOR_IZQUIERDO,
-    EXTREMO_DERECHO,
-    EXTREMO_IZQUIERDO,
-    MEDIAPUNTA,
-    DELANTERO_CENTRO,
-    SEGUNDO_DELANTERO;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    public static PositionEnum fromName(String name) {
-        if (isValid(name)) {
-            return PositionEnum.valueOf(name.toUpperCase());
-        }
-        throw new IllegalArgumentException("Invalid 'Position' name: '" + name + "'");
+import java.util.Arrays;
+
+@Getter
+@AllArgsConstructor
+public enum PositionEnum {
+    PORTERO ("Portero"),
+    LATERAL_DERECHO ("Lateral derecho"),
+    LATERAL_IZQUIERDO ("Lateral izquierdo"),
+    DEFENSA_CENTRAL ("Defensa central"),
+    DEFENSA_CENTRAL_DERECHO ("Defensa central derecho"),
+    DEFENSA_CENTRAL_IZQUIERDO ("Defensa central izquierdo"),
+    CARRILERO_DERECHO ("Carrilero derecho"),
+    CARRILERO_IZQUIERDO ("Carrilero izquierdo"),
+    MEDIOCENTRO ("Mediocentro"),
+    MEDIOCENTRO_DEFENSIVO ("Mediocentro defensivo"),
+    MEDIOCENTRO_OFENSIVO ("Mediocentro ofensivo"),
+    INTERIOR_DERECHO ("Interior derecho"),
+    INTERIOR_IZQUIERDO ("Interior izquierdo"),
+    EXTREMO_DERECHO ("Extremo derecho"),
+    EXTREMO_IZQUIERDO ("Extremo izquierdo"),
+    MEDIAPUNTA ("Mediapunta"),
+    DELANTERO_CENTRO ("Delantero centro"),
+    SEGUNDO_DELANTERO ("Segundo delantero");
+
+    private String positionName;
+
+    public static PositionEnum fromValue(String value) {
+        return Arrays.stream(PositionEnum.values())
+                .filter(category -> category.name().equalsIgnoreCase(value))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid 'Position.name': '" + value + "'"));
     }
 
-    public static boolean isValid(String value) {
-        for (PositionEnum position : PositionEnum.values()) {
-            if (position.name().equalsIgnoreCase(value)) {
-                return true;
-            }
-        }
-        return false;
+    public static PositionEnum fromPositionName(String name) {
+        return Arrays.stream(PositionEnum.values())
+                .filter(category -> category.positionName.equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid 'Position.positionName': '" + name + "'"));
     }
 }

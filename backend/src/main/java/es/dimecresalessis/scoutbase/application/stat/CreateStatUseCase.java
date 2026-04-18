@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 /**
  * Use case for creating {@link Stat} entities in the system.
  */
@@ -20,6 +18,7 @@ public class CreateStatUseCase {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateStatUseCase.class);
     private final StatRepository statRepository;
+    private final CheckIfStatAlreadyExistsOnPlayer checkIfStatAlreadyExistsOnPlayer;
 
     /**
      * Executes the operation to save a new {@link Stat} entity in the DB.
@@ -35,10 +34,10 @@ public class CreateStatUseCase {
         if (stat.getId() == null) {
             throw new StatException(ErrorEnum.STAT_ID_IS_NULL);
         }
-        Optional<Stat> optStat = statRepository.findById(stat.getId());
-        if (optStat.isPresent() && !optStat.get().getCode().equals(stat.getCode())) {
-            throw new StatException(ErrorEnum.STAT_ID_ALREADY_EXISTS, stat.getId().toString());
+        if (checkIfStatAlreadyExistsOnPlayer.execute(stat)) {
+            throw new StatException(ErrorEnum.STAT_CODE_ALREADY_EXISTS, stat.getId().toString(), stat.getPlayerId().toString());
         }
+
         statRepository.save(stat);
         logger.info("[CREATE] Created Stat with id '{}'", stat.getId());
         return stat;

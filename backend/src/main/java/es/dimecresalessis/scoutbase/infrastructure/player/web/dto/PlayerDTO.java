@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -11,11 +12,10 @@ import java.util.UUID;
 @Data
 @Setter
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PlayerDTO {
 
     private UUID id;
-
-    private UUID teamId;
 
     @NotBlank
     private String name;
@@ -28,11 +28,9 @@ public class PlayerDTO {
     @NotBlank
     private String email;
 
-    private int number; // "Dorsal"
+    private int number;
 
     private String position;
-
-    private String category;
 
     private int priority;
 }

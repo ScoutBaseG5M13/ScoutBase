@@ -33,9 +33,8 @@ public class Stat {
     public Stat(UUID id, UUID playerId, String name, String code, int value) {
         this.id = (id == null) ? UUID.randomUUID() : id;
         this.setPlayerId(playerId);
-        this.setName(name);
+        this.name = StatEnum.fromCode(code).statName;
         this.setCode(code);
-        checkStatIntegrity(name, code);
         this.value = value;
     }
 
@@ -51,11 +50,11 @@ public class Stat {
     }
 
     public void setName(final String name) {
-        this.name = StatEnum.fromName(name).name;
+        this.name = StatEnum.fromName(name).statName;
     }
 
     public void setCode(final String code) {
-        this.code = StatEnum.fromCode(code).code;
+        this.code = StatEnum.fromCode(code).statCode;
     }
 
     private void checkStatIntegrity(String name, String code) {

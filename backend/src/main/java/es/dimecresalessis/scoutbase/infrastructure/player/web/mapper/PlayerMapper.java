@@ -26,5 +26,7 @@ public interface PlayerMapper {
      * @param domain The {@link Player} domain object.
      * @return A {@link PlayerDTO} formatted for JSON serialization.
      */
+
+    @Mapping(target = "position", source = "position")
     PlayerDTO toDto(Player domain);
 }

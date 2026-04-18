@@ -20,6 +20,7 @@ public class UpdateStatUseCase {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateStatUseCase.class);
     private final StatRepository statRepository;
+    private final CheckIfStatAlreadyExistsOnPlayer checkIfStatAlreadyExistsOnPlayer;
 
     /**
      * Updates the details of a {@link Stat} identified by their unique ID.
@@ -43,6 +44,10 @@ public class UpdateStatUseCase {
         Stat idStat = statRepository.findById(id).orElseThrow(
                 () -> new StatException(ErrorEnum.STAT_NOT_FOUND, id.toString())
         );
+
+        if (checkIfStatAlreadyExistsOnPlayer.execute(stat)) {
+            throw new StatException(ErrorEnum.STAT_CODE_ALREADY_EXISTS, stat.getId().toString(), stat.getPlayerId().toString());
+        }
 
         if (!bodyStat.getId().toString().equals(idStat.getId().toString())) {
             throw new IllegalArgumentException("Stat id " + bodyStat.getId() + " does not match " + idStat.getId());

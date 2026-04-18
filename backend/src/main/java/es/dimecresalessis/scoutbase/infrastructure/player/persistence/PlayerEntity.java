@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.UUID;
-
 /**
  * Entity representing a player in the system.
  */
@@ -18,9 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Table(name = "player")
 public class PlayerEntity extends CommonEntity {
-
-    @Column
-    private UUID teamId;
 
     @Column(nullable = false)
     private String name;
@@ -36,8 +31,6 @@ public class PlayerEntity extends CommonEntity {
     private int number;
 
     private String position;
-
-    private String category;
 
     private int priority;
 }
