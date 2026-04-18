@@ -31,6 +31,15 @@ public class TeamRepositoryImpl implements TeamRepository {
     }
 
     @Override
+    public List<Team> findAllByPlayerId(UUID userId) {
+        return jpaTeamRepository.findAll()
+                .stream()
+                .filter(s -> s.getTrainers().contains(userId) || s.getScouters().contains(userId))
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Team save(Team team) {
         TeamEntity teamEntity = jpaTeamRepository.findById(team.getId())
                 .orElseGet(TeamEntity::new);
