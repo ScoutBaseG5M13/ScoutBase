@@ -30,7 +30,15 @@ class UserRepositoryImplIT {
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        user = new User(userId, "admin_test", "password123", "ROLE_ADMIN");
+        user = User.builder()
+                .id(UUID.randomUUID())
+                .username("scout_master")
+                .password("encoded_password")
+                .role("ADMIN")
+                .name("Alex")
+                .surname("Scout")
+                .email("alex@scoutbase.com")
+                .build();
     }
 
     @Test
@@ -61,7 +69,15 @@ class UserRepositoryImplIT {
     void save_ShouldUpdateExistingUser() {
         userRepository.save(user);
 
-        User updatedUser = new User(userId, "admin_updated", "new_password", "ROLE_USER");
+        User updatedUser = User.builder()
+                .id(userId)
+                .username("scout_master")
+                .password("encoded_password")
+                .role("ADMIN")
+                .name("Alex")
+                .surname("Scout")
+                .email("alex@scoutbase.com")
+                .build();
         userRepository.save(updatedUser);
 
         assertEquals(1, jpaUserRepository.count());

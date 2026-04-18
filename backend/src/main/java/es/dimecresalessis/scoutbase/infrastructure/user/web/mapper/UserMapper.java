@@ -1,20 +1,25 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web.mapper;
 
-import es.dimecresalessis.scoutbase.domain.user.model.Role;
+import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
+import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
-import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDto;
-import org.springframework.stereotype.Component;
+import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import static es.dimecresalessis.scoutbase.domain.exception.ErrorEnum.ROLE_NOT_FOUND;
 
 /**
- * Infrastructure mapper for converting between {@link UserDto} and {@link User} domain models.
+ * Infrastructure mapper for converting between {@link UserDTO} and {@link User} domain models.
  */
-@Component
-public class UserMapper {
+@Mapper(componentModel = "spring")
+public interface UserMapper {
 
     /**
-     * Transforms an incoming {@link UserDto} into a {@link User} domain model.
+     * Transforms an incoming {@link UserDTO} into a {@link User} domain model.
      * <p>
-     * This method uses the {@link Role#fromName} factory to ensure that the
+     * This method uses the {@link RoleEnum#fromName} factory to ensure that the
      * role string provided by the client corresponds to a valid system role
      * before instantiating the domain object.
      * </p>
@@ -22,35 +27,23 @@ public class UserMapper {
      * @param dto The data transfer object received from the web request.
      * @return A {@link User} domain object, or {@code null} if the input was null.
      */
-    public User toDomain(UserDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        return new User(
-                dto.getId(),
-                dto.getUsername(),
-                dto.getPassword(),
-                Role.fromName(dto.getRole()).getName()
-        );
-    }
+    @Mapping(target = "role", source = "role", qualifiedByName = "validateAndNormalizeRole")
+    User toDomain(UserDTO dto);
 
     /**
-     * Transforms a {@link User} domain model into a {@link UserDto} for API responses.
+     * Transforms a {@link User} domain model into a {@link UserDTO} for API responses.
      *
      * @param domain The business-level user entity.
-     * @return A {@link UserDto} formatted for JSON serialization in the web layer.
+     * @return A {@link UserDTO} formatted for JSON serialization in the web layer.
      */
-    public UserDto toDto(User domain) {
-        if (domain == null) {
-            return null;
-        }
+    UserDTO toDto(User domain);
 
-        return new UserDto(
-                domain.getId(),
-                domain.getUsername(),
-                domain.getPassword(),
-                domain.getRole()
-        );
+    @Named("validateAndNormalizeRole")
+    default String validateAndNormalizeRole(String role) {
+        RoleEnum roleEnum = RoleEnum.fromName(role);
+        if (roleEnum == null) {
+            throw new UserException(ROLE_NOT_FOUND, role);
+        }
+        return roleEnum.getName();
     }
 }

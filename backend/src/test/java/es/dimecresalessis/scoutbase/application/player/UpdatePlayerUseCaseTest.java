@@ -2,6 +2,8 @@ package es.dimecresalessis.scoutbase.application.player;
 
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
+import es.dimecresalessis.scoutbase.domain.shared.domain.CategoryEnum;
+import es.dimecresalessis.scoutbase.domain.shared.domain.PositionEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,15 +29,24 @@ class UpdatePlayerUseCaseTest {
     private UpdatePlayerUseCase updatePlayerUseCase;
 
     private UUID playerId;
+    private UUID teamId;
     private Player player;
 
     @BeforeEach
     void setUp() {
         playerId = UUID.randomUUID();
+        teamId = UUID.randomUUID();
         player = Player.builder()
                 .id(playerId)
-                .name("Ronald McGallahan")
-                .team("Scoutbase FC")
+                .teamId(teamId)
+                .name("Ronald")
+                .surname("McGallahan")
+                .age(14)
+                .email("ronald@mcgall.es")
+                .number(16)
+                .position(PositionEnum.PORTERO.name())
+                .category(CategoryEnum.BENJAMIN.name())
+                .priority(8)
                 .build();
     }
 

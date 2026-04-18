@@ -1,6 +1,5 @@
 package es.dimecresalessis.scoutbase.application.user;
 
-import es.dimecresalessis.scoutbase.application.security.RegistrationService;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
@@ -26,7 +25,7 @@ class CreateUserUseCaseTest {
     private UserRepository userRepository;
 
     @Mock
-    private RegistrationService registrationService;
+    private SaveUserUseCase saveUserUseCase;
 
     @InjectMocks
     private CreateUserUseCase createUserUseCase;
@@ -37,7 +36,7 @@ class CreateUserUseCaseTest {
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        user = new User(userId, "scout_master", "password123", "ADMIN");
+        user = new User(userId, "username", "pwd", "ADMIN", "name", "surname", "test@test.es");
     }
 
     @Test
@@ -45,14 +44,14 @@ class CreateUserUseCaseTest {
     void shouldCreateUser() {
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.empty());
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        when(registrationService.createUser(user)).thenReturn(user);
+        when(saveUserUseCase.execute(user)).thenReturn(user);
 
         User result = createUserUseCase.execute(user);
 
         assertNotNull(result);
         assertEquals("scout_master", result.getUsername());
         verify(userRepository).findByUsername("scout_master");
-        verify(registrationService).createUser(user);
+        verify(saveUserUseCase).execute(user);
     }
 
     @Test
@@ -63,7 +62,7 @@ class CreateUserUseCaseTest {
         });
 
         assertEquals(ErrorEnum.USER_IS_NULL, exception.getErrorEnum());
-        verifyNoInteractions(userRepository, registrationService);
+        verifyNoInteractions(userRepository, saveUserUseCase);
     }
 
     @Test
@@ -76,7 +75,7 @@ class CreateUserUseCaseTest {
         });
 
         assertEquals(ErrorEnum.USERNAME_ALREADY_EXISTS, exception.getErrorEnum());
-        verify(registrationService, never()).createUser(any());
+        verify(saveUserUseCase, never()).execute(any());
     }
 
     @Test
@@ -90,6 +89,6 @@ class CreateUserUseCaseTest {
         });
 
         assertEquals(ErrorEnum.USER_ID_ALREADY_EXISTS, exception.getErrorEnum());
-        verify(registrationService, never()).createUser(any());
+        verify(saveUserUseCase, never()).execute(any());
     }
 }

@@ -1,6 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.security.model;
 
-import es.dimecresalessis.scoutbase.domain.user.model.Role;
+import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,7 +29,7 @@ public class UserPrincipal implements UserDetails {
     /**
      * Extracts and flattens the user's roles and permissions into Spring Security authorities.
      * <p>
-     * This method converts the domain-defined {@link Role} and its associated permissions
+     * This method converts the domain-defined {@link RoleEnum} and its associated permissions
      * into a collection of {@link SimpleGrantedAuthority}. This enables the use of
      * {@code @PreAuthorize} and other security expressions at the controller level.
      * </p>
@@ -44,7 +44,7 @@ public class UserPrincipal implements UserDetails {
         authorities.add(new SimpleGrantedAuthority(domainUser.getRole()));
 
         // Add granular Permissions derived from the Role
-        Role.fromName(domainUser.getRole()).getPermissions()
+        RoleEnum.fromName(domainUser.getRole()).getPermissions()
                 .forEach(p -> authorities.add(new SimpleGrantedAuthority(p.name())));
 
         return authorities;

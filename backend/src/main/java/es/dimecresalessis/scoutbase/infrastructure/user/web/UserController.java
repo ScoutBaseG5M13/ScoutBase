@@ -5,18 +5,18 @@ import es.dimecresalessis.scoutbase.application.security.LoginRequest;
 import es.dimecresalessis.scoutbase.application.user.*;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
-import es.dimecresalessis.scoutbase.domain.user.model.Role;
 import es.dimecresalessis.scoutbase.infrastructure.security.JwtService;
+import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
-import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDto;
 import es.dimecresalessis.scoutbase.infrastructure.user.web.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,6 +46,7 @@ public class UserController {
     private final UpdateUserUseCase updateUserUseCase;
     private final FindUserByUsernameUseCase findUserByUsernameUseCase;
     private final JwtService jwtService;
+    private final CreateRandomUserUseCase createRandomUserUseCase;
 
     /**
      * Finds a user by their ID.
@@ -57,13 +58,11 @@ public class UserController {
     @Operation(summary = "Find user by id", description = "Returns a user through a path variable 'id'.")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<UserDto>> findById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<UserDTO>> findById(@PathVariable UUID id) {
         try {
-            return handleResponse(
-                    userMapper.toDto(
-                            findUserByIdUseCase.execute(id)
-                    )
-            ).ok();
+            User user = findUserByIdUseCase.execute(id);
+            UserDTO userDto = userMapper.toDto(user);
+            return handleResponse(userDto).ok();
         } catch (NoSuchElementException ex) {
             throw new UserException(ErrorEnum.USER_NOT_FOUND, id.toString());
         }
@@ -79,13 +78,11 @@ public class UserController {
     @Operation(summary = "Find user by username", description = "Returns a user through a path variable 'username'.")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<UserDto>> findByUsername(@PathVariable String username) {
+    public ResponseEntity<ApiResponse<UserDTO>> findByUsername(@PathVariable String username) {
         try {
-            return handleResponse(
-                    userMapper.toDto(
-                            findUserByUsernameUseCase.execute(username)
-                    )
-            ).ok();
+            User user = findUserByUsernameUseCase.execute(username);
+            UserDTO userDto = userMapper.toDto(user);
+            return handleResponse(userDto).ok();
         } catch (NoSuchElementException ex) {
             throw new UserException(ErrorEnum.USER_NOT_FOUND, username);
         }
@@ -100,15 +97,13 @@ public class UserController {
      */
     @GetMapping(Routes.NEW_PATH)
     @Operation(summary = "Create random user", description = "Creates a user with a specific role through the role query parameter ('ROLE_USER' or 'ROLE_ADMIN')")
-    public ResponseEntity<ApiResponse<UserDto>> newUser(@RequestParam(value = "role") String role) throws IllegalAccessException {
+    public ResponseEntity<ApiResponse<UserDTO>> newRandomUser(@RequestParam(value = "role") String role) throws IllegalAccessException {
         if (role == null) {
             throw new IllegalAccessException("Must send a 'role' as path parameter for the request.");
         }
-        if (Role.fromName(role) == null) {
-            throw new IllegalAccessException("Only roles ROLE_USER and ROLE_ADMIN are available.");
-        }
-        UserDto userDto = UserDto.getRandomInstance(role.toUpperCase());
-        User user = createUserUseCase.execute(userMapper.toDomain(userDto));
+
+        UserDTO userDto = UserDTO.getRandomInstance(role.toUpperCase());
+        User user = createRandomUserUseCase.execute(userMapper.toDomain(userDto));
         return handleResponse(userMapper.toDto(user)).ok();
     }
 
@@ -122,7 +117,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a user", description = "Creates a user through a UserDto body.")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<Boolean>> create(@RequestBody UserDto userDto) {
+    public ResponseEntity<ApiResponse<Boolean>> create(@RequestBody UserDTO userDto) {
         createUserUseCase.execute(userMapper.toDomain(userDto));
         return handleResponse(true).created();
     }
@@ -137,20 +132,13 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Updates a user", description = "Creates a user through a UserDto body.")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<ApiResponse<UserDto>> update(@RequestBody UserDto userDto, @PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<UserDTO>> update(@RequestBody UserDTO userDto, @PathVariable UUID id) {
         try {
-            if (findUserByIdUseCase.execute(id) == null) {
-                throw new UserException(ErrorEnum.USER_NOT_FOUND, userDto.getId().toString());
-            }
-            return handleResponse(
-                    userMapper.toDto(
-                            updateUserUseCase.execute(
-                                    userMapper.toDomain(userDto), id
-                            )
-                    )
-            ).ok();
-        } catch (NoSuchElementException ex) {
-            throw new UserException(ErrorEnum.USER_NOT_FOUND, userDto.getId().toString());
+            User updatedUser = updateUserUseCase.execute(userMapper.toDomain(userDto), id);
+            UserDTO updatedUserDTO = userMapper.toDto(updatedUser);
+            return handleResponse(updatedUserDTO).ok();
+        } catch (DataIntegrityViolationException ex) {
+            throw new UserException(ErrorEnum.USER_NOT_VALID, ex.getMessage());
         }
     }
 
@@ -166,9 +154,8 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
         try {
-            return handleResponse(
-                    deleteUserUseCase.execute(id)
-            ).ok();
+            boolean isDeleted = deleteUserUseCase.execute(id);
+            return handleResponse(isDeleted).ok();
         } catch (NoSuchElementException ex) {
             throw new UserException(ErrorEnum.USER_NOT_FOUND, id.toString());
         }

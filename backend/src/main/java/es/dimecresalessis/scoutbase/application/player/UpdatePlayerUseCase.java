@@ -1,5 +1,7 @@
 package es.dimecresalessis.scoutbase.application.player;
 
+import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
+import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
 import lombok.AllArgsConstructor;
@@ -27,13 +29,23 @@ public class UpdatePlayerUseCase {
      * @return The updated {@link Player} object after being persisted.
      */
     public Player execute(Player player, UUID id) {
-        Player idPlayer = playerRepository.findById(id).orElseThrow();
-        Player bodyPlayer = playerRepository.findById(player.getId()).orElseThrow();
-        if (!idPlayer.getId().toString().equals(bodyPlayer.getId().toString())) {
-            throw new IllegalArgumentException("Player id does not match");
-        }
+        validateAndRetrievePlayer(player, id);
         playerRepository.save(player);
         logger.info("[UPDATE] Updated Player with id '{}'", player.getId());
         return player;
+    }
+
+    private void validateAndRetrievePlayer(Player player, UUID id) {
+        Player bodyPlayer = playerRepository.findById(player.getId()).orElseThrow(
+                () -> new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, player.getId().toString())
+        );
+
+        Player idPlayer = playerRepository.findById(id).orElseThrow(
+                () -> new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, id.toString())
+        );
+
+        if (!bodyPlayer.getId().toString().equals(idPlayer.getId().toString())) {
+            throw new IllegalArgumentException("Player id " + bodyPlayer.getId() + " does not match " + idPlayer.getId());
+        }
     }
 }

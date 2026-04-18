@@ -1,6 +1,5 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,49 +8,47 @@ import java.util.Random;
 import java.util.UUID;
 
 /**
- * Data Transfer Object (DTO) for User entities.
+ * Data Transfer Object (DTO) for User.
  */
 @Data
 @AllArgsConstructor
-public class UserDto {
+public class UserDTO {
 
-    /**
-     * ID for the user.
-     * If not provided during creation, a random UUID will be generated server-side.
-     */
-    @Schema(
-            description = "Unique identifier. Optional for creation (server will generate one if null).",
-            example = "550e8400-e29b-41d4-a716-446655440000",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED
-    )
     private UUID id;
 
-    /**
-     * Username of the user.
-     */
     @NotBlank
     private String username;
 
-    /**
-     * Password of the user.
-     */
     @NotBlank
     private String password;
 
-    /**
-     * Role of the user, such as 'ADMIN' or 'USER'.
-     */
     @NotBlank
     private String role;
+
+    @NotBlank
+    private String name;
+
+    private String surname;
+
+    @NotBlank
+    private String email;
 
     /**
      * Generates a random instance for testing purposes.
      *
      * @param role The role to be assigned to the random user.
-     * @return A random {@link UserDto} instance.
+     * @return A random {@link UserDTO} instance.
      */
-    public static UserDto getRandomInstance(String role) {
-        return new UserDto(UUID.randomUUID(), shuffleAndReturnRandomString(9), shuffleAndReturnRandomString(9), role);
+    public static UserDTO getRandomInstance(String role) {
+        return new UserDTO(
+                UUID.randomUUID(),
+                shuffleAndReturnRandomString(9),
+                shuffleAndReturnRandomString(9),
+                role,
+                "Test name " + new Random().nextInt(10000),
+                "Test surname " + new Random().nextInt(10000),
+                new Random().nextInt(10000) + "@test.com"
+        );
     }
 
     /**

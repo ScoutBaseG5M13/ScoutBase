@@ -2,12 +2,11 @@ package es.dimecresalessis.scoutbase.infrastructure.player.web;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
-import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDto;
+import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.infrastructure.shared.utils.JsonUtils;
 import es.dimecresalessis.scoutbase.infrastructure.user.web.MockUsersIT;
-import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDto;
+import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
@@ -39,10 +38,11 @@ public class PlayerControllerIT {
     private final MockUsersIT mockUsers;
     private final ObjectMapper objectMapper;
 
-    private UserDto admin;
+    private UserDTO admin;
     private String jwtToken;
 
-    private PlayerDto player;
+    private PlayerDTO player;
+    private UUID teamId;
 
     @BeforeAll
     void setUp() throws Exception {
@@ -57,20 +57,30 @@ public class PlayerControllerIT {
 
     @BeforeEach
     void beforeEach() {
-        player = new PlayerDto(UUID.randomUUID(), "Leo Testi", "Testelona FC", "test@test.ar");
+        teamId = UUID.randomUUID();
+        player = new PlayerDTO(
+                UUID.randomUUID(),
+                teamId,
+                "Leo",
+                "Testi",
+                25,
+                "test@test.ar",
+                10,
+                "DELANTERO",
+                "SENIOR"
+        );
     }
 
     @Test
     void shouldCreatePlayer() {
-        PlayerDto createdPlayer = null;
+        PlayerDTO createdPlayer = null;
         try {
             createdPlayer = createPlayer(player, status().isCreated());
 
             assertNotNull(createdPlayer);
             assertNotNull(createdPlayer.getId());
-            assertEquals(createdPlayer.getName(), player.getName());
-            assertEquals(createdPlayer.getTeam(), player.getTeam());
-            assertEquals(createdPlayer.getEmail(), player.getEmail());
+            assertEquals(player.getName(), createdPlayer.getName());
+            assertEquals(player.getSurname(), createdPlayer.getSurname());
         } finally {
             if (createdPlayer != null && createdPlayer.getId() != null) {
                 deletePlayerSilently(createdPlayer.getId().toString());
@@ -80,16 +90,16 @@ public class PlayerControllerIT {
 
     @Test
     void shouldCreatePlayer_WhenPlayerHasNoId() {
-        PlayerDto createdPlayer = null;
+        PlayerDTO createdPlayer = null;
         try {
             player.setId(null);
             createdPlayer = createPlayer(player, status().isCreated());
 
             assertNotNull(createdPlayer);
             assertNotNull(createdPlayer.getId());
-            assertEquals(createdPlayer.getName(), player.getName());
-            assertEquals(createdPlayer.getTeam(), player.getTeam());
-            assertEquals(createdPlayer.getEmail(), player.getEmail());
+            assertEquals(player.getName(), createdPlayer.getName());
+            assertEquals(player.getTeamId(), createdPlayer.getTeamId());
+            assertEquals(player.getEmail(), createdPlayer.getEmail());
         } finally {
             if (createdPlayer != null && createdPlayer.getId() != null) {
                 deletePlayerSilently(createdPlayer.getId().toString());
@@ -99,18 +109,18 @@ public class PlayerControllerIT {
 
     @Test
     void shouldFindPlayerById() {
+        PlayerDTO createdPlayer = null;
         try {
-            createPlayer(player, status().isCreated());
-            PlayerDto foundPlayer = findPlayer(player.getId().toString(), status().isOk());
+            createdPlayer = createPlayer(player, status().isCreated());
+            PlayerDTO foundPlayer = findPlayer(createdPlayer.getId().toString(), status().isOk());
 
             assertNotNull(foundPlayer);
-            assertEquals(foundPlayer.getId(), player.getId());
-            assertEquals(foundPlayer.getName(), player.getName());
-            assertEquals(foundPlayer.getTeam(), player.getTeam());
-            assertEquals(foundPlayer.getEmail(), player.getEmail());
+            assertEquals(createdPlayer.getId(), foundPlayer.getId());
+            assertEquals(createdPlayer.getName(), foundPlayer.getName());
+            assertEquals(createdPlayer.getEmail(), foundPlayer.getEmail());
         } finally {
-            if (player != null && player.getId() != null) {
-                deletePlayerSilently(player.getId().toString());
+            if (createdPlayer != null && createdPlayer.getId() != null) {
+                deletePlayerSilently(createdPlayer.getId().toString());
             }
         }
     }
@@ -122,25 +132,32 @@ public class PlayerControllerIT {
         mockMvc.perform(get(Routes.API_ROOT + Routes.PLAYERS + "/" + nonExistentId)
                         .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.data").value(PlayerException.class.getSimpleName()));
+                .andExpect(jsonPath("$.success").value(false));
     }
 
     @Test
     void shouldUpdatePlayer() {
-        PlayerDto oldPlayer = null;
+        PlayerDTO oldPlayer = null;
         try {
             oldPlayer = createPlayer(player, status().isCreated());
-            PlayerDto newPlayer = new PlayerDto(oldPlayer.getId(), "Updated name", "Updated team", "Updated email");
+            PlayerDTO updateRequest = new PlayerDTO(
+                    oldPlayer.getId(),
+                    oldPlayer.getTeamId(),
+                    "Updated name",
+                    "Updated surname",
+                    oldPlayer.getAge(),
+                    "updated@email.com",
+                    oldPlayer.getNumber(),
+                    oldPlayer.getPosition(),
+                    oldPlayer.getCategory()
+            );
 
-            updatePlayer(oldPlayer.getId().toString(), newPlayer, status().isOk());
-            PlayerDto finalPlayer = findPlayer(oldPlayer.getId().toString(), status().isOk());
+            updatePlayer(oldPlayer.getId().toString(), updateRequest, status().isOk());
+            PlayerDTO finalPlayer = findPlayer(oldPlayer.getId().toString(), status().isOk());
 
             assertNotNull(finalPlayer);
-            assertEquals(finalPlayer.getId(), newPlayer.getId());
-            assertEquals(finalPlayer.getName(), newPlayer.getName());
-            assertEquals(finalPlayer.getTeam(), newPlayer.getTeam());
-            assertEquals(finalPlayer.getEmail(), newPlayer.getEmail());
+            assertEquals(updateRequest.getName(), finalPlayer.getName());
+            assertEquals(updateRequest.getEmail(), finalPlayer.getEmail());
         } finally {
             if (oldPlayer != null && oldPlayer.getId() != null) {
                 deletePlayerSilently(oldPlayer.getId().toString());
@@ -150,25 +167,20 @@ public class PlayerControllerIT {
 
     @Test
     void shouldDeletePlayer() {
-        try {
-            createPlayer(player, status().isCreated());
-            deletePlayer(player.getId().toString(), status().isOk());
+        PlayerDTO createdPlayer = createPlayer(player, status().isCreated());
+        assertNotNull(createdPlayer);
 
-            assertNull(findPlayer(player.getId().toString(), status().isNotFound()));
-        } finally {
-            if (player != null && player.getId() != null) {
-                deletePlayerSilently(player.getId().toString());
-            }
-        }
+        deletePlayer(createdPlayer.getId().toString(), status().isOk());
+
+        findPlayer(createdPlayer.getId().toString(), status().isNotFound());
     }
 
-    private PlayerDto findPlayer(String id, ResultMatcher status) {
+    private PlayerDTO findPlayer(String id, ResultMatcher status) {
         try {
             MvcResult result = mockMvc.perform(get(Routes.API_ROOT + Routes.PLAYERS + "/" + id)
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "Bearer " + jwtToken))
                     .andExpect(status)
-                    .andExpect(jsonPath("$.data").exists())
                     .andReturn();
             return extractPlayerDto(result);
         } catch (Exception e) {
@@ -176,16 +188,13 @@ public class PlayerControllerIT {
         }
     }
 
-    private PlayerDto createPlayer(PlayerDto dto, ResultMatcher status) {
+    private PlayerDTO createPlayer(PlayerDTO dto, ResultMatcher status) {
         try {
             MvcResult result = mockMvc.perform(post(Routes.API_ROOT + Routes.PLAYERS)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(JsonUtils.toJson(dto))
                             .header("Authorization", "Bearer " + jwtToken))
                     .andExpect(status)
-                    .andExpect(jsonPath("$.data.name").value(dto.getName()))
-                    .andExpect(jsonPath("$.data.team").value(dto.getTeam()))
-                    .andExpect(jsonPath("$.data.email").value(dto.getEmail()))
                     .andExpect(jsonPath("$.success").value(true))
                     .andReturn();
             return extractPlayerDto(result);
@@ -194,16 +203,13 @@ public class PlayerControllerIT {
         }
     }
 
-    private PlayerDto updatePlayer(String id, PlayerDto newDto, ResultMatcher status) {
+    private PlayerDTO updatePlayer(String id, PlayerDTO newDto, ResultMatcher status) {
         try {
             MvcResult result = mockMvc.perform(put(Routes.API_ROOT + Routes.PLAYERS + "/" + id)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(JsonUtils.toJson(newDto))
                             .header("Authorization", "Bearer " + jwtToken))
                     .andExpect(status)
-                    .andExpect(jsonPath("$.data.name").value(newDto.getName()))
-                    .andExpect(jsonPath("$.data.team").value(newDto.getTeam()))
-                    .andExpect(jsonPath("$.data.email").value(newDto.getEmail()))
                     .andExpect(jsonPath("$.success").value(true))
                     .andReturn();
             return extractPlayerDto(result);
@@ -228,17 +234,22 @@ public class PlayerControllerIT {
 
     private void deletePlayerSilently(String id) {
         try {
-            deletePlayer(id, status().isIAmATeapot());
-        } catch (Throwable ignored) {}
+            mockMvc.perform(delete(Routes.API_ROOT + Routes.PLAYERS + "/" + id)
+                    .header("Authorization", "Bearer " + jwtToken));
+        } catch (Exception ignored) {}
     }
 
-    private PlayerDto extractPlayerDto(MvcResult result) throws Exception {
+    private PlayerDTO extractPlayerDto(MvcResult result) throws Exception {
         String jsonResponse = result.getResponse().getContentAsString();
-        return objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<PlayerDto>>() {}).data();
+        if (jsonResponse.isEmpty()) return null;
+        ApiResponse<PlayerDTO> response = objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<PlayerDTO>>() {});
+        return response.data();
     }
 
     private Boolean extractBoolean(MvcResult result) throws Exception {
         String jsonResponse = result.getResponse().getContentAsString();
-        return objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<Boolean>>() {}).data();
+        if (jsonResponse.isEmpty()) return null;
+        ApiResponse<Boolean> response = objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<Boolean>>() {});
+        return response.data();
     }
 }

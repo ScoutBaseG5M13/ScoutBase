@@ -1,9 +1,9 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web;
 
+import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
-import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDto;
 import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.mapper.PlayerMapper;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
@@ -47,13 +47,10 @@ public class PlayerController {
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find all players", description = "Retrieves all registered players in the DB")
-    public ResponseEntity<ApiResponse<List<PlayerDto>>> findAll() {
-        return handleResponse(
-                findAllPlayersUseCase.execute()
-                .stream()
-                .map(playerMapper::toDto)
-                .toList()
-        ).ok();
+    public ResponseEntity<ApiResponse<List<PlayerDTO>>> findAll() {
+        List<Player> players = findAllPlayersUseCase.execute();
+        List<PlayerDTO> playersDto = players.stream().map(playerMapper::toDto).toList();
+        return handleResponse(playersDto).ok();
     }
 
     /**
@@ -66,13 +63,11 @@ public class PlayerController {
     @GetMapping(Routes.ID_PATHVAR)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find player by ID", description = "Finds and returns a player by their ID")
-    public ResponseEntity<ApiResponse<PlayerDto>> findById(@PathVariable UUID id) throws PlayerException {
+    public ResponseEntity<ApiResponse<PlayerDTO>> findById(@PathVariable UUID id) throws PlayerException {
         try {
-            return handleResponse(
-                    playerMapper.toDto(
-                            findPlayerByIdUseCase.execute(id)
-                    )
-            ).ok();
+            Player player = findPlayerByIdUseCase.execute(id);
+            PlayerDTO playerDto = playerMapper.toDto(player);
+            return handleResponse(playerDto).ok();
         } catch (NoSuchElementException ex) {
             throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, id.toString());
         }
@@ -88,13 +83,11 @@ public class PlayerController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Create a new player", description = "Adds a new player to the DB")
-    public ResponseEntity<ApiResponse<PlayerDto>> create(@Valid @RequestBody PlayerDto playerDto) throws PlayerException {
+    public ResponseEntity<ApiResponse<PlayerDTO>> create(@Valid @RequestBody PlayerDTO playerDto) throws PlayerException {
         Player player = playerMapper.toDomain(playerDto);
-        return handleResponse(
-                playerMapper.toDto(
-                        createPlayerUseCase.execute(player)
-                )
-        ).created();
+        Player createdPlayer = createPlayerUseCase.execute(player);
+        PlayerDTO createdPlayerDTO = playerMapper.toDto(createdPlayer);
+        return handleResponse(createdPlayerDTO).created();
     }
 
     /**
@@ -108,20 +101,14 @@ public class PlayerController {
     @PutMapping(value = Routes.ID_PATHVAR, consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Update player by ID", description = "Updates the data for a specific player")
-    public ResponseEntity<ApiResponse<PlayerDto>> update(@Valid @RequestBody PlayerDto playerDto, @PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<PlayerDTO>> update(@Valid @RequestBody PlayerDTO playerDto, @PathVariable UUID id) {
         try {
-            if (findPlayerByIdUseCase.execute(id) == null) {
-                throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, playerDto.getId().toString());
-            }
-            return handleResponse(
-                    playerMapper.toDto(
-                            updatePlayerUseCase.execute(
-                                    playerMapper.toDomain(playerDto), id
-                            )
-                    )
-            ).ok();
+            Player player = playerMapper.toDomain(playerDto);
+            Player updatedPlayer = updatePlayerUseCase.execute(player, id);
+            PlayerDTO updatedPlayerDTO = playerMapper.toDto(updatedPlayer);
+            return handleResponse(updatedPlayerDTO).ok();
         } catch (NoSuchElementException ex) {
-            throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, playerDto.getId().toString());
+            throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, ex.getMessage());
         }
     }
 
@@ -137,9 +124,8 @@ public class PlayerController {
     @Operation(summary = "Delete player by ID", description = "Deletes a specific player by their ID")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
         try {
-            return handleResponse(
-                    deletePlayerUseCase.execute(id)
-            ).ok();
+            boolean isDeleted = deletePlayerUseCase.execute(id);
+            return handleResponse(isDeleted).ok();
         } catch (NoSuchElementException ex) {
             throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, id.toString());
         }

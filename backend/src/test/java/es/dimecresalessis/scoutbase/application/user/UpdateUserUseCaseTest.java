@@ -32,7 +32,7 @@ class UpdateUserUseCaseTest {
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        user = new User(userId, "scout_master", "password123", "ADMIN");
+        user = new User(userId, "scout_master", "password123", "ADMIN", "Scout", "Test", "test@test.com");
     }
 
     @Test
@@ -52,7 +52,7 @@ class UpdateUserUseCaseTest {
     @DisplayName("Should throw IllegalArgumentException when path ID and body ID do not match")
     void shouldThrowException_WhenIdsDoNotMatch() {
         UUID differentId = UUID.randomUUID();
-        User differentUser = new User(differentId, "other_user", "pass", "USER");
+        User differentUser = new User(differentId, "other_user", "pass", "USER", "usr", "pass", "al@ex.com");
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userRepository.findById(differentId)).thenReturn(Optional.of(differentUser));

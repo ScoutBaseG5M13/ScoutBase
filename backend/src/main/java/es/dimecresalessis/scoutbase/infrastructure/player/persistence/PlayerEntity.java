@@ -3,6 +3,7 @@ package es.dimecresalessis.scoutbase.infrastructure.player.persistence;
 import es.dimecresalessis.scoutbase.infrastructure.web.persistence.CommonEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
@@ -12,31 +13,31 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@SuperBuilder
 @NoArgsConstructor
-@Table(name = "players")
+@AllArgsConstructor
+@Table(name = "player")
 public class PlayerEntity extends CommonEntity {
 
-    /**
-     * Unique identifier for the player entity.
-     */
-    @Id
-    private UUID id;
+    @Column
+    private UUID teamId;
 
-    /**
-     * The player's full name.
-     */
     @Column(nullable = false)
     private String name;
 
-    /**
-     * The team of the player.
-     */
     @Column(nullable = false)
-    private String team;
+    private String surname;
 
-    /**
-     * The player's email.
-     */
+    private int age;
+
     @Column(nullable = false)
     private String email;
+
+    private int number;
+
+    private String position;
+
+    private String category;
+
+    private int priority;
 }

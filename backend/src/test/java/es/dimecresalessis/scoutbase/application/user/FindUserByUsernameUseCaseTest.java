@@ -27,35 +27,41 @@ class FindUserByUsernameUseCaseTest {
     private FindUserByUsernameUseCase findUserByUsernameUseCase;
 
     private User user;
-    private String username;
 
     @BeforeEach
     void setUp() {
-        username = "scout_master";
-        user = new User(UUID.randomUUID(), username, "password123", "ADMIN");
+        user = User.builder()
+                .id(UUID.randomUUID())
+                .username("scout_master")
+                .password("encoded_password")
+                .role("ADMIN")
+                .name("Alex")
+                .surname("Scout")
+                .email("alex@scoutbase.com")
+                .build();
     }
 
     @Test
     @DisplayName("Should return user when username exists")
     void shouldFindUserByUsername() {
-        when(userRepository.findFirstByUsername(username)).thenReturn(Optional.of(user));
+        when(userRepository.findFirstByUsername(user.getUsername())).thenReturn(Optional.of(user));
 
-        User result = findUserByUsernameUseCase.execute(username);
+        User result = findUserByUsernameUseCase.execute(user.getUsername());
 
         assertNotNull(result);
-        assertEquals(username, result.getUsername());
-        verify(userRepository, times(1)).findFirstByUsername(username);
+        assertEquals(user.getUsername(), result.getUsername());
+        verify(userRepository, times(1)).findFirstByUsername(user.getUsername());
     }
 
     @Test
     @DisplayName("Should throw NoSuchElementException when username does not exist")
     void shouldThrowException_WhenUsernameNotFound() {
-        when(userRepository.findFirstByUsername(username)).thenReturn(Optional.empty());
+        when(userRepository.findFirstByUsername(user.getUsername())).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> {
-            findUserByUsernameUseCase.execute(username);
+            findUserByUsernameUseCase.execute(user.getUsername());
         });
 
-        verify(userRepository, times(1)).findFirstByUsername(username);
+        verify(userRepository, times(1)).findFirstByUsername(user.getUsername());
     }
 }

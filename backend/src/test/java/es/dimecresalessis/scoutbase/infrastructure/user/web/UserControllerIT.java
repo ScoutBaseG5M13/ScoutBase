@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.infrastructure.shared.utils.JsonUtils;
-import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDto;
+import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;
@@ -37,10 +37,10 @@ public class UserControllerIT {
     private final MockUsersIT mockUsers;
     private final ObjectMapper objectMapper;
 
-    private UserDto admin;
+    private UserDTO admin;
     private String jwtToken;
 
-    private UserDto userTest;
+    private UserDTO userTest;
 
     @BeforeAll
     void setUp() throws Exception {
@@ -55,12 +55,12 @@ public class UserControllerIT {
 
     @BeforeEach
     void beforeEach() {
-        userTest = UserDto.getRandomInstance("ROLE_USER");
+        userTest = UserDTO.getRandomInstance("ROLE_USER");
     }
 
     @Test
     void shouldCreateUser() {
-        UserDto createdUser = null;
+        UserDTO createdUser = null;
         try {
             createUser(userTest, status().isCreated());
             createdUser = findUserById(userTest.getId().toString(), status().isOk());
@@ -78,7 +78,7 @@ public class UserControllerIT {
 
     @Test
     void shouldCreateUser_WhenUserHasNoId() {
-        UserDto createdUser = null;
+        UserDTO createdUser = null;
         try {
             userTest.setId(null);
             createUser(userTest, status().isCreated());
@@ -96,7 +96,7 @@ public class UserControllerIT {
 
     @Test
     void shouldFindUserById() {
-        UserDto foundUser = null;
+        UserDTO foundUser = null;
         try {
             createUser(userTest, status().isCreated());
             foundUser = findUserById(userTest.getId().toString(), status().isOk());
@@ -124,14 +124,22 @@ public class UserControllerIT {
 
     @Test
     void shouldUpdateUser() {
-        UserDto oldUser = null;
+        UserDTO oldUser = null;
         try {
             createUser(userTest, status().isCreated());
             oldUser = findUserById(userTest.getId().toString(), status().isOk());
-            UserDto newUser = new UserDto(oldUser.getId(), "updatedUser", "newPass123", "ROLE_ADMIN");
+            UserDTO newUser = new UserDTO(
+                    UUID.randomUUID(),
+                    "scout_user",
+                    "raw_password",
+                    "USER",
+                    "John",
+                    "Doe",
+                    "john@doe.com"
+            );
 
             updateUser(oldUser.getId().toString(), newUser, status().isOk());
-            UserDto finalUser = findUserById(oldUser.getId().toString(), status().isOk());
+            UserDTO finalUser = findUserById(oldUser.getId().toString(), status().isOk());
 
             assertNotNull(finalUser);
             assertEquals(finalUser.getUsername(), newUser.getUsername());
@@ -173,7 +181,7 @@ public class UserControllerIT {
         assertEquals(expectedRole, extractedRole);
     }
 
-    private UserDto findUserById(String id, ResultMatcher status) {
+    private UserDTO findUserById(String id, ResultMatcher status) {
         try {
             MvcResult result = mockMvc.perform(get(Routes.API_ROOT + Routes.USERS + "/" + id)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -186,7 +194,7 @@ public class UserControllerIT {
         }
     }
 
-    private UserDto findUserByUsername(String username, ResultMatcher status) {
+    private UserDTO findUserByUsername(String username, ResultMatcher status) {
         try {
             MvcResult result = mockMvc.perform(get(Routes.API_ROOT + Routes.USERS + Routes.USERNAME_PATH + "/" + username)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -199,7 +207,7 @@ public class UserControllerIT {
         }
     }
 
-    private Boolean createUser(UserDto dto, ResultMatcher status) {
+    private Boolean createUser(UserDTO dto, ResultMatcher status) {
         try {
             MvcResult result = mockMvc.perform(post(Routes.API_ROOT + Routes.USERS)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -214,7 +222,7 @@ public class UserControllerIT {
         }
     }
 
-    private UserDto updateUser(String id, UserDto newDto, ResultMatcher status) {
+    private UserDTO updateUser(String id, UserDTO newDto, ResultMatcher status) {
         try {
             MvcResult result = mockMvc.perform(put(Routes.API_ROOT + Routes.USERS + "/" + id)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -250,9 +258,9 @@ public class UserControllerIT {
         } catch (Throwable ignored) {}
     }
 
-    private UserDto extractUserDto(MvcResult result) throws Exception {
+    private UserDTO extractUserDto(MvcResult result) throws Exception {
         String jsonResponse = result.getResponse().getContentAsString();
-        return objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<UserDto>>() {}).data();
+        return objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<UserDTO>>() {}).data();
     }
 
     private Boolean extractBoolean(MvcResult result) throws Exception {

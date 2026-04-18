@@ -1,6 +1,5 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web.dto;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -10,29 +9,28 @@ import java.util.UUID;
  * Data Transfer Object (DTO) for Player entities.
  */
 @Data
+@Setter
 @AllArgsConstructor
-public class PlayerDto {
+public class PlayerDTO {
 
-    /**
-     * The player's ID.
-     */
     private UUID id;
 
-    /**
-     * The player's name.
-     */
+    private UUID teamId;
+
     @NotBlank
     private String name;
 
-    /**
-     * The player's team.
-     */
     @NotBlank
-    private String team;
+    private String surname;
 
-    /**
-     * The player's email.
-     */
+    private int age;
+
     @NotBlank
     private String email;
+
+    private int number; // "Dorsal"
+
+    private String position;
+
+    private String category;
 }

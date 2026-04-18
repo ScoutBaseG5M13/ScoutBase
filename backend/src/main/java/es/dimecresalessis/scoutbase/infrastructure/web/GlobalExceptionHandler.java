@@ -2,6 +2,7 @@ package es.dimecresalessis.scoutbase.infrastructure.web;
 
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
+import es.dimecresalessis.scoutbase.domain.stat.exception.StatException;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import org.slf4j.Logger;
@@ -9,12 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.access.AccessDeniedException;
+
 import java.time.LocalDateTime;
 
 /**
@@ -55,6 +58,29 @@ public class GlobalExceptionHandler {
             return buildErrorResponse(ex.getMessage(), ex, HttpStatus.NOT_FOUND);
         }
         return buildErrorResponse(ex.getMessage(), ex, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles custom Scoutbase Stat failures.
+     * @param ex The caught {@link StatException}.
+     * @return A response with serialized error details depending on the error.
+     */
+    @ExceptionHandler(StatException.class)
+    public ResponseEntity<ApiResponse<String>> handleStatException(StatException ex) {
+        logException(ex);
+        return buildErrorResponse(ex.getMessage(), ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<String>> handleValidationErrors(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getDefaultMessage())
+                .findFirst()
+                .orElse("Validation failed");
+
+        return buildErrorResponse(errorMessage, ex, HttpStatus.BAD_REQUEST);
     }
 
     /**

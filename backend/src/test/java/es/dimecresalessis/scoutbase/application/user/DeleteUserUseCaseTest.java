@@ -32,7 +32,15 @@ class DeleteUserUseCaseTest {
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        user = new User(userId, "scout_master", "password123", "ADMIN");
+        user = User.builder()
+                .id(userId)
+                .username("scout_master")
+                .password("encoded_password")
+                .role("ADMIN")
+                .name("Alex")
+                .surname("Scout")
+                .email("alex@scoutbase.com")
+                .build();
     }
 
     @Test

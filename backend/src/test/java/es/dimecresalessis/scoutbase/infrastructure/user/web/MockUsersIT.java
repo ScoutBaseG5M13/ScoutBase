@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.dimecresalessis.scoutbase.application.security.LoginRequest;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
-import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDto;
+import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
@@ -26,7 +26,7 @@ public class MockUsersIT {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
-    public UserDto createAdmin() throws Exception {
+    public UserDTO createAdmin() throws Exception {
         MvcResult result = mockMvc.perform(get(Routes.API_ROOT + Routes.USERS + Routes.NEW_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("role", "ROLE_ADMIN"))
@@ -34,11 +34,11 @@ public class MockUsersIT {
                 .andReturn();
 
         String jsonResponse = result.getResponse().getContentAsString();
-        ApiResponse<UserDto> response = objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<UserDto>>() {});
+        ApiResponse<UserDTO> response = objectMapper.readValue(jsonResponse, new TypeReference<ApiResponse<UserDTO>>() {});
         return response.data();
     }
 
-    public String login(UserDto user) throws Exception {
+    public String login(UserDTO user) throws Exception {
         LoginRequest loginRequest = new LoginRequest(user.getUsername(), user.getPassword());
         String jsonBody = objectMapper.writeValueAsString(loginRequest);
 
@@ -53,7 +53,7 @@ public class MockUsersIT {
         return response.data().get("token");
     }
 
-    public void deleteUser(UserDto user, String jwtToken) throws Exception {
+    public void deleteUser(UserDTO user, String jwtToken) throws Exception {
         mockMvc.perform(delete(Routes.API_ROOT + Routes.USERS + "/" + user.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))

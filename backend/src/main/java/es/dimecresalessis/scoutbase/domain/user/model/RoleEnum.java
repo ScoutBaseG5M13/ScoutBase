@@ -4,7 +4,9 @@ import es.dimecresalessis.scoutbase.infrastructure.shared.utils.TextUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Enum representing predefined user roles within the system.
@@ -14,7 +16,7 @@ import java.util.List;
  */
 @Getter
 @AllArgsConstructor
-public enum Role {
+public enum RoleEnum {
     ADMIN("ROLE_ADMIN", "/admin", List.of(
             Permission.PLAYER_WRITE,
             Permission.PLAYER_READ,
@@ -32,17 +34,23 @@ public enum Role {
     private final List<Permission> permissions;
 
     /**
-     * Retrieves a {@link Role} from its name as a string.
+     * Retrieves a {@link RoleEnum} from its name as a string.
      *
      * @param name The name of the role to resolve.
-     * @return The matching {@link Role} instance, or {@code null} if no match is found.
+     * @return The matching {@link RoleEnum} instance, or {@code null} if no match is found.
      */
-    public static Role fromName(String name) {
-        for (Role role : values()) {
-            if (TextUtils.normalizeToUpperCase(role.getName()).equals(TextUtils.normalizeToUpperCase(name))) {
-                return role;
+    public static RoleEnum fromName(String name) {
+        for (RoleEnum roleEnum : values()) {
+            if (TextUtils.normalizeToUpperCase(roleEnum.getName()).equals(TextUtils.normalizeToUpperCase(name))) {
+                return roleEnum;
             }
         }
         return null;
+    }
+
+    public static String getEnumsBySeparator(String separatorSymbol) {
+        return Arrays.stream(values())
+                .map(RoleEnum::getName)
+                .collect(Collectors.joining(separatorSymbol));
     }
 }
