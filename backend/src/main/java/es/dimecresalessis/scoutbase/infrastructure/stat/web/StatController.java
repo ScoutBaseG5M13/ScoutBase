@@ -10,6 +10,7 @@ import es.dimecresalessis.scoutbase.infrastructure.stat.web.mapper.StatMapper;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
@@ -29,6 +30,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @RestController
 @AllArgsConstructor
 @ApiCommonResponses
+@Tag(name = "Stats", description = "Stat management endpoints")
 @RequestMapping(Routes.API_ROOT + Routes.STAT)
 public class StatController {
 

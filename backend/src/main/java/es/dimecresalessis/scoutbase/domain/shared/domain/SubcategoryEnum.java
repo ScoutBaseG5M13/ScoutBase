@@ -12,8 +12,7 @@ public enum SubcategoryEnum {
     SUB14,
     SUB15,
     SUB16,
-    SUB17,
-    SUB18;
+    SUB17;
 
     public static SubcategoryEnum fromName(String name) {
         if (isValid(name)) {

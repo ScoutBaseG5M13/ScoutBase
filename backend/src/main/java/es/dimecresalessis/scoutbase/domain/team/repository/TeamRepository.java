@@ -26,6 +26,14 @@ public interface TeamRepository {
     Optional<Team> findById(UUID id);
 
     /**
+     * Locates a list of teams by their ID.
+     *
+     * @param userId The unique {@link UUID} of the user teams to find.
+     * @return A {@link List} containing the found teams, or empty if no match is found.
+     */
+    List<Team> findAllByPlayerId(UUID userId);
+
+    /**
      * Persists a team entity into the system.
      * <p>
      * This method handles both the creation of new teams and the updating of existing ones.

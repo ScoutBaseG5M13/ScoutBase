@@ -33,4 +33,6 @@ public class PlayerDTO {
     private String position;
 
     private String category;
+
+    private int priority;
 }

@@ -1,9 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.team.web;
 
-import es.dimecresalessis.scoutbase.application.team.CreateTeamUseCase;
-import es.dimecresalessis.scoutbase.application.team.DeleteTeamUseCase;
-import es.dimecresalessis.scoutbase.application.team.FindAllTeamsUseCase;
-import es.dimecresalessis.scoutbase.application.team.UpdateTeamUseCase;
+import es.dimecresalessis.scoutbase.application.team.*;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.team.exception.TeamException;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
@@ -13,6 +10,7 @@ import es.dimecresalessis.scoutbase.infrastructure.team.web.mapper.TeamMapper;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +29,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @RestController
 @AllArgsConstructor
 @ApiCommonResponses
+@Tag(name = "Teams", description = "Team management endpoints")
 @RequestMapping(Routes.API_ROOT + Routes.TEAM)
 public class TeamController {
 
@@ -39,12 +38,22 @@ public class TeamController {
     private final CreateTeamUseCase createTeamUseCase;
     private final UpdateTeamUseCase updateTeamUseCase;
     private final DeleteTeamUseCase deleteTeamUseCase;
+    private final FindAllTeamsByUserId findAllTeamsByUserId;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find all teams", description = "Retrieves all registered teams in the DB")
     public ResponseEntity<ApiResponse<List<TeamDTO>>> findAll() {
         List<Team> teams = findAllTeamsUseCase.execute();
+        List<TeamDTO> teamsDto = teams.stream().map(teamMapper::toDto).toList();
+        return handleResponse(teamsDto).ok();
+    }
+
+    @GetMapping(Routes.USERS + Routes.ID_PATHVAR)
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Find all teams by user", description = "Retrieves all registered teams by user in the DB")
+    public ResponseEntity<ApiResponse<List<TeamDTO>>> findAllTeamsByUserId(@PathVariable("id") UUID userId) {
+        List<Team> teams = findAllTeamsByUserId.execute(userId);
         List<TeamDTO> teamsDto = teams.stream().map(teamMapper::toDto).toList();
         return handleResponse(teamsDto).ok();
     }
