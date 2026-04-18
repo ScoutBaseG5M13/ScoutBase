@@ -67,7 +67,8 @@ public class PlayerControllerIT {
                 "test@test.ar",
                 10,
                 "DELANTERO",
-                "SENIOR"
+                "SENIOR",
+                4
         );
     }
 
@@ -149,7 +150,8 @@ public class PlayerControllerIT {
                     "updated@email.com",
                     oldPlayer.getNumber(),
                     oldPlayer.getPosition(),
-                    oldPlayer.getCategory()
+                    oldPlayer.getCategory(),
+                    7
             );
 
             updatePlayer(oldPlayer.getId().toString(), updateRequest, status().isOk());

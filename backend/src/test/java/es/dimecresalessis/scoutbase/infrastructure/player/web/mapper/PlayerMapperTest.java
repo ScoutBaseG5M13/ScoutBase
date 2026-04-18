@@ -39,8 +39,18 @@ class PlayerMapperTest {
                 .priority(6)
                 .build();
 
-        playerDTO = new PlayerDTO(playerId, teamId, "Ronald", "McGallahan", 14, "ronald@mcgall.es", 16,
-                PositionEnum.PORTERO.name(), CategoryEnum.BENJAMIN.name());
+        playerDTO = new PlayerDTO(
+                playerId,
+                teamId,
+                "Ronald",
+                "McGallahan",
+                14,
+                "ronald@mcgall.es",
+                16,
+                PositionEnum.PORTERO.name(),
+                CategoryEnum.BENJAMIN.name(),
+                6
+        );
     }
 
     @Test

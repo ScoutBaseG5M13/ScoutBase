@@ -51,7 +51,18 @@ class PlayerControllerTest {
     void setUp() {
         playerId = UUID.randomUUID();
         player = Player.builder().id(playerId).name("Ronald").build();
-        playerDto = new PlayerDTO(playerId, UUID.randomUUID(), "Ronald", "Scoutbase FC", 25, "ronald@scoutbase.es", 15, "PORTERO", "ALEVIN");
+        playerDto = new PlayerDTO(
+                playerId,
+                UUID.randomUUID(),
+                "Ronald",
+                "Scoutbase FC",
+                25,
+                "ronald@scoutbase.es",
+                15,
+                "PORTERO",
+                "ALEVIN",
+                5
+        );
     }
 
     @Test
