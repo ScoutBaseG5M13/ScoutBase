@@ -27,4 +27,7 @@ public class TeamCreateRequest {
     private List<UUID> trainers;
 
     private List<UUID> scouters;
+
+    @NotBlank
+    private UUID clubId;
 }

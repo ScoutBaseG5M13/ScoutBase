@@ -35,7 +35,6 @@ public class UserDTO {
     /**
      * Generates a random instance for testing purposes.
      *
-     * @param role The role to be assigned to the random user.
      * @return A random {@link UserDTO} instance.
      */
     public static UserDTO getRandomInstance() {

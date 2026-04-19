@@ -1,6 +1,10 @@
 package es.dimecresalessis.scoutbase.infrastructure.club.web;
 
-import es.dimecresalessis.scoutbase.application.club.*;
+import es.dimecresalessis.scoutbase.application.club.create.CreateClubUseCase;
+import es.dimecresalessis.scoutbase.application.club.delete.DeleteClubUseCase;
+import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsUseCase;
+import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
+import es.dimecresalessis.scoutbase.application.club.update.UpdateClubUseCase;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.club.exception.ClubException;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
@@ -75,7 +79,7 @@ public class ClubController {
     /**
      * Creates a new club record.
      *
-     * @param clubDto The club details submitted by the client.
+     * @param clubRequest The club details submitted by the client.
      * @return {@link ApiResponse} containing the created club's details.
      * @throws ClubException If an error occurs during club creation.
      */

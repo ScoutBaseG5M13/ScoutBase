@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.application.stat;
 
+import es.dimecresalessis.scoutbase.application.stat.create.CreateStatUseCase;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.stat.exception.StatException;
 import es.dimecresalessis.scoutbase.domain.stat.model.Stat;

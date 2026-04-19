@@ -35,9 +35,11 @@ public class TeamEntity extends CommonEntity {
     @Column
     private UUID secondTrainer;
 
+    @ElementCollection
     @Column
     private List<UUID> players;
 
+    @ElementCollection
     @Column
     private List<UUID> scouters;
 }

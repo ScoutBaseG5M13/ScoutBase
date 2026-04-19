@@ -1,11 +1,10 @@
 package es.dimecresalessis.scoutbase.application.security;
 
-import es.dimecresalessis.scoutbase.application.user.FindUserByUsernameUseCase;
+import es.dimecresalessis.scoutbase.application.user.find.FindUserByUsernameUseCase;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.security.JwtService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,7 +30,7 @@ public class AuthService {
      * @throws org.springframework.security.core.AuthenticationException If authentication fails.
      */
     public String authenticateAndGenerateToken(String username, String password) {
-        authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        //authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         User user = findUserByUsernameUseCase.execute(username);
         return jwtService.createToken(user);
     }

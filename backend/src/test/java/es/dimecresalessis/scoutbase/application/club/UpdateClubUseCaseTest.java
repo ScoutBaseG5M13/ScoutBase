@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.application.club;
 
+import es.dimecresalessis.scoutbase.application.club.update.UpdateClubUseCase;
 import es.dimecresalessis.scoutbase.domain.club.exception.ClubException;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.club.repository.ClubRepository;

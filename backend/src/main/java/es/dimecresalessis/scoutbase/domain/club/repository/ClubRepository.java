@@ -33,6 +33,8 @@ public interface ClubRepository {
      */
     List<Club> findAllByUserId(UUID userId);
 
+    Optional<Club> findClubByTeam(UUID teamId);
+
     /**
      * Persists a player's club into the system.
      * <p>

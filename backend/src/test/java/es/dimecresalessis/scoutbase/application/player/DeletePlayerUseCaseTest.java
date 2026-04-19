@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.application.player;
 
+import es.dimecresalessis.scoutbase.application.player.delete.DeletePlayerUseCase;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
 import org.junit.jupiter.api.BeforeEach;

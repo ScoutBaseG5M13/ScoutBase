@@ -37,7 +37,7 @@ public class JwtService {
     /**
      * Generates a JWT token for a user.
      *
-     * @param username The username to associate with the token.
+     * @param user The user to associate with the token.
      * @return A signed JWT token as a string.
      */
     public String createToken(User user) {
@@ -82,7 +82,7 @@ public class JwtService {
      * Checks if the provided JWT token is valid for the given user details.
      *
      * @param token The JWT token to validate.
-     * @param userDetails The user details to verify.
+     * @param user The user details to verify.
      * @return {@code true} if the token matches the provided user details and is not expired.
      */
 

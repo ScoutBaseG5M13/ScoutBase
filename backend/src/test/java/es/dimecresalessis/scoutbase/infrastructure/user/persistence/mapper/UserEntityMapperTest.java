@@ -23,7 +23,6 @@ class UserEntityMapperTest {
                 .id(userId)
                 .username("scout_master")
                 .password("encoded_password")
-                .role("ADMIN")
                 .name("Alex")
                 .surname("Scout")
                 .email("alex@scoutbase.com")
@@ -35,7 +34,6 @@ class UserEntityMapperTest {
         assertThat(result.getId()).isEqualTo(user.getId());
         assertThat(result.getUsername()).isEqualTo(user.getUsername());
         assertThat(result.getPassword()).isEqualTo(user.getPassword());
-        assertThat(result.getRole()).isEqualTo(user.getRole());
         assertThat(result.getName()).isEqualTo(user.getName());
         assertThat(result.getSurname()).isEqualTo(user.getSurname());
         assertThat(result.getEmail()).isEqualTo(user.getEmail());
@@ -48,7 +46,6 @@ class UserEntityMapperTest {
                 .id(userId)
                 .username("scout_entity")
                 .password("encoded_password_entity")
-                .role("ADMIN")
                 .name("Alexine")
                 .surname("Manager")
                 .email("alexine@scoutbase.com")
@@ -60,7 +57,6 @@ class UserEntityMapperTest {
         assertThat(result.getId()).isEqualTo(userEntity.getId());
         assertThat(result.getUsername()).isEqualTo(userEntity.getUsername());
         assertThat(result.getPassword()).isEqualTo(userEntity.getPassword());
-        assertThat(result.getRole()).isEqualTo(userEntity.getRole());
         assertThat(result.getName()).isEqualTo(userEntity.getName());
         assertThat(result.getSurname()).isEqualTo(userEntity.getSurname());
         assertThat(result.getEmail()).isEqualTo(userEntity.getEmail());

@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.application.team;
 
+import es.dimecresalessis.scoutbase.application.team.delete.DeleteTeamUseCase;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
 import org.junit.jupiter.api.Test;

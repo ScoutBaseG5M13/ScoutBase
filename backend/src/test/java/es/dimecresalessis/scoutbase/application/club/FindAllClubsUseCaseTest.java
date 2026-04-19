@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.application.club;
 
+import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsUseCase;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.club.repository.ClubRepository;
 import org.junit.jupiter.api.BeforeEach;

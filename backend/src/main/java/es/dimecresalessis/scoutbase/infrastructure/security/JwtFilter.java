@@ -1,12 +1,11 @@
 package es.dimecresalessis.scoutbase.infrastructure.security;
 
-import es.dimecresalessis.scoutbase.application.user.FindUserByUsernameUseCase;
+import es.dimecresalessis.scoutbase.application.user.find.FindUserByUsernameUseCase;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.security.handler.SecurityHandlers;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -41,11 +40,10 @@ public class JwtFilter extends OncePerRequestFilter {
      * @param response The outgoing {@link HttpServletResponse}.
      * @param filterChain The chain of filters to be executed.
      * @throws IOException If an input or output error occurs.
-     * @throws ServletException If the request cannot be handled.
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws IOException, ServletException {
+            throws IOException {
         String authHeader = request.getHeader("Authorization");
         String bearer = "Bearer ";
 

@@ -1,5 +1,10 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web;
 
+import es.dimecresalessis.scoutbase.application.player.create.CreatePlayerUseCase;
+import es.dimecresalessis.scoutbase.application.player.delete.DeletePlayerUseCase;
+import es.dimecresalessis.scoutbase.application.player.find.FindAllPlayersUseCase;
+import es.dimecresalessis.scoutbase.application.player.find.FindPlayerByIdUseCase;
+import es.dimecresalessis.scoutbase.application.player.update.UpdatePlayerUseCase;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
@@ -9,7 +14,6 @@ import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.mapper.PlayerMapper;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
-import es.dimecresalessis.scoutbase.application.player.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -75,7 +79,7 @@ public class PlayerController {
     /**
      * Creates a new player record.
      *
-     * @param playerDto The player details submitted by the client.
+     * @param playerRequest The player details submitted by the client.
      * @return {@link ApiResponse} containing the created player's details.
      * @throws PlayerException If an error occurs during player creation.
      */

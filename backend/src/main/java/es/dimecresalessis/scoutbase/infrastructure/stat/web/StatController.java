@@ -1,6 +1,11 @@
 package es.dimecresalessis.scoutbase.infrastructure.stat.web;
 
-import es.dimecresalessis.scoutbase.application.stat.*;
+import es.dimecresalessis.scoutbase.application.stat.create.CreateStatUseCase;
+import es.dimecresalessis.scoutbase.application.stat.delete.DeleteStatUseCase;
+import es.dimecresalessis.scoutbase.application.stat.find.FindAllStatsByPlayerIdUseCase;
+import es.dimecresalessis.scoutbase.application.stat.find.FindAllStatsUseCase;
+import es.dimecresalessis.scoutbase.application.stat.find.FindStatByIdUseCase;
+import es.dimecresalessis.scoutbase.application.stat.update.UpdateStatUseCase;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.stat.exception.StatException;
 import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
@@ -79,7 +84,7 @@ public class StatController {
     /**
      * Creates a new stat record.
      *
-     * @param statDto The stat details submitted by the client.
+     * @param statRequest The stat details submitted by the client.
      * @return {@link ApiResponse} containing the created stat's details.
      * @throws StatException If an error occurs during stat creation.
      */
@@ -95,7 +100,7 @@ public class StatController {
     /**
      * Updates an existing stat record.
      *
-     * @param statDto The updated stat details.
+     * @param statRequest The updated stat details.
      * @param id The ID of the stat to be updated.
      * @return {@link ApiResponse} containing the updated stat's details.
      * @throws StatException If the stat is not found.
