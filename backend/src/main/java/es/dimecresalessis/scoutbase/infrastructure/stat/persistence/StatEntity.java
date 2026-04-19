@@ -25,7 +25,9 @@ public class StatEntity extends CommonEntity {
 
     private String name;
 
+    @Column(nullable = false)
     private String code;
 
+    @Column(name = "\"value\"", nullable = false)
     private int value;
 }

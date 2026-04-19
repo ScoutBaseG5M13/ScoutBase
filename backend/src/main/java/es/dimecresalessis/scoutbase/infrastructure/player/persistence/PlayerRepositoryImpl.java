@@ -46,7 +46,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
         PlayerEntity playerEntity = jpaPlayerRepository.findById(player.getId())
                 .orElseGet(PlayerEntity::new);
         mapper.updateEntityFromDomain(player, playerEntity);
-        jpaPlayerRepository.save(playerEntity);
+        jpaPlayerRepository.saveAndFlush(playerEntity);
         return player;
     }
 

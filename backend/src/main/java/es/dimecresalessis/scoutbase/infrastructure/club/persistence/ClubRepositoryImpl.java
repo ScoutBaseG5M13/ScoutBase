@@ -53,7 +53,7 @@ public class ClubRepositoryImpl implements ClubRepository {
         ClubEntity clubEntity = jpaClubRepository.findById(club.getId())
                 .orElseGet(ClubEntity::new);
         mapper.updateEntityFromDomain(club, clubEntity);
-        jpaClubRepository.save(clubEntity);
+        jpaClubRepository.saveAndFlush(clubEntity);
         return club;
     }
 

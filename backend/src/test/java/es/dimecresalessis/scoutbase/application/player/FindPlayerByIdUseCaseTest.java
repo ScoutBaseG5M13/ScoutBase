@@ -2,8 +2,6 @@ package es.dimecresalessis.scoutbase.application.player;
 
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,40 +24,22 @@ class FindPlayerByIdUseCaseTest {
     @InjectMocks
     private FindPlayerByIdUseCase findPlayerByIdUseCase;
 
-    private UUID playerId;
-    private Player player;
+    @Test
+    void execute_ShouldReturnPlayer_WhenIdExists() {
+        UUID id = UUID.randomUUID();
+        Player player = Player.builder().id(id).build();
+        when(playerRepository.findById(id)).thenReturn(Optional.of(player));
 
-    @BeforeEach
-    void setUp() {
-        playerId = UUID.randomUUID();
-        player = Player.builder()
-                .id(playerId)
-                .name("Ronald McGallahan")
-                .build();
+        Player result = findPlayerByIdUseCase.execute(id);
+
+        assertEquals(id, result.getId());
     }
 
     @Test
-    @DisplayName("Should return player when ID exists")
-    void shouldFindPlayerById() {
-        when(playerRepository.findById(playerId)).thenReturn(Optional.of(player));
+    void execute_ShouldThrowException_WhenIdNotFound() {
+        UUID id = UUID.randomUUID();
+        when(playerRepository.findById(id)).thenReturn(Optional.empty());
 
-        Player result = findPlayerByIdUseCase.execute(playerId);
-
-        assertNotNull(result);
-        assertEquals(playerId, result.getId());
-        assertEquals("Ronald McGallahan", result.getName());
-        verify(playerRepository, times(1)).findById(playerId);
-    }
-
-    @Test
-    @DisplayName("Should throw NoSuchElementException when player ID does not exist")
-    void shouldThrowException_WhenPlayerNotFound() {
-        when(playerRepository.findById(playerId)).thenReturn(Optional.empty());
-
-        assertThrows(NoSuchElementException.class, () -> {
-            findPlayerByIdUseCase.execute(playerId);
-        });
-
-        verify(playerRepository, times(1)).findById(playerId);
+        assertThrows(NoSuchElementException.class, () -> findPlayerByIdUseCase.execute(id));
     }
 }

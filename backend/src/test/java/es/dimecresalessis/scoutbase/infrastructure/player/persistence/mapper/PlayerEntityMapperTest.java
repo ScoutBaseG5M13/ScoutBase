@@ -5,7 +5,6 @@ import es.dimecresalessis.scoutbase.domain.shared.domain.PositionEnum;
 import es.dimecresalessis.scoutbase.infrastructure.player.persistence.PlayerEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 
 import java.util.UUID;
 
@@ -20,7 +19,7 @@ class PlayerEntityMapperTest {
 
     @BeforeEach
     void setUp() {
-        playerEntityMapper = Mappers.getMapper(PlayerEntityMapper.class);
+        playerEntityMapper = new PlayerEntityMapperImpl();
         playerId = UUID.randomUUID();
 
         playerDomain = Player.builder()
@@ -71,13 +70,21 @@ class PlayerEntityMapperTest {
     }
 
     @Test
-    void updateEntityFromDomain_ShouldUpdateFields() {
-        PlayerEntity entityToUpdate = new PlayerEntity();
+    void updateEntityFromDomain_ShouldUpdateFieldsWithNewData() {
+        PlayerEntity entityToUpdate = PlayerEntity.builder()
+                .id(playerId)
+                .name("Old Name")
+                .surname("Old Surname")
+                .position("PORTERO")
+                .priority(5)
+                .build();
 
         playerEntityMapper.updateEntityFromDomain(playerDomain, entityToUpdate);
 
-        assertEquals(playerDomain.getName(), entityToUpdate.getName());
-        assertEquals(playerDomain.getSurname(), entityToUpdate.getSurname());
-        assertEquals(playerDomain.getPosition().name(), entityToUpdate.getPosition());
+        assertEquals("Ronald", entityToUpdate.getName());
+        assertEquals("Araujo", entityToUpdate.getSurname());
+        assertEquals("DEFENSA_CENTRAL", entityToUpdate.getPosition());
+        assertEquals(1, entityToUpdate.getPriority());
+        assertEquals(playerId, entityToUpdate.getId());
     }
 }

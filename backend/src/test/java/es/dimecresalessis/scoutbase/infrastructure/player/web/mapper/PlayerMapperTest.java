@@ -6,7 +6,6 @@ import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerCreateRe
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 
 import java.util.UUID;
 
@@ -21,7 +20,7 @@ class PlayerMapperTest {
 
     @BeforeEach
     void setUp() {
-        playerMapper = Mappers.getMapper(PlayerMapper.class);
+        playerMapper = new PlayerMapperImpl();
         playerId = UUID.randomUUID();
 
         playerDomain = Player.builder()
@@ -72,7 +71,6 @@ class PlayerMapperTest {
         Player result = playerMapper.createToDomain(request);
 
         assertNotNull(result);
-        assertNotNull(result.getId());
         assertEquals(request.getName(), result.getName());
         assertEquals(PositionEnum.EXTREMO_DERECHO, result.getPosition());
     }

@@ -1,91 +1,77 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web.mapper;
 
+import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
+import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@SpringBootTest(classes = UserMapperImpl.class)
 class UserMapperTest {
 
+    @Autowired
     private UserMapper userMapper;
-    private UUID userId;
-    private User userDomain;
-    private UserDTO userDto;
 
-    @BeforeEach
-    void setUp() {
-        userMapper = Mappers.getMapper(UserMapper.class);
-        userId = UUID.randomUUID();
-
-        userDomain = User.builder()
-                .id(userId)
+    @Test
+    void shouldMapDomainToDto() {
+        User domain = User.builder()
+                .id(UUID.randomUUID())
                 .username("scout_master")
-                .password("encoded_password")
-                .role("ADMIN")
+                .password("pass123")
+                .role(RoleEnum.ADMIN.getName())
                 .name("Alex")
                 .surname("Scout")
                 .email("alex@scoutbase.com")
                 .build();
 
-        userDto = new UserDTO(
-                userId,
-                "scout_user",
-                "raw_password",
-                "USER",
-                "John",
-                "Doe",
-                "john@doe.com"
-        );
+        UserDTO dto = userMapper.toDto(domain);
+
+        assertThat(dto).isNotNull();
+        assertThat(dto.getId()).isEqualTo(domain.getId());
+        assertThat(dto.getUsername()).isEqualTo(domain.getUsername());
+        assertThat(dto.getRole()).isEqualTo(RoleEnum.ADMIN.getName());
+        assertThat(dto.getEmail()).isEqualTo(domain.getEmail());
     }
 
     @Test
-    void shouldMapToDomain_WithId() {
-        User result = userMapper.toDomain(userDto);
+    void shouldMapDtoToDomainWithValidRole() {
+        UserDTO dto = UserDTO.getRandomInstance(RoleEnum.USER.getName());
 
-        assertNotNull(result);
-        assertEquals(userDto.getId(), result.getId());
-        assertEquals(userDto.getUsername(), result.getUsername());
-        assertEquals(userDto.getPassword(), result.getPassword());
-        assertEquals(userDto.getRole(), result.getRole());
-        assertEquals(userDto.getName(), result.getName());
-        assertEquals(userDto.getSurname(), result.getSurname());
-        assertEquals(userDto.getEmail(), result.getEmail());
+        User domain = userMapper.toDomain(dto);
+
+        assertThat(domain).isNotNull();
+        assertThat(domain.getUsername()).isEqualTo(dto.getUsername());
+        assertThat(domain.getRole()).isEqualTo(RoleEnum.USER.getName());
     }
 
     @Test
-    void shouldMapToDomain_WithoutId() {
-        userDto.setId(null);
+    void shouldNormalizeRoleToUpperCaseWhenMappingToDomain() {
+        UserDTO dto = UserDTO.getRandomInstance("role_admin");
 
-        User result = userMapper.toDomain(userDto);
+        User domain = userMapper.toDomain(dto);
 
-        assertNotNull(result);
-        assertNotNull(result.getId());
-        assertNotEquals(userId, result.getId());
-        assertEquals(userDto.getUsername(), result.getUsername());
+        assertThat(domain.getRole()).isEqualTo(RoleEnum.ADMIN.getName());
     }
 
     @Test
-    void shouldMapToDto() {
-        UserDTO result = userMapper.toDto(userDomain);
+    void shouldThrowExceptionWhenRoleIsInvalid() {
+        UserDTO dto = UserDTO.getRandomInstance("INVALID_ROLE");
 
-        assertNotNull(result);
-        assertEquals(userDomain.getId(), result.getId());
-        assertEquals(userDomain.getUsername(), result.getUsername());
-        assertEquals(userDomain.getPassword(), result.getPassword());
-        assertEquals(userDomain.getRole(), result.getRole());
-        assertEquals(userDomain.getName(), result.getName());
-        assertEquals(userDomain.getSurname(), result.getSurname());
-        assertEquals(userDomain.getEmail(), result.getEmail());
+        assertThatThrownBy(() -> userMapper.toDomain(dto))
+                .isInstanceOf(UserException.class)
+                .hasMessageContaining("INVALID_ROLE");
     }
 
     @Test
-    void shouldReturnNull_WhenInputsAreNull() {
-        assertNull(userMapper.toDomain(null));
-        assertNull(userMapper.toDto(null));
+    void shouldReturnNullWhenMappingNulls() {
+        assertThat(userMapper.toDomain(null)).isNull();
+        assertThat(userMapper.toDto(null)).isNull();
     }
 }

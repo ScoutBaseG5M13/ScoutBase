@@ -49,7 +49,7 @@ public class TeamRepositoryImpl implements TeamRepository {
         TeamEntity teamEntity = jpaTeamRepository.findById(team.getId())
                 .orElseGet(TeamEntity::new);
         mapper.updateEntityFromDomain(team, teamEntity);
-        jpaTeamRepository.save(teamEntity);
+        jpaTeamRepository.saveAndFlush(teamEntity);
         return team;
     }
 

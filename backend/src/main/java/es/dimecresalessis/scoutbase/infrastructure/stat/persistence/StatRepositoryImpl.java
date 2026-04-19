@@ -21,7 +21,6 @@ import java.util.UUID;
 public class StatRepositoryImpl implements StatRepository {
 
     private final JpaStatRepository jpaStatRepository;
-
     private final StatEntityMapper mapper;
 
     @Override
@@ -39,9 +38,10 @@ public class StatRepositoryImpl implements StatRepository {
 
     @Override
     public List<Stat> findAllByPlayerId(UUID playerId) {
-        List<StatEntity> playerStats = jpaStatRepository.findAllByPlayerId(playerId);
-        List<Stat> stats = playerStats.stream().map(mapper::toDomain).toList();
-        return stats;
+        return jpaStatRepository.findAllByPlayerId(playerId)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override
@@ -49,13 +49,15 @@ public class StatRepositoryImpl implements StatRepository {
     public Stat save(Stat stat) {
         StatEntity savedStatEntity = jpaStatRepository.findById(stat.getId())
                 .orElseGet(StatEntity::new);
+
         List<Stat> savedStats = findAllByPlayerId(stat.getPlayerId());
         if (savedStats.stream().anyMatch(s -> s.getCode().equals(stat.getCode()))) {
             String statId = stat.getPlayerId() != null ? stat.getPlayerId().toString() : "null";
             throw new StatException(ErrorEnum.STAT_CODE_ALREADY_EXISTS, stat.getCode(), statId);
         }
+
         mapper.updateEntityFromDomain(stat, savedStatEntity);
-        jpaStatRepository.save(savedStatEntity);
+        jpaStatRepository.saveAndFlush(savedStatEntity);
         return stat;
     }
 
@@ -65,7 +67,7 @@ public class StatRepositoryImpl implements StatRepository {
         StatEntity savedStatEntity = jpaStatRepository.findById(stat.getId())
                 .orElseGet(StatEntity::new);
         mapper.updateEntityFromDomain(stat, savedStatEntity);
-        jpaStatRepository.save(savedStatEntity);
+        jpaStatRepository.saveAndFlush(savedStatEntity);
         return stat;
     }
 
@@ -73,5 +75,6 @@ public class StatRepositoryImpl implements StatRepository {
     @Transactional
     public void deleteById(UUID id) {
         jpaStatRepository.deleteById(id);
+        jpaStatRepository.flush();
     }
 }
