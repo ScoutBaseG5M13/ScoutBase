@@ -30,6 +30,7 @@ public class TeamRepositoryImpl implements TeamRepository {
         return jpaTeamRepository.findById(id).map(mapper::toDomain);
     }
 
+    @Override
     public List<Team> findAllByUserId(UUID userId) {
         List<TeamEntity> teamEntities = jpaTeamRepository.findAllByUserId(userId);
         return teamEntities.stream()

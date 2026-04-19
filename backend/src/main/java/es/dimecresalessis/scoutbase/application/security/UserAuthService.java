@@ -48,7 +48,7 @@ public class UserAuthService {
         return false;
     }
 
-    private RoleEnum findTeamUserRole(User user, UUID teamId) {
+    public RoleEnum findTeamUserRole(User user, UUID teamId) {
         Optional<Team> team = teamRepository.findById(teamId);
         if (team.isPresent()) {
             Optional<Club> club = clubRepository.findClubByTeam(teamId);
@@ -74,7 +74,7 @@ public class UserAuthService {
         return null;
     }
 
-    private RoleEnum findClubUserRole(User user, UUID clubId) {
+    public RoleEnum findClubUserRole(User user, UUID clubId) {
         Optional<Club> club = clubRepository.findById(clubId);
         if (club.isPresent()) {
             boolean clubHasUser = club.get().getAdminUserIds()
