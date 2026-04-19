@@ -34,7 +34,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @RestController
 @AllArgsConstructor
 @ApiCommonResponses
-@Tag(name = "Users", description = "User management endpoints")
+@Tag(name = "User", description = "User management endpoints")
 @RequestMapping(Routes.API_ROOT + Routes.USERS)
 public class UserController {
 

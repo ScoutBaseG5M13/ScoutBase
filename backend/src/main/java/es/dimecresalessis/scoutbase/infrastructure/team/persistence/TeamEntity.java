@@ -30,10 +30,13 @@ public class TeamEntity extends CommonEntity {
     private String subcategory;
 
     @Column
-    private List<UUID> players;
+    private UUID trainer;
 
     @Column
-    private List<UUID> trainers;
+    private UUID secondTrainer;
+
+    @Column
+    private List<UUID> players;
 
     @Column
     private List<UUID> scouters;

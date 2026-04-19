@@ -35,6 +35,12 @@ public enum ErrorEnum {
     TEAM_ID_IS_NULL("TEAM_ID_IS_NULL", "The team id can't be null"),
     TEAM_ALREADY_EXISTS("TEAM_ID_ALREADY_EXISTS", "A team with id '{}' already exists"),
 
+    CLUB_NOT_FOUND("CLUB_NOT_FOUND", "The club with id '{}' could not be found"),
+    CLUB_IS_NULL("CLUB_IS_NULL", "The club can't be null"),
+    CLUB_ID_IS_NULL("CLUB_ID_IS_NULL", "The club id can't be null"),
+    CLUB_ALREADY_EXISTS("CLUB_ALREADY_EXISTS", "A club with id '{}' already exists"),
+    CLUB_BAD_FORMAT("CLUB_BAD_FORMAT", "The club has bad format in fields: {}"),
+
 
     STAT_IS_NULL("STAT_IS_NULL", "The stat can't be null"),
     STAT_ID_IS_NULL("STAT_ID_IS_NULL", "The stat id can't be null"),

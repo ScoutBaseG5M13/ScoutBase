@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,7 +35,11 @@ public class TeamRepositoryImpl implements TeamRepository {
     public List<Team> findAllByPlayerId(UUID userId) {
         return jpaTeamRepository.findAll()
                 .stream()
-                .filter(s -> s.getTrainers().contains(userId) || s.getScouters().contains(userId))
+                .filter(s ->
+                        Objects.equals(s.getTrainer(), userId) ||
+                                Objects.equals(s.getSecondTrainer(), userId) ||
+                                (s.getScouters() != null && s.getScouters().contains(userId))
+                )
                 .map(mapper::toDomain)
                 .toList();
     }

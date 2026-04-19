@@ -10,8 +10,8 @@ public enum StatEnum {
     POTENCIA("Potencia", "POT"),
     VELOCIDAD("Velocidad", "VEL");
 
-    String statName;
-    String statCode;
+    public String statName;
+    public String statCode;
 
     public static StatEnum fromName(String name) {
         if (isValid(name, "name")) {
@@ -24,7 +24,7 @@ public enum StatEnum {
         throw new IllegalArgumentException("Invalid 'Stat.name': '" + name + "'");
     }
 
-    public static StatEnum fromCode(String code) {
+    public static StatEnum fromStatCode(String code) {
         if (isValid(code, "code")) {
             for (StatEnum statEnum : StatEnum.values()) {
                 if (statEnum.statCode.equals(code)) {

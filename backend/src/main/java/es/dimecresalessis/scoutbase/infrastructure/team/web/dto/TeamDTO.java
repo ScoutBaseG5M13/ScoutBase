@@ -24,9 +24,11 @@ public class TeamDTO {
 
     private String subcategory;
 
-    private List<UUID> players;
+    private UUID trainer;
 
-    private List<UUID> trainers;
+    private UUID secondTrainer;
+
+    private List<UUID> players;
 
     private List<UUID> scouters;
 }

@@ -5,6 +5,7 @@ import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.team.exception.TeamException;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
+import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamDTO;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.mapper.TeamMapper;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
@@ -30,11 +31,12 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @AllArgsConstructor
 @ApiCommonResponses
 @Tag(name = "Teams", description = "Team management endpoints")
-@RequestMapping(Routes.API_ROOT + Routes.TEAM)
+@RequestMapping(Routes.API_ROOT + Routes.TEAMS)
 public class TeamController {
 
     private final TeamMapper teamMapper;
     private final FindAllTeamsUseCase findAllTeamsUseCase;
+    private final FindTeamByIdUseCase findTeamById;
     private final CreateTeamUseCase createTeamUseCase;
     private final UpdateTeamUseCase updateTeamUseCase;
     private final DeleteTeamUseCase deleteTeamUseCase;
@@ -49,6 +51,15 @@ public class TeamController {
         return handleResponse(teamsDto).ok();
     }
 
+    @GetMapping(Routes.ID_PATHVAR)
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @Operation(summary = "Find a team by ID", description = "Retrieves a teams registred in the DB by ID")
+    public ResponseEntity<ApiResponse<TeamDTO>> findById(@PathVariable UUID id) {
+        Team team = findTeamById.execute(id);
+        TeamDTO teamDto = teamMapper.toDto(team);
+        return handleResponse(teamDto).ok();
+    }
+
     @GetMapping(Routes.USERS + Routes.ID_PATHVAR)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find all teams by user", description = "Retrieves all registered teams by user in the DB")
@@ -61,8 +72,8 @@ public class TeamController {
     @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Create a team", description = "Creates a team in the DB")
-    public ResponseEntity<ApiResponse<TeamDTO>> create(@RequestBody TeamDTO teamDto) {
-        Team team = teamMapper.toDomain(teamDto);
+    public ResponseEntity<ApiResponse<TeamDTO>> create(@RequestBody TeamCreateRequest teamRequest) {
+        Team team = teamMapper.createToDomain(teamRequest);
         Team createdTeam = createTeamUseCase.execute(team);
         TeamDTO createdTeamDto = teamMapper.toDto(createdTeam);
         return handleResponse(createdTeamDto).created();
@@ -73,7 +84,7 @@ public class TeamController {
     @Operation(summary = "Update a team", description = "Updates a team in the DB")
     public ResponseEntity<ApiResponse<TeamDTO>> update(@RequestBody TeamDTO teamDto, @PathVariable UUID id) {
         try {
-            Team team = teamMapper.toDomain(teamDto);
+            Team team = teamMapper.dtoToDomain(teamDto);
             Team updatedTeam = updateTeamUseCase.execute(team, id);
             TeamDTO updatedTeamDto = teamMapper.toDto(updatedTeam);
             return handleResponse(updatedTeamDto).ok();

@@ -24,9 +24,6 @@ public class PlayerRepositoryImpl implements PlayerRepository {
      */
     private final JpaPlayerRepository jpaPlayerRepository;
 
-    /**
-     * The mapper responsible for converting domain objects to/from persistence entities.
-     */
     private final PlayerEntityMapper mapper;
     private final JpaTeamRepository jpaTeamRepository;
 

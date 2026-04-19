@@ -12,6 +12,7 @@ import java.util.UUID;
 @Data
 @Setter
 @AllArgsConstructor
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlayerDTO {
 

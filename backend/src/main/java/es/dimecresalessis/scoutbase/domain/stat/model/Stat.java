@@ -22,18 +22,14 @@ public class Stat {
     private UUID playerId;
 
     @NotBlank
-    private String name;
-
-    @NotBlank
     private String code;
 
     @NotNull
     private int value;
 
-    public Stat(UUID id, UUID playerId, String name, String code, int value) {
+    public Stat(UUID id, UUID playerId, String code, int value) {
         this.id = (id == null) ? UUID.randomUUID() : id;
         this.setPlayerId(playerId);
-        this.name = StatEnum.fromCode(code).statName;
         this.setCode(code);
         this.value = value;
     }
@@ -49,17 +45,7 @@ public class Stat {
         this.playerId = playerId;
     }
 
-    public void setName(final String name) {
-        this.name = StatEnum.fromName(name).statName;
-    }
-
     public void setCode(final String code) {
-        this.code = StatEnum.fromCode(code).statCode;
-    }
-
-    private void checkStatIntegrity(String name, String code) {
-        if (!StatEnum.fromCode(code).equals(StatEnum.fromName(name))) {
-            throw new StatException(ErrorEnum.STAT_INTEGRITY_ERROR, name, code);
-        }
+        this.code = StatEnum.fromStatCode(code).statCode;
     }
 }

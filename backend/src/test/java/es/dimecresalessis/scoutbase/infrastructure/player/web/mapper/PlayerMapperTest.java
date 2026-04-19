@@ -1,11 +1,10 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web.mapper;
 
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
-import es.dimecresalessis.scoutbase.domain.shared.domain.CategoryEnum;
 import es.dimecresalessis.scoutbase.domain.shared.domain.PositionEnum;
+import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -17,7 +16,6 @@ class PlayerMapperTest {
 
     private PlayerMapper playerMapper;
     private UUID playerId;
-    private UUID teamId;
     private Player playerDomain;
     private PlayerDTO playerDTO;
 
@@ -25,89 +23,78 @@ class PlayerMapperTest {
     void setUp() {
         playerMapper = Mappers.getMapper(PlayerMapper.class);
         playerId = UUID.randomUUID();
-        teamId = UUID.randomUUID();
+
         playerDomain = Player.builder()
                 .id(playerId)
-                .teamId(teamId)
                 .name("Lionel")
-                .surname("Updated")
-                .age(16)
-                .email("lionel@updated.es")
-                .number(7)
-                .position(PositionEnum.DELANTERO_CENTRO.name())
-                .category(CategoryEnum.CADETE.name())
-                .priority(6)
+                .surname("Messi")
+                .age(36)
+                .email("leo@scoutbase.es")
+                .number(10)
+                .position(PositionEnum.MEDIAPUNTA)
+                .priority(1)
                 .build();
 
-        playerDTO = new PlayerDTO(
-                playerId,
-                teamId,
-                "Ronald",
-                "McGallahan",
-                14,
-                "ronald@mcgall.es",
+        playerDTO = PlayerDTO.builder()
+                .id(playerId)
+                .name("Ronald")
+                .surname("Araujo")
+                .age(25)
+                .email("ronald@scoutbase.es")
+                .number(4)
+                .position("DEFENSA_CENTRAL")
+                .priority(1)
+                .build();
+    }
+
+    @Test
+    void dtoToDomain_ShouldMapCorrectly() {
+        Player result = playerMapper.dtoToDomain(playerDTO);
+
+        assertNotNull(result);
+        assertEquals(playerDTO.getId(), result.getId());
+        assertEquals(playerDTO.getName(), result.getName());
+        assertEquals(PositionEnum.DEFENSA_CENTRAL, result.getPosition());
+    }
+
+    @Test
+    void createToDomain_ShouldMapRequestAndHandleEnums() {
+        PlayerCreateRequest request = new PlayerCreateRequest(
+                "Lamine",
+                "Yamal",
                 16,
-                PositionEnum.PORTERO.name(),
-                CategoryEnum.BENJAMIN.name(),
-                6
+                "lamine@scoutbase.es",
+                19,
+                "EXTREMO_DERECHO",
+                1
         );
-    }
 
-    @Test
-    @DisplayName("Should map PlayerDto to Domain Player with existing ID")
-    void shouldMapToDomain_WithId() {
-        Player result = playerMapper.toDomain(playerDTO);
+        Player result = playerMapper.createToDomain(request);
 
         assertNotNull(result);
-        assertEquals(playerDTO.getId(), result.getId());
-        assertEquals(playerDTO.getTeamId(), result.getTeamId());
-        assertEquals(playerDTO.getName(), result.getName());
-        assertEquals(playerDTO.getSurname(), result.getSurname());
-        assertEquals(playerDTO.getAge(), result.getAge());
-        assertEquals(playerDTO.getEmail(), result.getEmail());
-        assertEquals(playerDTO.getNumber(), result.getNumber());
-        assertEquals(playerDTO.getPosition(), result.getPosition().name());
-        assertEquals(playerDTO.getCategory(), result.getCategory().name());
+        assertNotNull(result.getId());
+        assertEquals(request.getName(), result.getName());
+        assertEquals(PositionEnum.EXTREMO_DERECHO, result.getPosition());
     }
 
     @Test
-    @DisplayName("Should map PlayerDto to Domain Player and generate new ID when ID is null")
-    void shouldMapToDomain_WithoutId() {
-        playerDTO.setId(null);
-        Player result = playerMapper.toDomain(playerDTO);
-
-        assertNotNull(result);
-        assertEquals(playerDTO.getId(), result.getId());
-        assertEquals(playerDTO.getTeamId(), result.getTeamId());
-        assertEquals(playerDTO.getName(), result.getName());
-        assertEquals(playerDTO.getSurname(), result.getSurname());
-        assertEquals(playerDTO.getAge(), result.getAge());
-        assertEquals(playerDTO.getEmail(), result.getEmail());
-        assertEquals(playerDTO.getNumber(), result.getNumber());
-        assertEquals(playerDTO.getPosition(), result.getPosition().name());
-        assertEquals(playerDTO.getCategory(), result.getCategory().name());
+    void dtoToDomain_ShouldReturnNull_WhenInputIsNull() {
+        assertNull(playerMapper.dtoToDomain(null));
+        assertNull(playerMapper.createToDomain(null));
     }
 
     @Test
-    @DisplayName("Should map Domain Player to PlayerDto")
-    void shouldMapToDto() {
+    void toDto_ShouldMapDomainToDto() {
         PlayerDTO result = playerMapper.toDto(playerDomain);
 
         assertNotNull(result);
         assertEquals(playerDomain.getId(), result.getId());
-        assertEquals(playerDomain.getTeamId(), result.getTeamId());
         assertEquals(playerDomain.getName(), result.getName());
-        assertEquals(playerDomain.getSurname(), result.getSurname());
-        assertEquals(playerDomain.getAge(), result.getAge());
-        assertEquals(playerDomain.getEmail(), result.getEmail());
-        assertEquals(playerDomain.getNumber(), result.getNumber());
         assertEquals(playerDomain.getPosition().name(), result.getPosition());
-        assertEquals(playerDomain.getCategory().name(), result.getCategory());
     }
 
     @Test
-    @DisplayName("Should return null when mapping null DTO")
-    void shouldReturnNull_WhenDtoIsNull() {
-        assertNull(playerMapper.toDomain(null));
+    void toDto_ShouldReturnNull_WhenDomainIsNull() {
+        assertNull(playerMapper.toDto(null));
     }
 }
