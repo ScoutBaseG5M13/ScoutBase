@@ -21,50 +21,19 @@ import java.util.List;
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-    /**
-     * The underlying domain user containing business-level identity and roles.
-     */
     private final User domainUser;
+    private final Collection<? extends GrantedAuthority> authorities;
 
-    /**
-     * Extracts and flattens the user's roles and permissions into Spring Security authorities.
-     * <p>
-     * This method converts the domain-defined {@link RoleEnum} and its associated permissions
-     * into a collection of {@link SimpleGrantedAuthority}. This enables the use of
-     * {@code @PreAuthorize} and other security expressions at the controller level.
-     * </p>
-     *
-     * @return A collection of {@link GrantedAuthority} representing both roles and permissions.
-     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-
-        // Add the primary Role as an authority
-        authorities.add(new SimpleGrantedAuthority(domainUser.getRole()));
-
-        // Add granular Permissions derived from the Role
-        RoleEnum.fromName(domainUser.getRole()).getPermissions()
-                .forEach(p -> authorities.add(new SimpleGrantedAuthority(p.name())));
-
         return authorities;
     }
 
-    /**
-     * Returns the password used to authenticate the user.
-     *
-     * @return The hashed password from the domain user.
-     */
     @Override
     public String getPassword() {
         return domainUser.getPassword();
     }
 
-    /**
-     * Returns the username used to authenticate the user.
-     *
-     * @return The unique username or identifier from the domain user.
-     */
     @Override
     public String getUsername() {
         return domainUser.getUsername();

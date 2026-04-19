@@ -26,10 +26,10 @@ public interface ClubRepository {
     Optional<Club> findById(UUID id);
 
     /**
-     * Locates a club by their club ID.
+     * Locates all clubs where the user is in.
      *
      * @param userId The clubs of the user {@link UUID} to find.
-     * @return An {@link Optional} containing the found club, or empty if no match is found.
+     * @return An {@link Optional} containing clubs, or empty if no match is found.
      */
     List<Club> findAllByUserId(UUID userId);
 

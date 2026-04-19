@@ -15,9 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,7 +48,6 @@ public class StatController {
      * @return {@link ApiResponse} containing a list of all {@link Stat}.
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find all stats", description = "Retrieves all registered stats in the DB")
     public ResponseEntity<ApiResponse<List<StatDTO>>> findAll() {
         List<Stat> stats = findAllStatsUseCase.execute();
@@ -59,7 +56,6 @@ public class StatController {
     }
 
     @GetMapping(Routes.ID_PATHVAR)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find stat by ID", description = "Retrieves a stat registered in the DB through its ID")
     public ResponseEntity<ApiResponse<StatDTO>> findById(@PathVariable(name = "id") UUID id) {
         Stat stat = findStatByIdUseCase.execute(id);
@@ -73,7 +69,6 @@ public class StatController {
      * @return {@link ApiResponse} containing a list of all {@link Stat}.
      */
     @GetMapping(Routes.PLAYERS)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find stats by player", description = "Retrieves all registered stats in the DB assigned to certain player")
     public ResponseEntity<ApiResponse<List<StatDTO>>> findAllByPlayerId(@RequestParam(name = "playerId") UUID playerId) {
         List<Stat> stats = findAllStatsByPlayerIdUseCase.execute(playerId);
@@ -88,8 +83,7 @@ public class StatController {
      * @return {@link ApiResponse} containing the created stat's details.
      * @throws StatException If an error occurs during stat creation.
      */
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PostMapping
     @Operation(summary = "Create a new stat", description = "Adds a new stat to the DB")
     public ResponseEntity<ApiResponse<StatDTO>> create(@Valid @RequestBody StatCreateRequest statRequest) throws StatException {
         Stat stat = statMapper.createToDomain(statRequest);
@@ -106,8 +100,7 @@ public class StatController {
      * @return {@link ApiResponse} containing the updated stat's details.
      * @throws StatException If the stat is not found.
      */
-    @PutMapping(value = Routes.ID_PATHVAR, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PutMapping(value = Routes.ID_PATHVAR)
     @Operation(summary = "Update stat by ID", description = "Updates the data for a specific stat")
     public ResponseEntity<ApiResponse<StatDTO>> update(@Valid @RequestBody StatModifyRequest statRequest, @PathVariable UUID id) {
         try {
@@ -128,7 +121,6 @@ public class StatController {
      * @throws StatException If the stat is not found.
      */
     @DeleteMapping(Routes.ID_PATHVAR)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Delete stat by ID", description = "Deletes a specific stat by their ID")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
         try {

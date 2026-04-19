@@ -33,6 +33,6 @@ public class AuthService {
     public String authenticateAndGenerateToken(String username, String password) {
         authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         User user = findUserByUsernameUseCase.execute(username);
-        return jwtService.createToken(username, user.getRole());
+        return jwtService.createToken(user);
     }
 }

@@ -13,9 +13,7 @@ import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,7 +41,6 @@ public class TeamController {
     private final FindAllTeamsByUserId findAllTeamsByUserId;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find all teams", description = "Retrieves all registered teams in the DB")
     public ResponseEntity<ApiResponse<List<TeamDTO>>> findAll() {
         List<Team> teams = findAllTeamsUseCase.execute();
@@ -52,7 +49,6 @@ public class TeamController {
     }
 
     @GetMapping(Routes.ID_PATHVAR)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find a team by ID", description = "Retrieves a teams registred in the DB by ID")
     public ResponseEntity<ApiResponse<TeamDTO>> findById(@PathVariable UUID id) {
         Team team = findTeamById.execute(id);
@@ -61,7 +57,6 @@ public class TeamController {
     }
 
     @GetMapping(Routes.USERS + Routes.ID_PATHVAR)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find all teams by user", description = "Retrieves all registered teams by user in the DB")
     public ResponseEntity<ApiResponse<List<TeamDTO>>> findAllTeamsByUserId(@PathVariable("id") UUID userId) {
         List<Team> teams = findAllTeamsByUserId.execute(userId);
@@ -70,7 +65,6 @@ public class TeamController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Create a team", description = "Creates a team in the DB")
     public ResponseEntity<ApiResponse<TeamDTO>> create(@RequestBody TeamCreateRequest teamRequest) {
         Team team = teamMapper.createToDomain(teamRequest);
@@ -79,8 +73,7 @@ public class TeamController {
         return handleResponse(createdTeamDto).created();
     }
 
-    @PutMapping(value = Routes.ID_PATHVAR, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PutMapping(value = Routes.ID_PATHVAR)
     @Operation(summary = "Update a team", description = "Updates a team in the DB")
     public ResponseEntity<ApiResponse<TeamDTO>> update(@RequestBody TeamDTO teamDto, @PathVariable UUID id) {
         try {
@@ -94,7 +87,6 @@ public class TeamController {
     }
 
     @DeleteMapping(Routes.ID_PATHVAR)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Delete team by ID", description = "Deletes a specific team by their ID")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
         try {

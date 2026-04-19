@@ -25,9 +25,6 @@ public class UserDTO {
     private String password;
 
     @NotBlank
-    private String role;
-
-    @NotBlank
     private String name;
 
     private String surname;
@@ -41,12 +38,11 @@ public class UserDTO {
      * @param role The role to be assigned to the random user.
      * @return A random {@link UserDTO} instance.
      */
-    public static UserDTO getRandomInstance(String role) {
+    public static UserDTO getRandomInstance() {
         return new UserDTO(
                 UUID.randomUUID(),
                 shuffleAndReturnRandomString(9),
                 shuffleAndReturnRandomString(9),
-                role,
                 "Test name " + new Random().nextInt(10000),
                 "Test surname " + new Random().nextInt(10000),
                 new Random().nextInt(10000) + "@test.com"
