@@ -9,14 +9,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface JpaTeamRepository extends JpaRepository<TeamEntity, UUID> {
-    @Query("SELECT t FROM TeamEntity t WHERE " +
-            "t.trainer = :userId OR " +
-            "t.secondTrainer = :userId OR " +
-            ":userId MEMBER OF t.scouters")
+    @Query(value = "SELECT * FROM team t WHERE t.trainer = :userId OR t.second_trainer = :userId OR :userId = ANY(t.scouters)",
+            nativeQuery = true)
     List<TeamEntity> findAllByUserId(@Param("userId") UUID userId);
 
-    @Query("SELECT t FROM TeamEntity t WHERE " +
-            ":playerId MEMBER OF t.players")
+    @Query(value = "SELECT * FROM team t WHERE :playerId = ANY(t.players) LIMIT 1",
+            nativeQuery = true)
     Optional<TeamEntity> findByPlayerId(@Param("playerId") UUID playerId);
 
 }

@@ -61,7 +61,7 @@ public class TeamController {
     }
 
     @GetMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Find team by ID", description = "Retrieves a team. Needs a SCOUTER authorization")
+    @Operation(summary = "Find team by ID [Auth SCOUTER]", description = "Retrieves a team")
     public ResponseEntity<ApiResponse<TeamDTO>> findTeamById(@PathVariable UUID id) {
         Team team = findTeamById.execute(id);
         if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), team.getId(), RoleEnum.SCOUTER)) {
@@ -80,7 +80,7 @@ public class TeamController {
     }
 
     @PostMapping
-    @Operation(summary = "Create a team", description = "Creates a team in the DB. Needs an ADMIN authorization")
+    @Operation(summary = "Create a team [Auth ADMIN]", description = "Creates a team in the DB")
     public ResponseEntity<ApiResponse<TeamDTO>> createTeam(@RequestBody TeamCreateRequest teamRequest) {
         if (!userAuthService.isAuthorizedByClub(Session.getSessionUser(), teamRequest.getClubId(), RoleEnum.ADMIN)) {
             throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
@@ -98,7 +98,7 @@ public class TeamController {
     }
 
     @PutMapping(value = Routes.ID_PATHVAR)
-    @Operation(summary = "Update a team", description = "Updates a team in the DB. Needs a TRAINER authorization")
+    @Operation(summary = "Update a team [Auth TRAINER]", description = "Updates a team in the DB")
     public ResponseEntity<ApiResponse<TeamDTO>> updateTeam(@RequestBody TeamDTO teamDto, @PathVariable UUID id) {
         if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamDto.getId(), RoleEnum.TRAINER)) {
             throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.TRAINER.name());
@@ -110,7 +110,7 @@ public class TeamController {
     }
 
     @DeleteMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Delete team by ID", description = "Deletes a specific team by their ID. Needs an ADMIN authorization.")
+    @Operation(summary = "Delete team by ID [Auth ADMIN]", description = "Deletes a specific team by their ID")
     public ResponseEntity<ApiResponse<Boolean>> deleteTeam(@PathVariable UUID id) {
         if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), id, RoleEnum.ADMIN)) {
             throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());

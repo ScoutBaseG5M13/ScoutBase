@@ -12,7 +12,8 @@ public enum RoleEnum {
     SCOUTER("SCOUTER", 1),
     SECOND_TRAINER("SECOND_TRAINER", 2),
     TRAINER("TRAINER", 3),
-    ADMIN("ADMIN", 4);
+    ADMIN("ADMIN", 4),
+    SUPERADMIN("SUPERADMIN", 5);
 
     private final String roleName;
     private final int roleAuthLevel;
