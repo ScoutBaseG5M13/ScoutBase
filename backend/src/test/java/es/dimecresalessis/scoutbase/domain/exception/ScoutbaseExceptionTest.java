@@ -1,14 +1,13 @@
 package es.dimecresalessis.scoutbase.domain.exception;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class ScoutbaseExceptionTest {
 
     @Test
-    @DisplayName("Constructor - Should format message with single variable")
     void shouldFormatMessageWithOneVariable() {
         String id = "123-ABC";
         ScoutbaseException exception = new ScoutbaseException(ErrorEnum.PLAYER_NOT_FOUND, id);
@@ -17,23 +16,45 @@ class ScoutbaseExceptionTest {
         assertEquals(ErrorEnum.PLAYER_NOT_FOUND, exception.getErrorEnum());
     }
 
-//    Me lo guardo para cuando tenga un error con dos {}
-//    @Test
-//    @DisplayName("Constructor - Should format message with multiple variables")
-//    void shouldFormatMessageWithMultipleVariables() {
-//        ScoutbaseException exception = new ScoutbaseException(
-//                ErrorEnum.PLAYER_BAD_FORMAT,
-//                "email, name"
-//        );
-//
-//        assertEquals("The player has bad format in fields: email, name", exception.getMessage());
-//    }
+    @Test
+    void shouldFormatMessageWithMultipleVariables() {
+        String username = "admin";
+        String id = "uuid-999";
+        ScoutbaseException exception = new ScoutbaseException(
+                ErrorEnum.USER_ID_DOES_NOT_MATCH,
+                username,
+                id
+        );
+
+        assertEquals("The user id 'admin' does not match the one provided 'uuid-999'.", exception.getMessage());
+        assertArrayEquals(new String[]{username, id}, exception.getVariables());
+    }
 
     @Test
-    @DisplayName("Constructor - Should ignore extra variables if placeholders are missing")
+    void shouldFormatStatIntegrityError() {
+        ScoutbaseException exception = new ScoutbaseException(
+                ErrorEnum.STAT_INTEGRITY_ERROR,
+                "Pase",
+                "VEL"
+        );
+
+        assertEquals("The stat has name 'Pase' but code 'VEL'. They have no correlation", exception.getMessage());
+    }
+
+    @Test
     void shouldIgnoreExtraVariables() {
-        ScoutbaseException exception = new ScoutbaseException(ErrorEnum.PLAYER_IS_NULL, "Extra");
+        ScoutbaseException exception = new ScoutbaseException(ErrorEnum.PLAYER_IS_NULL, "Extra", "Unused");
 
         assertEquals("The player can't be null", exception.getMessage());
+    }
+
+    @Test
+    void shouldKeepPlaceholderIfVariableMissing() {
+        ScoutbaseException exception = new ScoutbaseException(
+                ErrorEnum.STAT_CODE_ALREADY_EXISTS,
+                "PAS"
+        );
+
+        assertEquals("The stat with code 'PAS' already exists on player with id '{}'", exception.getMessage());
     }
 }

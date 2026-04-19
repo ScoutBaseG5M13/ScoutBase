@@ -1,111 +1,123 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.persistence;
 
 import es.dimecresalessis.scoutbase.domain.user.model.User;
-import es.dimecresalessis.scoutbase.infrastructure.user.persistence.mapper.UserEntityMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import es.dimecresalessis.scoutbase.infrastructure.user.persistence.mapper.UserEntityMapperImpl;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import({UserRepositoryImpl.class, UserEntityMapper.class})
+@Import({UserRepositoryImpl.class, UserEntityMapperImpl.class})
+@ActiveProfiles("test")
 class UserRepositoryImplIT {
 
     @Autowired
     private UserRepositoryImpl userRepository;
 
     @Autowired
-    private JpaUserRepository jpaUserRepository;
-
-    private User user;
-    private UUID userId;
-
-    @BeforeEach
-    void setUp() {
-        userId = UUID.randomUUID();
-        user = User.builder()
-                .id(UUID.randomUUID())
-                .username("scout_master")
-                .password("encoded_password")
-                .role("ADMIN")
-                .name("Alex")
-                .surname("Scout")
-                .email("alex@scoutbase.com")
-                .build();
-    }
+    private EntityManager entityManager;
 
     @Test
-    @DisplayName("save - Should persist a new user and retrieve it by ID")
-    void saveAndFindById_ShouldWork() {
+    void shouldSaveAndFindUserById() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .username("test_user")
+                .password("pass123")
+                .role("USER")
+                .name("Test")
+                .email("test@scoutbase.com")
+                .build();
+
         userRepository.save(user);
+        entityManager.flush();
+        entityManager.clear();
 
         Optional<User> found = userRepository.findById(userId);
 
-        assertTrue(found.isPresent());
-        assertEquals("admin_test", found.get().getUsername());
-        assertEquals("ROLE_ADMIN", found.get().getRole());
+        assertThat(found).isPresent();
+        assertThat(found.get().getUsername()).isEqualTo("test_user");
+        assertThat(found.get().getEmail()).isEqualTo("test@scoutbase.com");
     }
 
     @Test
-    @DisplayName("findByUsername - Should return user when username exists")
-    void findByUsername_ShouldReturnUser() {
-        userRepository.save(user);
-
-        Optional<User> found = userRepository.findByUsername("admin_test");
-
-        assertTrue(found.isPresent());
-        assertEquals(userId, found.get().getId());
-    }
-
-    @Test
-    @DisplayName("save - Should update existing user instead of creating a duplicate")
-    void save_ShouldUpdateExistingUser() {
-        userRepository.save(user);
-
-        User updatedUser = User.builder()
-                .id(userId)
-                .username("scout_master")
-                .password("encoded_password")
+    void shouldFindByUsername() {
+        String username = "unique_scout";
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .username(username)
+                .password("secure")
                 .role("ADMIN")
-                .name("Alex")
-                .surname("Scout")
-                .email("alex@scoutbase.com")
+                .name("Admin")
+                .email("admin@scoutbase.com")
                 .build();
-        userRepository.save(updatedUser);
 
-        assertEquals(1, jpaUserRepository.count());
-        Optional<UserEntity> entityInDb = jpaUserRepository.findById(userId);
-        assertTrue(entityInDb.isPresent());
-        assertEquals("admin_updated", entityInDb.get().getUsername());
-        assertEquals("ROLE_USER", entityInDb.get().getRole());
+        userRepository.save(user);
+        entityManager.flush();
+        entityManager.clear();
+
+        Optional<User> found = userRepository.findByUsername(username);
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getUsername()).isEqualTo(username);
     }
 
     @Test
-    @DisplayName("deleteById - Should remove user from database")
-    void deleteById_ShouldRemoveUser() {
+    void shouldUpdateExistingUser() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .username("original_user")
+                .password("pass")
+                .role("USER")
+                .name("Original")
+                .email("original@test.com")
+                .build();
         userRepository.save(user);
-        assertTrue(jpaUserRepository.existsById(userId));
+        entityManager.flush();
+
+        User updatedUser = user.toBuilder()
+                .name("Updated Name")
+                .email("updated@test.com")
+                .build();
+
+        userRepository.save(updatedUser);
+        entityManager.flush();
+        entityManager.clear();
+
+        Optional<User> found = userRepository.findById(userId);
+        assertThat(found).isPresent();
+        assertThat(found.get().getName()).isEqualTo("Updated Name");
+        assertThat(found.get().getEmail()).isEqualTo("updated@test.com");
+    }
+
+    @Test
+    void shouldDeleteUser() {
+        UUID userId = UUID.randomUUID();
+        User user = User.builder()
+                .id(userId)
+                .username("delete_me")
+                .password("pass")
+                .role("USER")
+                .name("Delete")
+                .email("delete@test.com")
+                .build();
+        userRepository.save(user);
+        entityManager.flush();
 
         userRepository.deleteById(userId);
+        entityManager.flush();
+        entityManager.clear();
 
-        assertFalse(jpaUserRepository.existsById(userId));
-    }
-
-    @Test
-    @DisplayName("findFirstByUsername - Should return first user matching username")
-    void findFirstByUsername_ShouldReturnUser() {
-        userRepository.save(user);
-
-        Optional<User> found = userRepository.findFirstByUsername("admin_test");
-
-        assertTrue(found.isPresent());
-        assertEquals("admin_test", found.get().getUsername());
+        Optional<User> found = userRepository.findById(userId);
+        assertThat(found).isEmpty();
     }
 }

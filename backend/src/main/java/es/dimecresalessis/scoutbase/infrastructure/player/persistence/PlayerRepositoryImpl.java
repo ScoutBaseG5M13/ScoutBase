@@ -24,9 +24,6 @@ public class PlayerRepositoryImpl implements PlayerRepository {
      */
     private final JpaPlayerRepository jpaPlayerRepository;
 
-    /**
-     * The mapper responsible for converting domain objects to/from persistence entities.
-     */
     private final PlayerEntityMapper mapper;
     private final JpaTeamRepository jpaTeamRepository;
 
@@ -49,7 +46,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
         PlayerEntity playerEntity = jpaPlayerRepository.findById(player.getId())
                 .orElseGet(PlayerEntity::new);
         mapper.updateEntityFromDomain(player, playerEntity);
-        jpaPlayerRepository.save(playerEntity);
+        jpaPlayerRepository.saveAndFlush(playerEntity);
         return player;
     }
 

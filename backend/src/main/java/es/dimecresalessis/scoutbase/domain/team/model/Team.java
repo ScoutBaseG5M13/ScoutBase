@@ -15,26 +15,20 @@ public class Team {
     private String name;
     private CategoryEnum category;
     private SubcategoryEnum subcategory;
+    private UUID trainer;
+    private UUID secondTrainer;
     private List<UUID> players;
-    private List<UUID> trainers;
     private List<UUID> scouters;
 
     @Builder
-    public Team(UUID id, String name, String category, String subcategory, List<UUID> players, List<UUID> trainers, List<UUID> scouters) {
+    public Team(UUID id, String name, CategoryEnum category, SubcategoryEnum subcategory, UUID trainer, UUID secondTrainer, List<UUID> players, List<UUID> scouters) {
         this.id = (id == null) ? UUID.randomUUID() : id;
         this.name = name;
-        this.setCategory(category);
-        this.setSubcategory(subcategory);
+        this.category = category;
+        this.subcategory = subcategory;
+        this.trainer = trainer;
+        this.secondTrainer = secondTrainer;
         this.players = players;
-        this.trainers = trainers;
         this.scouters = scouters;
-    }
-
-    public void setCategory(String category) {
-        this.category = CategoryEnum.fromName(category);
-    }
-
-    public void setSubcategory(String subcategory) {
-        this.subcategory = SubcategoryEnum.fromName(subcategory);
     }
 }

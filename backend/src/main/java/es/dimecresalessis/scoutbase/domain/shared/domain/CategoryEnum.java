@@ -1,27 +1,34 @@
 package es.dimecresalessis.scoutbase.domain.shared.domain;
 
-public enum CategoryEnum {
-    QUERUBIN,
-    PREBENJAMIN,
-    BENJAMIN,
-    ALEVIN,
-    INFANTIL,
-    CADETE,
-    JUVENIL;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-    public static CategoryEnum fromName(String name) {
-        if (isValid(name)) {
-            return CategoryEnum.valueOf(name.toUpperCase());
-        }
-        throw new IllegalArgumentException("Invalid 'Category' name: '" + name + "'");
+import java.util.Arrays;
+
+@Getter
+@AllArgsConstructor
+public enum CategoryEnum {
+    QUERUBIN("QUERUBÍN"),
+    PREBENJAMIN("PREBENJAMÍN"),
+    BENJAMIN("BENJAMÍN"),
+    ALEVIN("ALEVÍN"),
+    INFANTIL("INFANTIL"),
+    CADETE("CADETE"),
+    JUVENIL("JUVENIL");
+
+    private String categoryName;
+
+    public static CategoryEnum fromValue(String value) {
+        return Arrays.stream(CategoryEnum.values())
+                .filter(category -> category.name().equalsIgnoreCase(value))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid 'Category.name': '" + value + "'"));
     }
 
-    public static boolean isValid(String value) {
-        for (CategoryEnum category : CategoryEnum.values()) {
-            if (category.name().equalsIgnoreCase(value)) {
-                return true;
-            }
-        }
-        return false;
+    public static CategoryEnum fromCategoryName(String name) {
+        return Arrays.stream(CategoryEnum.values())
+            .filter(category -> category.categoryName.equalsIgnoreCase(name))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Invalid 'Category.categoryName': '" + name + "'"));
     }
 }

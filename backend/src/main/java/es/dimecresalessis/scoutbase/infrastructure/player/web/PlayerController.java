@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web;
 
+import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
@@ -85,8 +86,8 @@ public class PlayerController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Create a new player", description = "Adds a new player to the DB")
-    public ResponseEntity<ApiResponse<PlayerDTO>> create(@Valid @RequestBody PlayerDTO playerDto) throws PlayerException {
-        Player player = playerMapper.toDomain(playerDto);
+    public ResponseEntity<ApiResponse<PlayerDTO>> create(@Valid @RequestBody PlayerCreateRequest playerRequest) throws PlayerException {
+        Player player = playerMapper.createToDomain(playerRequest);
         Player createdPlayer = createPlayerUseCase.execute(player);
         PlayerDTO createdPlayerDTO = playerMapper.toDto(createdPlayer);
         return handleResponse(createdPlayerDTO).created();
@@ -105,7 +106,7 @@ public class PlayerController {
     @Operation(summary = "Update player by ID", description = "Updates the data for a specific player")
     public ResponseEntity<ApiResponse<PlayerDTO>> update(@Valid @RequestBody PlayerDTO playerDto, @PathVariable UUID id) {
         try {
-            Player player = playerMapper.toDomain(playerDto);
+            Player player = playerMapper.dtoToDomain(playerDto);
             Player updatedPlayer = updatePlayerUseCase.execute(player, id);
             PlayerDTO updatedPlayerDTO = playerMapper.toDto(updatedPlayer);
             return handleResponse(updatedPlayerDTO).ok();

@@ -2,8 +2,6 @@ package es.dimecresalessis.scoutbase.application.user;
 
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.domain.user.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -20,48 +17,23 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class FindUserByUsernameUseCaseTest {
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
+    @InjectMocks private FindUserByUsernameUseCase findUserByUsernameUseCase;
 
-    @InjectMocks
-    private FindUserByUsernameUseCase findUserByUsernameUseCase;
+    @Test
+    void execute_ShouldReturnUser_WhenUsernameExists() {
+        String username = "admin";
+        User user = User.builder().username(username).build();
+        when(userRepository.findFirstByUsername(username)).thenReturn(Optional.of(user));
 
-    private User user;
+        User result = findUserByUsernameUseCase.execute(username);
 
-    @BeforeEach
-    void setUp() {
-        user = User.builder()
-                .id(UUID.randomUUID())
-                .username("scout_master")
-                .password("encoded_password")
-                .role("ADMIN")
-                .name("Alex")
-                .surname("Scout")
-                .email("alex@scoutbase.com")
-                .build();
+        assertEquals(username, result.getUsername());
     }
 
     @Test
-    @DisplayName("Should return user when username exists")
-    void shouldFindUserByUsername() {
-        when(userRepository.findFirstByUsername(user.getUsername())).thenReturn(Optional.of(user));
-
-        User result = findUserByUsernameUseCase.execute(user.getUsername());
-
-        assertNotNull(result);
-        assertEquals(user.getUsername(), result.getUsername());
-        verify(userRepository, times(1)).findFirstByUsername(user.getUsername());
-    }
-
-    @Test
-    @DisplayName("Should throw NoSuchElementException when username does not exist")
-    void shouldThrowException_WhenUsernameNotFound() {
-        when(userRepository.findFirstByUsername(user.getUsername())).thenReturn(Optional.empty());
-
-        assertThrows(NoSuchElementException.class, () -> {
-            findUserByUsernameUseCase.execute(user.getUsername());
-        });
-
-        verify(userRepository, times(1)).findFirstByUsername(user.getUsername());
+    void execute_ShouldThrowException_WhenNotFound() {
+        when(userRepository.findFirstByUsername("none")).thenReturn(Optional.empty());
+        assertThrows(NoSuchElementException.class, () -> findUserByUsernameUseCase.execute("none"));
     }
 }

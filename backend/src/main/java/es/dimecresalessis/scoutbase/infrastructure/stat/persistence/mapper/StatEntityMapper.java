@@ -1,6 +1,7 @@
 package es.dimecresalessis.scoutbase.infrastructure.stat.persistence.mapper;
 
 import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
+import es.dimecresalessis.scoutbase.domain.stat.model.StatEnum;
 import es.dimecresalessis.scoutbase.infrastructure.stat.persistence.StatEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,7 +11,7 @@ import org.mapstruct.MappingTarget;
  * Infrastructure mapper for converting between {@link Stat} domain models
  * and {@link StatEntity} persistence objects.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", imports = { StatEnum.class } )
 public interface StatEntityMapper {
 
     /**
@@ -20,7 +21,7 @@ public interface StatEntityMapper {
      * @param domain The domain-level Stat entity to be converted.
      * @return A {@link StatEntity} ready for persistence via JPA.
      */
-    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", expression = "java(StatEnum.fromStatCode(domain.getCode()).statName)")
     StatEntity toEntity(Stat domain);
 
     /**
@@ -33,6 +34,6 @@ public interface StatEntityMapper {
      */
     Stat toDomain(StatEntity entity);
 
-    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", expression = "java(StatEnum.fromStatCode(domain.getCode()).statName)")
     void updateEntityFromDomain(Stat domain, @MappingTarget StatEntity entity);
 }

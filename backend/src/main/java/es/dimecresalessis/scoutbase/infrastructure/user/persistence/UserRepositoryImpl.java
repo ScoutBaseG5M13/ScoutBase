@@ -89,11 +89,11 @@ public class UserRepositoryImpl implements UserRepository {
         return jpaUserRepository.findById(user.getId())
                 .map(existingEntity -> {
                     mapper.updateEntityFromDomain(user, existingEntity);
-                    return mapper.toDomain(jpaUserRepository.save(existingEntity));
+                    return mapper.toDomain(jpaUserRepository.saveAndFlush(existingEntity));
                 })
                 .orElseGet(() -> {
                     UserEntity newEntity = mapper.toEntity(user);
-                    return mapper.toDomain(jpaUserRepository.save(newEntity));
+                    return mapper.toDomain(jpaUserRepository.saveAndFlush(newEntity));
                 });
     }
 

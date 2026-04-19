@@ -5,7 +5,9 @@ import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.stat.exception.StatException;
 import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
+import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatDTO;
+import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatModifyRequest;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.mapper.StatMapper;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
@@ -31,7 +33,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @AllArgsConstructor
 @ApiCommonResponses
 @Tag(name = "Stats", description = "Stat management endpoints")
-@RequestMapping(Routes.API_ROOT + Routes.STAT)
+@RequestMapping(Routes.API_ROOT + Routes.STATS)
 public class StatController {
 
     private final StatMapper statMapper;
@@ -89,8 +91,8 @@ public class StatController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Create a new stat", description = "Adds a new stat to the DB")
-    public ResponseEntity<ApiResponse<StatDTO>> create(@Valid @RequestBody StatDTO statDto) throws StatException {
-        Stat stat = statMapper.toDomain(statDto);
+    public ResponseEntity<ApiResponse<StatDTO>> create(@Valid @RequestBody StatCreateRequest statRequest) throws StatException {
+        Stat stat = statMapper.createToDomain(statRequest);
         Stat createdStat = createStatUseCase.execute(stat);
         StatDTO createdStatDTO = statMapper.toDto(createdStat);
         return handleResponse(createdStatDTO).created();
@@ -107,9 +109,9 @@ public class StatController {
     @PutMapping(value = Routes.ID_PATHVAR, consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Update stat by ID", description = "Updates the data for a specific stat")
-    public ResponseEntity<ApiResponse<StatDTO>> update(@Valid @RequestBody StatDTO statDto, @PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<StatDTO>> update(@Valid @RequestBody StatModifyRequest statRequest, @PathVariable UUID id) {
         try {
-            Stat stat = statMapper.toDomain(statDto);
+            Stat stat = statMapper.modifyToDomain(statRequest);
             Stat updatedStat = updateStatUseCase.execute(stat, id);
             StatDTO updatedStatDTO = statMapper.toDto(updatedStat);
             return handleResponse(updatedStatDTO).ok();

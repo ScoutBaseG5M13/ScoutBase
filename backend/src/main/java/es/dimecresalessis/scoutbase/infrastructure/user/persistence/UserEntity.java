@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @SuperBuilder
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "sb_user")
 public class UserEntity extends CommonEntity {
 
     @Column(nullable = false)
