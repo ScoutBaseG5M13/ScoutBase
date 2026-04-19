@@ -1,0 +1,30 @@
+package es.dimecresalessis.scoutbase.application.team.find;
+
+import es.dimecresalessis.scoutbase.domain.team.model.Team;
+import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+@AllArgsConstructor
+public class FindTeamByPlayerUseCase {
+
+    private static final Logger logger = LoggerFactory.getLogger(FindTeamByPlayerUseCase.class);
+    private final TeamRepository teamRepository;
+
+    /**
+     * Executes the operation for getting the team where the player plays from the repository.
+     *
+     * @return A list of all {@link Team} entities.
+     */
+    public Team execute(UUID userId) {
+        Optional<Team> teams = teamRepository.findByPlayerId(userId);
+        logger.info("[FIND] Found {} teams", teams.isPresent() ? 1 : 0);
+        return teams.orElse(null);
+    }
+}

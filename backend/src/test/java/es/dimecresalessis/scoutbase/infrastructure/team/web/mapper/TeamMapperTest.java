@@ -52,7 +52,8 @@ class TeamMapperTest {
                 SubcategoryEnum.SUB16.name(),
                 List.of(UUID.randomUUID()),
                 List.of(trainerId),
-                List.of(UUID.randomUUID())
+                List.of(UUID.randomUUID()),
+                UUID.randomUUID()
         );
 
         Team domain = teamMapper.createToDomain(request);

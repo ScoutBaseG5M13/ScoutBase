@@ -1,5 +1,7 @@
 package es.dimecresalessis.scoutbase.application.team;
 
+import es.dimecresalessis.scoutbase.application.team.create.CreateTeamUseCase;
+import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.team.exception.TeamException;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
@@ -28,6 +30,8 @@ class CreateTeamUseCaseTest {
 
     private Team team;
     private UUID teamId;
+    private Club club;
+    private UUID clubId;
 
     @BeforeEach
     void setUp() {
@@ -36,6 +40,10 @@ class CreateTeamUseCaseTest {
                 .id(teamId)
                 .name("Team A")
                 .build();
+        club = Club.builder()
+                .id(clubId)
+                .name("Club A")
+                .build();
     }
 
     @Test
@@ -43,7 +51,7 @@ class CreateTeamUseCaseTest {
         when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
         when(teamRepository.save(team)).thenReturn(team);
 
-        Team result = createTeamUseCase.execute(team);
+        Team result = createTeamUseCase.execute(team, club);
 
         assertNotNull(result);
         assertEquals(teamId, result.getId());
@@ -53,7 +61,7 @@ class CreateTeamUseCaseTest {
     @Test
     void execute_ShouldThrowException_WhenTeamIsNull() {
         TeamException exception = assertThrows(TeamException.class, () ->
-                createTeamUseCase.execute(null)
+                createTeamUseCase.execute(null, null)
         );
         assertEquals(ErrorEnum.TEAM_IS_NULL, exception.getErrorEnum());
     }
@@ -64,7 +72,7 @@ class CreateTeamUseCaseTest {
         teamNoId.setId(null);
 
         TeamException exception = assertThrows(TeamException.class, () ->
-                createTeamUseCase.execute(teamNoId)
+                createTeamUseCase.execute(teamNoId, null)
         );
         assertEquals(ErrorEnum.TEAM_ID_IS_NULL, exception.getErrorEnum());
     }
@@ -74,7 +82,7 @@ class CreateTeamUseCaseTest {
         when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
 
         TeamException exception = assertThrows(TeamException.class, () ->
-                createTeamUseCase.execute(team)
+                createTeamUseCase.execute(team, null)
         );
         assertEquals(ErrorEnum.TEAM_ALREADY_EXISTS, exception.getErrorEnum());
         verify(teamRepository, never()).save(any());

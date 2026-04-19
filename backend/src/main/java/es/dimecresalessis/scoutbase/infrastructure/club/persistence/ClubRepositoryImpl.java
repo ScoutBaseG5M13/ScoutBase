@@ -48,6 +48,15 @@ public class ClubRepositoryImpl implements ClubRepository {
     }
 
     @Override
+    public Optional<Club> findClubByTeam(UUID teamId) {
+        return jpaClubRepository.findAll()
+                .stream()
+                .filter(s -> s.getTeams().contains(teamId))
+                .map(mapper::toDomain)
+                .findFirst();
+    }
+
+    @Override
     @Transactional
     public Club save(Club club) {
         ClubEntity clubEntity = jpaClubRepository.findById(club.getId())

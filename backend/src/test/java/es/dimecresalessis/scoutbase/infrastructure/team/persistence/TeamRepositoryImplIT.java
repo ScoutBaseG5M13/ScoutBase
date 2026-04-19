@@ -75,7 +75,7 @@ class TeamRepositoryImplIT {
         entityManager.flush();
         entityManager.clear();
 
-        List<Team> teams = teamRepository.findAllByPlayerId(userId);
+        List<Team> teams = teamRepository.findAllByUserId(userId);
 
         assertThat(teams).hasSize(2);
         assertThat(teams).extracting(Team::getName).containsExactlyInAnyOrder("Team 1", "Team 2");

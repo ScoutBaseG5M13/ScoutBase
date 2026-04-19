@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.application.stat;
 
+import es.dimecresalessis.scoutbase.application.stat.delete.DeleteStatUseCase;
 import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import es.dimecresalessis.scoutbase.domain.stat.repository.StatRepository;
 import org.junit.jupiter.api.Test;

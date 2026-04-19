@@ -32,7 +32,6 @@ class UserRepositoryImplIT {
                 .id(userId)
                 .username("test_user")
                 .password("pass123")
-                .role("USER")
                 .name("Test")
                 .email("test@scoutbase.com")
                 .build();
@@ -55,7 +54,6 @@ class UserRepositoryImplIT {
                 .id(UUID.randomUUID())
                 .username(username)
                 .password("secure")
-                .role("ADMIN")
                 .name("Admin")
                 .email("admin@scoutbase.com")
                 .build();
@@ -77,7 +75,6 @@ class UserRepositoryImplIT {
                 .id(userId)
                 .username("original_user")
                 .password("pass")
-                .role("USER")
                 .name("Original")
                 .email("original@test.com")
                 .build();
@@ -106,7 +103,6 @@ class UserRepositoryImplIT {
                 .id(userId)
                 .username("delete_me")
                 .password("pass")
-                .role("USER")
                 .name("Delete")
                 .email("delete@test.com")
                 .build();

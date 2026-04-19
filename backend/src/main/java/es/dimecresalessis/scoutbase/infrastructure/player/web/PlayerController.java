@@ -1,5 +1,10 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web;
 
+import es.dimecresalessis.scoutbase.application.player.create.CreatePlayerUseCase;
+import es.dimecresalessis.scoutbase.application.player.delete.DeletePlayerUseCase;
+import es.dimecresalessis.scoutbase.application.player.find.FindAllPlayersUseCase;
+import es.dimecresalessis.scoutbase.application.player.find.FindPlayerByIdUseCase;
+import es.dimecresalessis.scoutbase.application.player.update.UpdatePlayerUseCase;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
@@ -9,14 +14,11 @@ import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.mapper.PlayerMapper;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
-import es.dimecresalessis.scoutbase.application.player.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,7 +50,6 @@ public class PlayerController {
      * @return {@link ApiResponse} containing a list of all {@link Player}.
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find all players", description = "Retrieves all registered players in the DB")
     public ResponseEntity<ApiResponse<List<PlayerDTO>>> findAll() {
         List<Player> players = findAllPlayersUseCase.execute();
@@ -64,7 +65,6 @@ public class PlayerController {
      * @throws PlayerException If the requested player does not exist.
      */
     @GetMapping(Routes.ID_PATHVAR)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Find player by ID", description = "Finds and returns a player by their ID")
     public ResponseEntity<ApiResponse<PlayerDTO>> findById(@PathVariable UUID id) throws PlayerException {
         try {
@@ -79,12 +79,11 @@ public class PlayerController {
     /**
      * Creates a new player record.
      *
-     * @param playerDto The player details submitted by the client.
+     * @param playerRequest The player details submitted by the client.
      * @return {@link ApiResponse} containing the created player's details.
      * @throws PlayerException If an error occurs during player creation.
      */
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PostMapping
     @Operation(summary = "Create a new player", description = "Adds a new player to the DB")
     public ResponseEntity<ApiResponse<PlayerDTO>> create(@Valid @RequestBody PlayerCreateRequest playerRequest) throws PlayerException {
         Player player = playerMapper.createToDomain(playerRequest);
@@ -101,8 +100,7 @@ public class PlayerController {
      * @return {@link ApiResponse} containing the updated player's details.
      * @throws PlayerException If the player is not found.
      */
-    @PutMapping(value = Routes.ID_PATHVAR, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PutMapping(value = Routes.ID_PATHVAR)
     @Operation(summary = "Update player by ID", description = "Updates the data for a specific player")
     public ResponseEntity<ApiResponse<PlayerDTO>> update(@Valid @RequestBody PlayerDTO playerDto, @PathVariable UUID id) {
         try {
@@ -123,7 +121,6 @@ public class PlayerController {
      * @throws PlayerException If the player is not found.
      */
     @DeleteMapping(Routes.ID_PATHVAR)
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @Operation(summary = "Delete player by ID", description = "Deletes a specific player by their ID")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
         try {

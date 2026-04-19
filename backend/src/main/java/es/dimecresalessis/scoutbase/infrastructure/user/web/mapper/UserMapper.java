@@ -1,14 +1,9 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web.mapper;
 
-import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-
-import static es.dimecresalessis.scoutbase.domain.exception.ErrorEnum.ROLE_NOT_FOUND;
 
 /**
  * Infrastructure mapper for converting between {@link UserDTO} and {@link User} domain models.
@@ -27,7 +22,6 @@ public interface UserMapper {
      * @param dto The data transfer object received from the web request.
      * @return A {@link User} domain object, or {@code null} if the input was null.
      */
-    @Mapping(target = "role", source = "role", qualifiedByName = "validateAndNormalizeRole")
     User toDomain(UserDTO dto);
 
     /**
@@ -37,13 +31,4 @@ public interface UserMapper {
      * @return A {@link UserDTO} formatted for JSON serialization in the web layer.
      */
     UserDTO toDto(User domain);
-
-    @Named("validateAndNormalizeRole")
-    default String validateAndNormalizeRole(String role) {
-        RoleEnum roleEnum = RoleEnum.fromName(role);
-        if (roleEnum == null) {
-            throw new UserException(ROLE_NOT_FOUND, role);
-        }
-        return roleEnum.getName();
-    }
 }

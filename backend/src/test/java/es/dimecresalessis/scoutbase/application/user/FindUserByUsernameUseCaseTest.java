@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.application.user;
 
+import es.dimecresalessis.scoutbase.application.user.find.FindUserByUsernameUseCase;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;

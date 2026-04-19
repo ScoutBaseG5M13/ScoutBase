@@ -20,14 +20,6 @@ public enum ErrorEnum {
     PLAYER_BAD_FORMAT("PLAYER_BAD_FORMAT", "The player has bad format in fields: {}"),
     PLAYER_STAT_NOT_FOUND("PLAYER_STAT_NOT_FOUND", "The player stat with code '{}' could not be found"),
 
-    USER_NOT_FOUND("USER_NOT_FOUND", "The user with id '{}' could not be found"),
-    USER_IS_NULL("USER_IS_NULL", "The user can't be null"),
-    USER_ID_IS_NULL("USER_ID_IS_NULL", "The user id can't be null"),
-    USER_ID_ALREADY_EXISTS("USER_ID_ALREADY_EXISTS", "A user with id '{}' already exists"),
-    USERNAME_ALREADY_EXISTS("USER_NAME_ALREADY_EXISTS", "Username '{}' is already taken"),
-    USER_ID_DOES_NOT_MATCH("USER_ID_DOES_NOT_MATCH", "The user id '{}' does not match the one provided '{}'."),
-    USER_NOT_VALID("USER_NOT_VALID", "The user is not valid: {}"),
-
     ROLE_NOT_FOUND("ROLE_NOT_FOUND", "The role '{}' does not exist"),
 
     TEAM_NOT_FOUND("TEAM_NOT_FOUND", "The user with id '{}' could not be found"),
@@ -49,6 +41,15 @@ public enum ErrorEnum {
     STAT_MUST_HAVE_PLAYER_ID("STAT_MUST_HAVE_PLAYER_ID", "The stat must have a 'playerId'"),
     STAT_NOT_FOUND("STAT_NOT_FOUND", "The stat with id '{}' could not be found"),
     STAT_INTEGRITY_ERROR("STAT_INTEGRITY_ERROR", "The stat has name '{}' but code '{}'. They have no correlation"),
+
+    USER_NOT_FOUND("USER_NOT_FOUND", "The user with id '{}' could not be found"),
+    USER_IS_NULL("USER_IS_NULL", "The user can't be null"),
+    USER_ID_IS_NULL("USER_ID_IS_NULL", "The user id can't be null"),
+    USER_ID_ALREADY_EXISTS("USER_ID_ALREADY_EXISTS", "A user with id '{}' already exists"),
+    USERNAME_ALREADY_EXISTS("USER_NAME_ALREADY_EXISTS", "Username '{}' is already taken"),
+    USER_ID_DOES_NOT_MATCH("USER_ID_DOES_NOT_MATCH", "The user id '{}' does not match the one provided '{}'."),
+    USER_NOT_VALID("USER_NOT_VALID", "The user is not valid: {}"),
+    USER_HAS_NOT_AUTHORIZATION("USER_HAS_NOT_AUTHORIZATION", "The user has not enough authorization. Required: {}"),
 
     ID_IS_NOT_A_UUID("ID_IS_NOT_A_UUID", "The id '{}' is not a valid UUID"),
     INVALID_UUID("INVALID_UUID", "'{}' must have a valid UUID. Thrown error because of '{}'");

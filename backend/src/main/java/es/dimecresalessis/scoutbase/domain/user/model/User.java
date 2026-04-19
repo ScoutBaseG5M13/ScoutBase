@@ -17,7 +17,6 @@ public class User {
     UUID id;
     String username;
     String password;
-    String role;
     String name;
     String surname;
     String email;
@@ -58,7 +57,7 @@ public class User {
             throw new UserException(ErrorEnum.ROLE_NOT_FOUND, role);
         }
 
-        return new User(UUID.randomUUID(), username, password, RoleEnum.fromName(role).getName(),
+        return new User(UUID.randomUUID(), username, password,
                 "Name " + new Random().nextInt(100), "Surname " + new Random().nextInt(100),
                 username + "@test.com");
     }

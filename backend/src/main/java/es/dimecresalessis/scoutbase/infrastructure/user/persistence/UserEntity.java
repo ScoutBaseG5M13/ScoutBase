@@ -25,9 +25,6 @@ public class UserEntity extends CommonEntity {
     private String password;
 
     @Column(nullable = false)
-    private String role;
-
-    @Column(nullable = false)
     String name;
 
     @Column
@@ -39,7 +36,6 @@ public class UserEntity extends CommonEntity {
     public void update(UserEntity newEntity) {
         this.username = newEntity.getUsername();
         this.password = newEntity.getPassword();
-        this.role = newEntity.getRole();
         this.name = newEntity.getName();
         this.surname = newEntity.getSurname();
         this.email = newEntity.getEmail();
