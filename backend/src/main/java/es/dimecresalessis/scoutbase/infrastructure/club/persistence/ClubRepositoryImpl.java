@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -81,7 +82,13 @@ public class ClubRepositoryImpl implements ClubRepository {
                 .toList();
 
         return Stream.concat(clubs.stream(), teamClubs.stream())
-                .distinct()
+                .collect(Collectors.toMap(
+                        Club::getId,
+                        club -> club,
+                        (existing, replacement) -> existing
+                ))
+                .values()
+                .stream()
                 .toList();
     }
 
