@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Use case for deleting a {@link Player} entity from the system.
+ * Use case for deleting a {@link Player}.
  */
 @Service
 @AllArgsConstructor

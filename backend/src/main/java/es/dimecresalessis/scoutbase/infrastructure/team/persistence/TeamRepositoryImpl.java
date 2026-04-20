@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Infrastructure implementation of the {@link TeamRepository} interface.
+ */
 @Repository
 @RequiredArgsConstructor
 public class TeamRepositoryImpl implements TeamRepository {
@@ -17,6 +20,11 @@ public class TeamRepositoryImpl implements TeamRepository {
     private final JpaTeamRepository jpaTeamRepository;
     private final TeamEntityMapper mapper;
 
+    /**
+     * Finds all Teams present in the system.
+     *
+     * @return A {@link List} of all {@link Team} domain entities.
+     */
     @Override
     public List<Team> findAll() {
         return jpaTeamRepository.findAll()
@@ -25,11 +33,23 @@ public class TeamRepositoryImpl implements TeamRepository {
                 .toList();
     }
 
+    /**
+     * Finds a Team by its unique identifier.
+     *
+     * @param id The {@link UUID} of the Team.
+     * @return An {@link Optional} containing the {@link Team} if found, or empty otherwise.
+     */
     @Override
     public Optional<Team> findById(UUID id) {
         return jpaTeamRepository.findById(id).map(mapper::toDomain);
     }
 
+    /**
+     * Finds all Teams associated with a specific User.
+     *
+     * @param userId The {@link UUID} of the User.
+     * @return A {@link List} of {@link Team} entities linked to the User.
+     */
     @Override
     public List<Team> findAllByUserId(UUID userId) {
         List<TeamEntity> teamEntities = jpaTeamRepository.findAllByUserId(userId);
@@ -38,11 +58,23 @@ public class TeamRepositoryImpl implements TeamRepository {
                 .toList();
     }
 
+    /**
+     * Finds a Team that contains a specific Player in its roster.
+     *
+     * @param playerId The {@link UUID} of the Player.
+     * @return An {@link Optional} containing the {@link Team} the Player belongs to.
+     */
     public Optional<Team> findByPlayerId(UUID playerId) {
         return jpaTeamRepository.findByPlayerId(playerId)
                 .map(mapper::toDomain);
     }
 
+    /**
+     * Persists or updates a Team.
+     *
+     * @param team The {@link Team} domain object to be saved.
+     * @return The saved {@link Team} entity.
+     */
     @Override
     public Team save(Team team) {
         TeamEntity teamEntity = jpaTeamRepository.findById(team.getId())
@@ -52,6 +84,11 @@ public class TeamRepositoryImpl implements TeamRepository {
         return team;
     }
 
+    /**
+     * Deletes a Team.
+     *
+     * @param id The {@link UUID} of the team to delete.
+     */
     @Override
     public void deleteById(UUID id) {
         jpaTeamRepository.deleteById(id);

@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+/**
+ * Use case for creating a {@link Team}.
+ */
 @Service
 @AllArgsConstructor
 public class CreateTeamUseCase {
@@ -19,6 +22,14 @@ public class CreateTeamUseCase {
     private final TeamRepository teamRepository;
     private final ClubRepository clubRepository;
 
+    /**
+     * Executes the creation of a Team and updates the corresponding club.
+     * @param team The {@link Team} entity to be created.
+     * @param club The {@link Club} entity that will own the new team.
+     * @return The persisted {@link Team} entity.
+     * @throws TeamException if the team is null, the ID is missing, or if a team with
+     * the same ID already exists.
+     */
     public Team execute(Team team, Club club) {
         if (team == null) {
             throw new TeamException(ErrorEnum.TEAM_IS_NULL);

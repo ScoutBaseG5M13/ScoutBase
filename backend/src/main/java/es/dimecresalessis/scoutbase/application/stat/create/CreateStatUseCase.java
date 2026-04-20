@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Use case for creating {@link Stat} entities in the system.
+ * Use case for creating {@link Stat}.
  */
 @Service
 @AllArgsConstructor

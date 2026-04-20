@@ -61,7 +61,7 @@ public class PlayerController {
      * @return {@link ApiResponse} containing a list of all {@link Player}.
      */
     @GetMapping(Routes.TEAMS + Routes.ID_PATHVAR)
-    @Operation(summary = "Find all players of team [Auth SCOUTER]", description = "Find all Players of the passed Team")
+    @Operation(summary = "Find all players of team [Auth SCOUTER]", description = "Find all Players of the requested Team")
     public ResponseEntity<ApiResponse<List<PlayerDTO>>> findAllPlayersByTeam(@PathVariable(value = "id") UUID teamId) {
         if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamId, RoleEnum.SCOUTER)) {
             throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
@@ -79,7 +79,7 @@ public class PlayerController {
      * @throws PlayerException If the requested player does not exist.
      */
     @GetMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Find player by ID [Auth SCOUTER]", description = "Finds and returns a player by their ID")
+    @Operation(summary = "Find Player by ID [Auth SCOUTER]", description = "Finds a Player")
     public ResponseEntity<ApiResponse<PlayerDTO>> findPlayerById(@PathVariable(value = "id") UUID playerId) throws PlayerException {
         try {
             Team team = findTeamByPlayerUseCase.execute(playerId);
@@ -105,7 +105,7 @@ public class PlayerController {
      * @throws PlayerException If an error occurs during player creation.
      */
     @PostMapping(Routes.TEAMS + Routes.ID_PATHVAR)
-    @Operation(summary = "Create player", description = "Creates a new Player")
+    @Operation(summary = "Create Player [Auth SCOUTER]", description = "Creates a new Player")
     public ResponseEntity<ApiResponse<PlayerDTO>> createPlayer(@PathVariable("id") UUID teamId, @Valid @RequestBody PlayerCreateRequest playerRequest) throws PlayerException {
         Team team = findTeamByIdUseCase.execute(teamId);
         if (team == null) {
@@ -129,7 +129,7 @@ public class PlayerController {
      * @throws PlayerException If the player is not found.
      */
     @PutMapping(value = Routes.ID_PATHVAR)
-    @Operation(summary = "Update player", description = "Updates a Player")
+    @Operation(summary = "Update Player", description = "Updates a Player")
     public ResponseEntity<ApiResponse<PlayerDTO>> updatePlayer(@PathVariable("id") UUID playerId, @Valid @RequestBody PlayerDTO playerDto) {
         try {
             Team team = findTeamByPlayerUseCase.execute(playerDto.getId());

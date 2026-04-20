@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Use case for finding a {@link Club} entity by their unique ID.
+ * Use case for finding a {@link Club} by their unique {@link UUID}.
  */
 @Service
 @AllArgsConstructor

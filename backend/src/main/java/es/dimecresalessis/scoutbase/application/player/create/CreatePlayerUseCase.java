@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Use case for creating {@link Player} entities in the system.
+ * Use case for creating {@link Player}.
  */
 @Service
 @AllArgsConstructor

@@ -53,16 +53,22 @@ public class StatController {
      * @return {@link ApiResponse} containing a list of all {@link Stat}.
      */
     @GetMapping
-    @Operation(summary = "Find all stats", description = "Retrieves all registered stats in the DB")
-    public ResponseEntity<ApiResponse<List<StatDTO>>> findAll() {
+    @Operation(summary = "Find all Stats [Auth SCOUTER]", description = "Finds all Stats")
+    public ResponseEntity<ApiResponse<List<StatDTO>>> findAllStats() {
         List<Stat> stats = findAllStatsUseCase.execute();
         List<StatDTO> statsDto = stats.stream().map(statMapper::toDto).toList();
         return handleResponse(statsDto).ok();
     }
 
+    /**
+     * Retrieves a specific statistic by its unique identifier.
+     *
+     * @param id The {@link UUID} of the statistic.
+     * @return {@link ApiResponse} containing the {@link StatDTO} if found.
+     */
     @GetMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Find stat by ID", description = "Retrieves a stat registered in the DB through its ID")
-    public ResponseEntity<ApiResponse<StatDTO>> findById(@PathVariable(name = "id") UUID id) {
+    @Operation(summary = "Find stat by ID [Auth SCOUTER]", description = "Finds a Stat")
+    public ResponseEntity<ApiResponse<StatDTO>> findStatById(@PathVariable(name = "id") UUID id) {
         Stat stat = findStatByIdUseCase.execute(id);
         StatDTO statDto = statMapper.toDto(stat);
         return handleResponse(statDto).ok();
@@ -74,7 +80,7 @@ public class StatController {
      * @return {@link ApiResponse} containing a list of all {@link Stat}.
      */
     @GetMapping(Routes.PLAYERS)
-    @Operation(summary = "Find stats by player", description = "Retrieves all registered stats in the DB assigned to certain player")
+    @Operation(summary = "Find Stats by Player [Auth SCOUTER]", description = "Finds all Stats from a Player")
     public ResponseEntity<ApiResponse<List<StatDTO>>> findAllByPlayerId(@RequestParam(name = "playerId") UUID playerId) {
         List<Stat> stats = findAllStatsByPlayerIdUseCase.execute(playerId);
         List<StatDTO> statsDto = stats.stream().map(statMapper::toDto).toList();
@@ -89,8 +95,8 @@ public class StatController {
      * @throws StatException If an error occurs during stat creation.
      */
     @PostMapping
-    @Operation(summary = "Create a new stat", description = "Adds a new stat to the DB")
-    public ResponseEntity<ApiResponse<StatDTO>> create(@Valid @RequestBody StatCreateRequest statRequest) throws StatException {
+    @Operation(summary = "Create new Stat [Auth SCOUTER]", description = "Creates a new Stat")
+    public ResponseEntity<ApiResponse<StatDTO>> createStat(@Valid @RequestBody StatCreateRequest statRequest) throws StatException {
         Stat stat = statMapper.createToDomain(statRequest);
         Stat createdStat = createStatUseCase.execute(stat);
         StatDTO createdStatDTO = statMapper.toDto(createdStat);
@@ -106,8 +112,8 @@ public class StatController {
      * @throws StatException If the stat is not found.
      */
     @PutMapping(value = Routes.ID_PATHVAR)
-    @Operation(summary = "Update stat by ID", description = "Updates the data for a specific stat")
-    public ResponseEntity<ApiResponse<StatDTO>> update(@Valid @RequestBody StatModifyRequest statRequest, @PathVariable UUID id) {
+    @Operation(summary = "Update Stat by ID [Auth SCOUTER]", description = "Updates a Stat")
+    public ResponseEntity<ApiResponse<StatDTO>> updateStat(@Valid @RequestBody StatModifyRequest statRequest, @PathVariable UUID id) {
         try {
             Stat stat = statMapper.modifyToDomain(statRequest);
             Stat updatedStat = updateStatUseCase.execute(stat, id);
@@ -126,8 +132,8 @@ public class StatController {
      * @throws StatException If the stat is not found.
      */
     @DeleteMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Delete stat by ID", description = "Deletes a specific stat by their ID")
-    public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
+    @Operation(summary = "Delete Stat by ID [Auth SCOUTER]", description = "Deletes a Stat")
+    public ResponseEntity<ApiResponse<Boolean>> deleteStat(@PathVariable UUID id) {
         try {
             boolean isDeleted = deleteStatUseCase.execute(id);
             return handleResponse(isDeleted).ok();

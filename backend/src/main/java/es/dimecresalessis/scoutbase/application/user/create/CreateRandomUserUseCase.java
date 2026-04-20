@@ -9,6 +9,9 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+/**
+ * Use case for creating a random {@link User}.
+ */
 @Service
 @AllArgsConstructor
 public class CreateRandomUserUseCase {

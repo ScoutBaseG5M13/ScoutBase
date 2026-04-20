@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Use case for deleting a {@link Stat} entity from the system.
+ * Use case for deleting a {@link Stat}.
  */
 @Service
 @AllArgsConstructor

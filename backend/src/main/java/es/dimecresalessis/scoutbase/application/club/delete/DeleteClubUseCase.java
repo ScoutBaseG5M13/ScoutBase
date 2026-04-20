@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Use case for deleting a {@link Club} entity from the system.
+ * Use case for deleting a {@link Club}.
  */
 @Service
 @AllArgsConstructor

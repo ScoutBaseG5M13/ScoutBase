@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
- * Use case for updating an existing {@link Player} entity in the system.
+ * Use case for updating a {@link Player}.
  */
 @Service
 @AllArgsConstructor

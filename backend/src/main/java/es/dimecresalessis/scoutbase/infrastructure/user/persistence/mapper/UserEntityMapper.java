@@ -18,11 +18,22 @@ public interface UserEntityMapper {
      * @param user The domain-level user to be converted.
      * @return A {@link UserEntity} ready for persistence operations.
      */
-
     UserEntity toEntity(User user);
 
+    /**
+     * Updates an existing {@link UserEntity} using data from another entity source.
+     *
+     * @param target The entity to be updated.
+     * @param source The entity containing the source data.
+     */
     void updateEntity(@MappingTarget UserEntity target, UserEntity source);
 
+    /**
+     * Updates an existing {@link UserEntity} with the state of a {@link User} domain model.
+     *
+     * @param domain The domain model containing updated business state.
+     * @param target The persistence entity to be modified.
+     */
     void updateEntityFromDomain(User domain, @MappingTarget UserEntity target);
 
     /**
