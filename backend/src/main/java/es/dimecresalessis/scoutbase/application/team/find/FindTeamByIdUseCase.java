@@ -26,7 +26,7 @@ public class FindTeamByIdUseCase {
      * @return The {@link Team} entity corresponding to the provided ID.
      */
     public Team execute(UUID id)  {
-        Team team = teamRepository.findById(id).orElseThrow();
+        Team team = teamRepository.findById(id).orElse(null);
         logger.info("[FIND] Found Team with id '{}'", id);
         return team;
     }
