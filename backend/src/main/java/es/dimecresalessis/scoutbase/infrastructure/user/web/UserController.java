@@ -89,6 +89,13 @@ public class UserController {
         throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
     }
 
+    @GetMapping(Routes.ME_PATH)
+    @Operation(summary = "Find my user", description = "Finds own User")
+    public ResponseEntity<ApiResponse<UserDTO>> findUserById() {
+        User user = findUserByIdUseCase.execute(Session.getSessionUser().getId());
+        return handleResponse(userMapper.toDto(user)).ok();
+    }
+
     /**
      * Finds a user by their username.
      *

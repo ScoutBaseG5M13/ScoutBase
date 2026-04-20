@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.team.web;
 
+import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserUseCase;
 import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.security.UserAuthService;
 import es.dimecresalessis.scoutbase.application.team.create.CreateTeamUseCase;
@@ -29,8 +30,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactory.handleResponse;
 
@@ -54,12 +55,36 @@ public class TeamController {
     private final FindClubByIdUseCase findClubByIdUseCase;
     private final UserAuthService userAuthService;
     private final RemoveUserFromTeam removeUserFromTeam;
+    private final FindAllClubsByUserUseCase findAllClubsByUserUseCase;
 
     @GetMapping
-    @Operation(summary = "Find all teams related to User", description = "Retrieves all teams that the user takes part in")
-    public ResponseEntity<ApiResponse<List<TeamDTO>>> findAllTeamsOfUser() {
+    @Operation(summary = "Find all teams related to User", description = "Retrieves all teams that the User takes part in")
+    public ResponseEntity<ApiResponse<List<TeamDTO>>> findAllTeamsByUser() {
         List<Team> teams = findAllTeamsByUserUseCase.execute(Session.getSessionUser().getId());
         List<TeamDTO> teamsDto = teams.stream().map(teamMapper::toDto).toList();
+        return handleResponse(teamsDto).ok();
+    }
+
+    @GetMapping(Routes.CLUBS + Routes.ID_PATHVAR)
+    @Operation(summary = "Find all teams related to a Club", description = "Retrieves all teams that the User takes part in filtered by Club")
+    public ResponseEntity<ApiResponse<List<TeamDTO>>> findAllTeamsByClub(@PathVariable(value = "id") UUID clubId) {
+        List<Club> userClubs = findAllClubsByUserUseCase.execute(Session.getSessionUser().getId());
+
+        Optional<Club> targetClub = userClubs.stream()
+                .filter(c -> c.getId().equals(clubId))
+                .findFirst();
+
+        if (targetClub.isEmpty()) {
+            return handleResponse(Collections.<TeamDTO>emptyList()).ok();
+        }
+
+        List<Team> allTeams = findAllTeamsByUserUseCase.execute(Session.getSessionUser().getId());
+
+        List<TeamDTO> teamsDto = allTeams.stream()
+                .filter(team -> targetClub.get().getTeams().contains(team.getId()))
+                .map(teamMapper::toDto)
+                .toList();
+
         return handleResponse(teamsDto).ok();
     }
 

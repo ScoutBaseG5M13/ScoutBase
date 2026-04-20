@@ -104,14 +104,14 @@ public class PlayerController {
      * @return {@link ApiResponse} containing the created player's details.
      * @throws PlayerException If an error occurs during player creation.
      */
-    @PostMapping
+    @PostMapping(Routes.TEAMS + Routes.ID_PATHVAR)
     @Operation(summary = "Create player", description = "Creates a new Player")
-    public ResponseEntity<ApiResponse<PlayerDTO>> createPlayer(@Valid @RequestBody PlayerCreateRequest playerRequest) throws PlayerException {
-        Team team = findTeamByIdUseCase.execute(playerRequest.getTeamId());
+    public ResponseEntity<ApiResponse<PlayerDTO>> createPlayer(@PathVariable("id") UUID teamId, @Valid @RequestBody PlayerCreateRequest playerRequest) throws PlayerException {
+        Team team = findTeamByIdUseCase.execute(teamId);
         if (team == null) {
-            throw new TeamException(ErrorEnum.TEAM_NOT_FOUND, playerRequest.getTeamId().toString());
+            throw new TeamException(ErrorEnum.TEAM_NOT_FOUND, teamId.toString());
         }
-        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), playerRequest.getTeamId(), RoleEnum.SCOUTER)) {
+        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamId, RoleEnum.SCOUTER)) {
             throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
         }
         Player player = playerMapper.createToDomain(playerRequest);
@@ -130,16 +130,15 @@ public class PlayerController {
      */
     @PutMapping(value = Routes.ID_PATHVAR)
     @Operation(summary = "Update player", description = "Updates a Player")
-    public ResponseEntity<ApiResponse<PlayerDTO>> updatePlayer(@Valid @RequestBody PlayerDTO playerDto, @PathVariable UUID playerId) {
+    public ResponseEntity<ApiResponse<PlayerDTO>> updatePlayer(@PathVariable("id") UUID playerId, @Valid @RequestBody PlayerDTO playerDto) {
         try {
-            Team team = findTeamByIdUseCase.execute(playerDto.getTeamId());
+            Team team = findTeamByPlayerUseCase.execute(playerDto.getId());
             if (team == null) {
-                throw new TeamException(ErrorEnum.TEAM_NOT_FOUND, playerDto.getTeamId().toString());
+                throw new TeamException(ErrorEnum.TEAM_IS_NULL);
             }
-            if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), playerDto.getTeamId(), RoleEnum.SCOUTER)) {
+            if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), team.getId(), RoleEnum.SCOUTER)) {
                 throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
             }
-
             Player player = playerMapper.dtoToDomain(playerDto);
             Player updatedPlayer = updatePlayerUseCase.execute(player, playerId);
             PlayerDTO updatedPlayerDTO = playerMapper.toDto(updatedPlayer);

@@ -64,7 +64,6 @@ class PlayerMapperTest {
                 16,
                 "lamine@scoutbase.es",
                 19,
-                UUID.randomUUID(),
                 "EXTREMO_DERECHO",
                 1
         );

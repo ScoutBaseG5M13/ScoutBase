@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -24,8 +22,6 @@ public class PlayerCreateRequest {
     private String email;
 
     private int number;
-
-    private UUID teamId;
 
     private String position;
 
