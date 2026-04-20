@@ -1,5 +1,5 @@
 .root-container {
-    -fx-background-color: #1A1A1F; /* 🔥 mismo gris que la card */
+    -fx-background-color: #1A1A1F;
 }
 
 .top-bar {
@@ -7,10 +7,9 @@
 }
 
 .center-panel {
-    -fx-background-color: #1A1A1F; /* 🔥 igual que root */
+    -fx-background-color: #1A1A1F;
 }
 
-/* ---------------- TEXTOS ---------------- */
 
 .app-title {
     -fx-font-size: 22px;
@@ -53,7 +52,6 @@
     -fx-text-fill: #E0E0E0;
 }
 
-/* ---------------- CARDS ---------------- */
 
 .card-title {
     -fx-font-size: 14px;
@@ -77,10 +75,9 @@
     -fx-text-fill: #E0E0E0;
 }
 
-/* 🔥 LOGIN CARD MEJORADA */
 
 .login-card {
-    -fx-background-color: #202027; /* un pelín más clara que el fondo */
+    -fx-background-color: #202027;
     -fx-background-radius: 18;
     -fx-border-radius: 18;
     -fx-border-color: #2E2E35;
@@ -88,7 +85,6 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 20, 0.3, 0, 5);
 }
 
-/* 🔥 DASHBOARD CARDS */
 
 .dashboard-card {
     -fx-background-color: #111827;
@@ -106,7 +102,6 @@
     -fx-border-radius: 10;
 }
 
-/* ---------------- INPUTS ---------------- */
 
 .text-field,
 .password-field {
@@ -119,7 +114,6 @@
     -fx-border-width: 1.2;
 }
 
-/* ---------------- BOTONES ---------------- */
 
 .primary-button {
     -fx-background-color: #0A4F8A;
@@ -167,7 +161,6 @@
     -fx-background-color: #1261A0;
 }
 
-/* ---------------- LOGOUT ---------------- */
 
 .logout-button {
     -fx-background-color: #BA0000;
@@ -181,7 +174,6 @@
     -fx-background-color: #D94A47;
 }
 
-/* ---------------- ERRORES ---------------- */
 
 .error-label {
     -fx-text-fill: #FF7B7B;

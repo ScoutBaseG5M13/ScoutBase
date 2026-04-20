@@ -102,6 +102,50 @@ public class AuthService {
     }
 
     /**
+     * Obtiene los datos del usuario autenticado a partir del token actual.
+     *
+     * <p>Este método consulta el endpoint {@code /users/me} para recuperar
+     * la información del usuario en sesión, incluyendo su identificador,
+     * que puede ser necesario para operaciones como la creación de clubes
+     * o equipos.</p>
+     *
+     * @param token token de autenticación del usuario actual
+     * @return objeto {@link UserDto} con los datos del usuario autenticado
+     * @throws IOException si ocurre un error durante la comunicación
+     * @throws InterruptedException si la petición es interrumpida
+     * @throws RuntimeException si la respuesta no contiene datos válidos o se produce un error HTTP
+     */
+    public UserDto getCurrentUser(String token) throws IOException, InterruptedException {
+        String url = BASE_URL + "/me";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Accept", "application/json")
+                .header("Authorization", "Bearer " + token)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println("GET ME URL: " + url);
+        System.out.println("GET ME STATUS: " + response.statusCode());
+        System.out.println("GET ME BODY: " + response.body());
+
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            ApiResponse apiResponse = objectMapper.readValue(response.body(), ApiResponse.class);
+
+            if (apiResponse.getData() != null && !apiResponse.getData().isNull()) {
+                return objectMapper.treeToValue(apiResponse.getData(), UserDto.class);
+            }
+
+            throw new RuntimeException("La respuesta no contiene datos del usuario actual");
+        }
+
+        throw new RuntimeException("Error obteniendo usuario actual: HTTP "
+                + response.statusCode() + " -> " + response.body());
+    }
+
+    /**
      * Obtiene el rol del usuario autenticado a partir del token JWT.
      *
      * <p>Este método utiliza el endpoint específico del backend destinado

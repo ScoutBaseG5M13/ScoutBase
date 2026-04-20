@@ -139,9 +139,9 @@ public class DashboardController {
         setButtonVisible(jugadoresButton, true);
         setButtonVisible(clubesButton, true);
         setButtonVisible(informesButton, true);
-        setButtonVisible(estadisticasButton, false);
-        setButtonVisible(scoutsButton, false);
-        setButtonVisible(usuariosButton, false);
+        setButtonVisible(estadisticasButton, true);
+        setButtonVisible(scoutsButton, true);
+        setButtonVisible(usuariosButton, true);
     }
 
     /**
@@ -487,10 +487,21 @@ public class DashboardController {
     @FXML
     private void onClubesClick(ActionEvent event) {
         setActiveButton(clubesButton);
-        loadPlaceholderSection(
-                "Gestión de clubes",
-                "Aquí se mostrará el listado de clubes, sus datos principales y las acciones disponibles sobre ellos."
-        );
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("clubs-view.fxml"));
+            Parent clubsView = loader.load();
+
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(clubsView);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            loadPlaceholderSection(
+                    "Gestión de clubes",
+                    "No se pudo cargar la vista de clubes."
+            );
+        }
     }
 
     /**

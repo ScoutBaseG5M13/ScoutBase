@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="scoutbase.ClubsController">
+    <children>
+        <VBox spacing="15.0"
+              AnchorPane.topAnchor="20.0"
+              AnchorPane.leftAnchor="20.0"
+              AnchorPane.rightAnchor="20.0"
+              AnchorPane.bottomAnchor="20.0">
+
+            <Label text="Gestión de clubes" styleClass="dashboard-title" />
+
+            <Label text="Listado de clubes disponibles en el sistema"
+                   styleClass="section-subtitle" />
+
+            <HBox spacing="10.0">
+                <Button text="Recargar" onAction="#onReloadClick" styleClass="quick-action-button" />
+                <Button text="Ver equipos" onAction="#onViewTeamsClick" styleClass="quick-action-button" />
+            </HBox>
+
+            <TableView fx:id="clubsTable" VBox.vgrow="ALWAYS" styleClass="content-table">
+                <columns>
+                    <TableColumn fx:id="idColumn" text="ID" prefWidth="320.0" />
+                    <TableColumn fx:id="nameColumn" text="Nombre" prefWidth="320.0" />
+                </columns>
+            </TableView>
+            <Button text="Añadir club"
+                    onAction="#onAddClubClick"
+                    styleClass="quick-action-button" />
+            <Label fx:id="statusLabel" styleClass="panel-text" />
+        </VBox>
+    </children>
+</AnchorPane>
