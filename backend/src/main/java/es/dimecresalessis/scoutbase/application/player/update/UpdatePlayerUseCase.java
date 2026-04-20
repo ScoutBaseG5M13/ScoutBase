@@ -1,18 +1,14 @@
 package es.dimecresalessis.scoutbase.application.player.update;
 
-import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
-import es.dimecresalessis.scoutbase.application.team.update.UpdateTeamUseCase;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
-import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -24,8 +20,6 @@ public class UpdatePlayerUseCase {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdatePlayerUseCase.class);
     private final PlayerRepository playerRepository;
-    private final UpdateTeamUseCase updateTeamUseCase;
-    private final FindTeamByIdUseCase findTeamByIdUseCase;
 
     /**
      * Updates the details of a {@link Player} identified by their unique ID.
@@ -36,23 +30,8 @@ public class UpdatePlayerUseCase {
      */
     public Player execute(Player player, UUID id) {
         validateAndRetrievePlayer(player, id);
-        Player savedPlayer = playerRepository.findById(player.getId()).orElseThrow();
         playerRepository.save(player);
-        logger.info("[UPDATE] Updated Player with id '{}'", player.getId());
-        if (!savedPlayer.getTeamId().equals(player.getTeamId())) {
-            Team team = findTeamByIdUseCase.execute(savedPlayer.getTeamId());
-            team.getPlayers().remove(savedPlayer.getId());
-            team.setPlayers(team.getPlayers().stream().filter(Objects::nonNull).toList());
-            updateTeamUseCase.execute(team, team.getId());
-            logger.info("[DELETE] Removed Player '{}' from Team '{}' because the updated entity has another Team", player.getId(), team.getId());
-            if (player.getTeamId() != null) {
-                Team newTeam = findTeamByIdUseCase.execute(player.getTeamId());
-                newTeam.getPlayers().add(player.getId());
-                updateTeamUseCase.execute(newTeam, newTeam.getId());
-                logger.info("[CREATE] Added Player '{}' to Team '{}'", player.getId(), newTeam.getName());
-            }
-        }
-
+        logger.info("[UPDATE] Updated Player '{}'", player.getId());
         return player;
     }
 

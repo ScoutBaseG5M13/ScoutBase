@@ -22,7 +22,7 @@ public enum ErrorEnum {
 
     ROLE_NOT_FOUND("ROLE_NOT_FOUND", "The role '{}' does not exist"),
 
-    TEAM_NOT_FOUND("TEAM_NOT_FOUND", "The user with id '{}' could not be found"),
+    TEAM_NOT_FOUND("TEAM_NOT_FOUND", "The team with id '{}' could not be found"),
     TEAM_IS_NULL("TEAM_IS_NULL", "The team can't be null"),
     TEAM_ID_IS_NULL("TEAM_ID_IS_NULL", "The team id can't be null"),
     TEAM_ALREADY_EXISTS("TEAM_ID_ALREADY_EXISTS", "A team with id '{}' already exists"),

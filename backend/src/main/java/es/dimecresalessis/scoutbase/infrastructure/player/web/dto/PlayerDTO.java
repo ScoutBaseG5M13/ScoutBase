@@ -30,8 +30,6 @@ public class PlayerDTO {
     private String email;
 
     private int number;
-    
-    private UUID teamId;
 
     private String position;
 
