@@ -2,6 +2,7 @@ package es.dimecresalessis.scoutbase.application.team;
 
 import es.dimecresalessis.scoutbase.application.team.create.CreateTeamUseCase;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
+import es.dimecresalessis.scoutbase.domain.club.repository.ClubRepository;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.team.exception.TeamException;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
@@ -13,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +27,9 @@ class CreateTeamUseCaseTest {
     @Mock
     private TeamRepository teamRepository;
 
+    @Mock
+    private ClubRepository clubRepository;
+
     @InjectMocks
     private CreateTeamUseCase createTeamUseCase;
 
@@ -36,13 +41,17 @@ class CreateTeamUseCaseTest {
     @BeforeEach
     void setUp() {
         teamId = UUID.randomUUID();
+        clubId = UUID.randomUUID(); // Assign a value
+
         team = Team.builder()
                 .id(teamId)
                 .name("Team A")
                 .build();
+
         club = Club.builder()
                 .id(clubId)
                 .name("Club A")
+                .teams(new ArrayList<>()) // Ensure list is present
                 .build();
     }
 

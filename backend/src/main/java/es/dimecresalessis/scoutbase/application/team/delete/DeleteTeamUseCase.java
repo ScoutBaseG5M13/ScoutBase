@@ -1,6 +1,5 @@
 package es.dimecresalessis.scoutbase.application.team.delete;
 
-import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.club.repository.ClubRepository;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
@@ -31,14 +30,15 @@ public class DeleteTeamUseCase {
      * @throws NoSuchElementException if the team or its associated club cannot be found.
      */
     public boolean execute(UUID id) {
-        teamRepository.findById(id).orElseThrow();
+        Team team = teamRepository.findById(id).orElseThrow();
         teamRepository.deleteById(id);
         logger.info("[DELETE] Deleted Team '{}'", id);
 
-        Club club = clubRepository.findClubByTeam(id).orElseThrow();
-        club.getTeams().remove(id);
-        clubRepository.save(club);
-        logger.info("[DELETE] Removed Team '{}' from Club {}", id, club.getId());
+        clubRepository.findClubByTeam(id).ifPresent(club -> {
+            club.getTeams().remove(id);
+            clubRepository.save(club);
+            logger.info("[DELETE] Removed Team '{}' from Club '{}'", id, club.getName());
+        });
 
         return true;
     }
