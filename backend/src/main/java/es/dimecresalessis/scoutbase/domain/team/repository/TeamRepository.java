@@ -36,10 +36,10 @@ public interface TeamRepository {
     /**
      * Retrieves a list of teams that contain a specific player.
      *
-     * @param userId The unique {@link UUID} of the player to find.
+     * @param playerId The unique {@link UUID} of the player to find.
      * @return A {@link Optional} containing the found team.
      */
-    Optional<Team> findByPlayerId(UUID userId);
+    Optional<Team> findByPlayerId(UUID playerId);
 
     /**
      * Persists a team entity into the system.

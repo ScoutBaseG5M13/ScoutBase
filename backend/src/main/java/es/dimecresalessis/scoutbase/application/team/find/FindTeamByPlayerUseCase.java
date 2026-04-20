@@ -22,8 +22,8 @@ public class FindTeamByPlayerUseCase {
      *
      * @return A list of all {@link Team} entities.
      */
-    public Team execute(UUID userId) {
-        Optional<Team> teams = teamRepository.findByPlayerId(userId);
+    public Team execute(UUID playerId) {
+        Optional<Team> teams = teamRepository.findByPlayerId(playerId);
         logger.info("[FIND] Found {} teams", teams.isPresent() ? 1 : 0);
         return teams.orElse(null);
     }

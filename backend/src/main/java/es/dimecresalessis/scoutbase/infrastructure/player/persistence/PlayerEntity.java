@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.UUID;
-
 /**
  * Entity representing a player in the system.
  */
@@ -31,8 +29,6 @@ public class PlayerEntity extends CommonEntity {
     private String email;
 
     private int number;
-
-    private UUID teamId;
 
     private String position;
 

@@ -38,8 +38,8 @@ public class TeamRepositoryImpl implements TeamRepository {
                 .toList();
     }
 
-    public Optional<Team> findByPlayerId(UUID userId) {
-        return jpaTeamRepository.findByPlayerId(userId)
+    public Optional<Team> findByPlayerId(UUID playerId) {
+        return jpaTeamRepository.findByPlayerId(playerId)
                 .map(mapper::toDomain);
     }
 
