@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Use case for finding a {@link List<Club>} by {@link User} {@link UUID].
+ * Use case for finding a {@link List<Club>} by {@link User} {@link UUID}.
  */
 @Service
 @AllArgsConstructor
