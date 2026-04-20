@@ -4,7 +4,6 @@ import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserUseC
 import es.dimecresalessis.scoutbase.application.security.AuthService;
 import es.dimecresalessis.scoutbase.application.security.LoginRequest;
 import es.dimecresalessis.scoutbase.application.security.UserAuthService;
-import es.dimecresalessis.scoutbase.application.user.create.CreateRandomUserUseCase;
 import es.dimecresalessis.scoutbase.application.user.create.CreateUserUseCase;
 import es.dimecresalessis.scoutbase.application.user.delete.DeleteUserUseCase;
 import es.dimecresalessis.scoutbase.application.user.find.FindUserByIdUseCase;
@@ -14,8 +13,8 @@ import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
-import es.dimecresalessis.scoutbase.infrastructure.security.JwtService;
 import es.dimecresalessis.scoutbase.infrastructure.security.Session;
+import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
@@ -62,6 +61,7 @@ public class UserController {
     @GetMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Find user by ID [Auth ADMIN]", description = "Finds a user by ID")
     public ResponseEntity<ApiResponse<UserDTO>> findUserById(@PathVariable(value = "id") UUID userId) {
+        // ¿En qué Clubs están ambos Users?
         List<Club> clubsOfLookedUpUser = findAllClubsByUserUseCase.execute(userId);
         List<Club> clubsOfCurrentUser = findAllClubsByUserUseCase.execute(Session.getSessionUser().getId());
         List<Club> sameClubs = new ArrayList<>();
@@ -74,6 +74,7 @@ public class UserController {
             }
         }
 
+        // ¿En cualquiera de esos Club el usuario autentificado es ADMIN para proseguir con la acción?
         for (Club club : sameClubs) {
             if (userAuthService.isAuthorizedByClub(Session.getSessionUser(), club.getId(), RoleEnum.ADMIN)) {
                 try {
@@ -95,12 +96,31 @@ public class UserController {
      * @return {@link ApiResponse} containing the user's information.
      */
     @GetMapping(Routes.USERNAME_PATH + Routes.USERNAME_PATHVAR)
-    @Operation(summary = "Find user by username", description = "Returns a user through a path variable 'username'.")
+    @Operation(summary = "Find user by username", description = "Returns a User through a 'username'.")
     public ResponseEntity<ApiResponse<UserDTO>> findByUsername(@PathVariable String username) {
+        // ¿En qué Clubs están ambos Users?
         try {
             User user = findUserByUsernameUseCase.execute(username);
-            UserDTO userDto = userMapper.toDto(user);
-            return handleResponse(userDto).ok();
+            List<Club> clubsOfLookedUpUser = findAllClubsByUserUseCase.execute(user.getId());
+            List<Club> clubsOfCurrentUser = findAllClubsByUserUseCase.execute(Session.getSessionUser().getId());
+            List<Club> sameClubs = new ArrayList<>();
+            for (Club club : clubsOfLookedUpUser) {
+                for (Club club2 : clubsOfCurrentUser) {
+                    if (club.getId().equals(club2.getId()) && !sameClubs.contains(club)) {
+                        sameClubs.add(club);
+                        break;
+                    }
+                }
+            }
+
+            // ¿En cualquiera de esos Club el usuario autentificado es ADMIN para proseguir con la acción?
+            for (Club club : sameClubs) {
+                if (userAuthService.isAuthorizedByClub(Session.getSessionUser(), club.getId(), RoleEnum.ADMIN)) {
+                        UserDTO userDto = userMapper.toDto(user);
+                        return handleResponse(userDto).ok();
+                }
+            }
+            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
         } catch (NoSuchElementException ex) {
             throw new UserException(ErrorEnum.USER_NOT_FOUND, username);
         }
@@ -109,13 +129,13 @@ public class UserController {
     /**
      * Creates a new {@link User}.
      *
-     * @param userDto The details of the user to create.
+     * @param createRequest The details of the user to create.
      * @return {@link ApiResponse} containing the user's information.
      */
     @PostMapping
-    @Operation(summary = "Create a user", description = "Creates a user through a UserDto body.")
-    public ResponseEntity<ApiResponse<Boolean>> createUser(@RequestBody UserDTO userDto) {
-        createUserUseCase.execute(userMapper.toDomain(userDto));
+    @Operation(summary = "Create a user", description = "Creates a user")
+    public ResponseEntity<ApiResponse<Boolean>> createUser(@RequestBody UserCreateRequest createRequest) {
+        createUserUseCase.execute(userMapper.createToDomain(createRequest));
         return handleResponse(true).created();
     }
 
@@ -127,7 +147,7 @@ public class UserController {
      */
     @PutMapping(value = Routes.ID_PATHVAR)
     @Operation(summary = "Updates a user", description = "Creates a user through a UserDto body.")
-    public ResponseEntity<ApiResponse<UserDTO>> update(@RequestBody UserDTO userDto, @PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<UserDTO>> updateUser(@RequestBody UserDTO userDto, @PathVariable UUID id) {
         try {
             User updatedUser = updateUserUseCase.execute(userMapper.toDomain(userDto), id);
             UserDTO updatedUserDTO = userMapper.toDto(updatedUser);
@@ -176,11 +196,11 @@ public class UserController {
      * @param teamId the team from the consumer wants to check the role of the user.
      * @return {@link ApiResponse} containing the user's role.
      */
-    @GetMapping(value =  Routes.TEAMS + Routes.ROLE_PATH + Routes.ID_PATHVAR)
+    @GetMapping(value =  Routes.TEAMS + Routes.ID_PATHVAR + Routes.ROLE_PATH)
     @Operation(summary = "Get user role in the team", description = "Returns the role in the team of the user currently logged")
     public ResponseEntity<ApiResponse<String>> getTeamRole(@PathVariable(value = "id") UUID teamId) {
         RoleEnum role = userAuthService.findTeamUserRole(Session.getSessionUser(), teamId);
-        return handleResponse(role != null ? role.getRoleName() : "No result found").ok();
+        return handleResponse(role != null ? role.getRoleName() : "No role found").ok();
     }
 
     /**
@@ -189,10 +209,10 @@ public class UserController {
      * @param clubId the club from the consumer wants to check the role of the user.
      * @return {@link ApiResponse} containing the user's role.
      */
-    @GetMapping(value =  Routes.CLUBS + Routes.ROLE_PATH + Routes.ID_PATHVAR)
+    @GetMapping(value =  Routes.CLUBS + Routes.ID_PATHVAR + Routes.ROLE_PATH)
     @Operation(summary = "Get user role in the club", description = "Returns the role in the club of the user currently logged")
     public ResponseEntity<ApiResponse<String>> getClubRole(@PathVariable(value = "id") UUID clubId) {
         RoleEnum role = userAuthService.findClubUserRole(Session.getSessionUser(), clubId);
-        return handleResponse(role != null ? role.getRoleName() : "No result found").ok();
+        return handleResponse(role != null ? role.getRoleName() : "No role found").ok();
     }
 }

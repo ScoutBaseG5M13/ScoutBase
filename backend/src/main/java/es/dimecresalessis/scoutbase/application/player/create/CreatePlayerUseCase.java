@@ -1,9 +1,12 @@
 package es.dimecresalessis.scoutbase.application.player.create;
 
+import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
+import es.dimecresalessis.scoutbase.application.team.update.UpdateTeamUseCase;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
 import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
+import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,8 @@ public class CreatePlayerUseCase {
 
     private static final Logger logger = LoggerFactory.getLogger(CreatePlayerUseCase.class);
     private final PlayerRepository playerRepository;
+    private final FindTeamByIdUseCase findTeamByIdUseCase;
+    private final UpdateTeamUseCase updateTeamUseCase;
 
     /**
      * Executes the operation to save a new {@link Player} entity in the DB.
@@ -37,7 +42,12 @@ public class CreatePlayerUseCase {
             throw new PlayerException(ErrorEnum.PLAYER_ALREADY_EXISTS, player.getId().toString());
         }
         playerRepository.save(player);
-        logger.info("[CREATE] Created Player with id '{}'", player.getId());
+        logger.info("[CREATE] Created Player '{}'", player.getId());
+
+        Team team = findTeamByIdUseCase.execute(player.getTeamId());
+        team.getPlayers().add(player.getId());
+        updateTeamUseCase.execute(team, team.getId());
+        logger.info("[CREATE] Added Player '{}' in Team '{}'", player.getId(), team.getId());
         return player;
     }
 }

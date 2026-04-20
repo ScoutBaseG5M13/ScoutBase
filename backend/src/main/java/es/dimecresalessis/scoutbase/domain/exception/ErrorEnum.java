@@ -26,6 +26,7 @@ public enum ErrorEnum {
     TEAM_IS_NULL("TEAM_IS_NULL", "The team can't be null"),
     TEAM_ID_IS_NULL("TEAM_ID_IS_NULL", "The team id can't be null"),
     TEAM_ALREADY_EXISTS("TEAM_ID_ALREADY_EXISTS", "A team with id '{}' already exists"),
+    TEAM_BY_PLAYER_NOT_FOUND("TEAM_BY_PLAYER_NOT_FOUND", "The team of the player '{}' can't be found"),
 
     CLUB_NOT_FOUND("CLUB_NOT_FOUND", "The club with id '{}' could not be found"),
     CLUB_IS_NULL("CLUB_IS_NULL", "The club can't be null"),
@@ -42,7 +43,7 @@ public enum ErrorEnum {
     STAT_NOT_FOUND("STAT_NOT_FOUND", "The stat with id '{}' could not be found"),
     STAT_INTEGRITY_ERROR("STAT_INTEGRITY_ERROR", "The stat has name '{}' but code '{}'. They have no correlation"),
 
-    USER_NOT_FOUND("USER_NOT_FOUND", "The user with id '{}' could not be found"),
+    USER_NOT_FOUND("USER_NOT_FOUND", "The user '{}' could not be found"),
     USER_IS_NULL("USER_IS_NULL", "The user can't be null"),
     USER_ID_IS_NULL("USER_ID_IS_NULL", "The user id can't be null"),
     USER_ID_ALREADY_EXISTS("USER_ID_ALREADY_EXISTS", "A user with id '{}' already exists"),

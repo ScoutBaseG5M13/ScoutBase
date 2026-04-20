@@ -4,6 +4,8 @@ import es.dimecresalessis.scoutbase.infrastructure.web.persistence.CommonEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,11 +37,11 @@ public class TeamEntity extends CommonEntity {
     @Column
     private UUID secondTrainer;
 
-    @ElementCollection
-    @Column
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(nullable = false, columnDefinition = "uuid[]")
     private List<UUID> players;
 
-    @ElementCollection
-    @Column
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(nullable = false, columnDefinition = "uuid[]")
     private List<UUID> scouters;
 }

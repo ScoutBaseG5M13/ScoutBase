@@ -18,8 +18,8 @@ public class UpdateTeamUseCase {
     private static final Logger logger = LoggerFactory.getLogger(UpdateTeamUseCase.class);
     private final TeamRepository teamRepository;
 
-    public Team execute(Team team, UUID id) {
-        validateAndRetrieveTeam(team, id);
+    public Team execute(Team team, UUID teamId) {
+        validateAndRetrieveTeam(team, teamId);
         teamRepository.save(team);
         logger.info("[UPDATE] Updated Player '{}'", team.getId());
         return team;

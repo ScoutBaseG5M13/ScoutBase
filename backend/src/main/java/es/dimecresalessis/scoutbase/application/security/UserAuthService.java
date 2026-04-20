@@ -26,12 +26,12 @@ public class UserAuthService {
         Optional<Club> club = clubRepository.findClubByTeam(teamId);
         if (club.isPresent()) {
             RoleEnum clubRole = findClubUserRole(user, club.get().getId());
-            if (clubRole != null && RoleEnum.isEqualsOrHigher(minimumRole, clubRole)) {
+            if (clubRole != null && RoleEnum.isEqualsOrHigher(clubRole, minimumRole)) {
                 return true;
             }
         }
         RoleEnum teamRole = findTeamUserRole(user, teamId);
-        if (teamRole != null && RoleEnum.isEqualsOrHigher(minimumRole, teamRole)) {
+        if (teamRole != null && RoleEnum.isEqualsOrHigher(teamRole, minimumRole)) {
             return true;
         }
         return false;

@@ -8,12 +8,14 @@ import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByUserUseC
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByPlayerUseCase;
 import es.dimecresalessis.scoutbase.application.team.update.UpdateTeamUseCase;
+import es.dimecresalessis.scoutbase.application.user.delete.RemoveUserFromTeam;
 import es.dimecresalessis.scoutbase.domain.club.exception.ClubException;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
+import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.infrastructure.security.Session;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamCreateRequest;
@@ -51,6 +53,7 @@ public class TeamController {
     private final FindTeamByPlayerUseCase findTeamByPlayerUseCase;
     private final FindClubByIdUseCase findClubByIdUseCase;
     private final UserAuthService userAuthService;
+    private final RemoveUserFromTeam removeUserFromTeam;
 
     @GetMapping
     @Operation(summary = "Find all teams related to User", description = "Retrieves all teams that the user takes part in")
@@ -116,6 +119,23 @@ public class TeamController {
             throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
         }
         boolean isDeleted = deleteTeamUseCase.execute(id);
+        return handleResponse(isDeleted).ok();
+    }
+
+    /**
+     * Removes a {@link User} from a {@link Team}.
+     *
+     * @param userId The ID of the user to remove.
+     * @param teamId The ID of the team from where to remove the player.
+     * @return {@link ApiResponse} containing the result of the operation.
+     */
+    @DeleteMapping(Routes.ID_TEAM_PATHVAR + Routes.USERS + Routes.ID_PATHVAR)
+    @Operation(summary = "Removes user from team [Auth ADMIN]", description = "Removes a User from a Team")
+    public ResponseEntity<ApiResponse<Boolean>> removeFromTeam(@PathVariable("team-id") UUID teamId, @PathVariable("id") UUID userId) {
+        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamId, RoleEnum.ADMIN)) {
+            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
+        }
+        boolean isDeleted = removeUserFromTeam.execute(userId, teamId);
         return handleResponse(isDeleted).ok();
     }
 }
