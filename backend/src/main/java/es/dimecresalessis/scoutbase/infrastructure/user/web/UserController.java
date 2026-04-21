@@ -1,9 +1,12 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web;
 
 import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserUseCase;
+import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.security.AuthService;
 import es.dimecresalessis.scoutbase.application.security.LoginRequest;
 import es.dimecresalessis.scoutbase.application.security.UserAuthService;
+import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByClubUseCase;
+import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.user.create.CreateUserUseCase;
 import es.dimecresalessis.scoutbase.application.user.delete.DeleteUserUseCase;
 import es.dimecresalessis.scoutbase.application.user.find.FindUserByIdUseCase;
@@ -11,6 +14,7 @@ import es.dimecresalessis.scoutbase.application.user.find.FindUserByUsernameUseC
 import es.dimecresalessis.scoutbase.application.user.update.UpdateUserUseCase;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
+import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.infrastructure.security.Session;
@@ -51,6 +55,9 @@ public class UserController {
     private final FindUserByUsernameUseCase findUserByUsernameUseCase;
     private final UserAuthService userAuthService;
     private final FindAllClubsByUserUseCase findAllClubsByUserUseCase;
+    private final FindAllTeamsByClubUseCase findAllTeamsByClubUseCase;
+    private final FindClubByIdUseCase findClubByIdUseCase;
+    private final FindTeamByIdUseCase findTeamByIdUseCase;
 
     /**
      * Finds a user by their ID.
@@ -87,6 +94,72 @@ public class UserController {
             }
         }
         throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
+    }
+
+    /**
+     * Finds all users in the Club.
+     *
+     * @param clubId The ID of the club.
+     * @return {@link ApiResponse} containing the user's information.
+     */
+    @GetMapping(Routes.CLUBS + Routes.ID_PATHVAR)
+    @Operation(summary = "Finds all Users by Club ID [Auth ADMIN]", description = "Finds all Users by Club")
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllUsersByClub(@PathVariable(value = "id") UUID clubId) {
+        if (userAuthService.isAuthorizedByClub(Session.getSessionUser(), clubId, RoleEnum.ADMIN)) {
+            List<UUID> userIds = new ArrayList<>();
+            Club clubs = findClubByIdUseCase.execute(clubId);
+            userIds.addAll(clubs.getAdminUserIds());
+            List<Team> teams = findAllTeamsByClubUseCase.execute(clubs.getId());
+            for (Team team : teams) {
+                if (team.getTrainer() != null) {
+                    userIds.add(team.getTrainer());
+                }
+                if (team.getSecondTrainer() != null) {
+                    userIds.add(team.getSecondTrainer());
+                }
+                if (!team.getScouters().isEmpty()) {
+                    userIds.addAll(team.getScouters());
+                }
+            }
+            List<UserDTO> usersDTO = new ArrayList<>();
+            for (UUID userId : userIds) {
+                User user = findUserByIdUseCase.execute(userId);
+                usersDTO.add(userMapper.toDto(user));
+            }
+            return handleResponse(usersDTO).ok();
+        }
+        throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
+    }
+
+    /**
+     * Finds all users in the Team.
+     *
+     * @param teamId The ID of the club.
+     * @return {@link ApiResponse} containing the user's information.
+     */
+    @GetMapping(Routes.TEAMS + Routes.ID_PATHVAR)
+    @Operation(summary = "Finds all Users by Team ID [Auth ADMIN]", description = "Finds all Users by Team")
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllUsersByTeam(@PathVariable(value = "id") UUID teamId) {
+        if (userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamId, RoleEnum.SCOUTER)) {
+            List<UUID> userIds = new ArrayList<>();
+            Team team = findTeamByIdUseCase.execute(teamId);
+                if (team.getTrainer() != null) {
+                    userIds.add(team.getTrainer());
+                }
+                if (team.getSecondTrainer() != null) {
+                    userIds.add(team.getSecondTrainer());
+                }
+                if (!team.getScouters().isEmpty()) {
+                    userIds.addAll(team.getScouters());
+                }
+            List<UserDTO> usersDTO = new ArrayList<>();
+            for (UUID userId : userIds) {
+                User user = findUserByIdUseCase.execute(userId);
+                usersDTO.add(userMapper.toDto(user));
+            }
+            return handleResponse(usersDTO).ok();
+        }
+        throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
     }
 
     /**

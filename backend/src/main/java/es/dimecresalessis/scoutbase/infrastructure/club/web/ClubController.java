@@ -5,11 +5,12 @@ import es.dimecresalessis.scoutbase.application.club.delete.DeleteClubUseCase;
 import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsUseCase;
 import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.club.update.UpdateClubUseCase;
-import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
+import es.dimecresalessis.scoutbase.application.security.UserAuthService;
 import es.dimecresalessis.scoutbase.domain.club.exception.ClubException;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
-import es.dimecresalessis.scoutbase.infrastructure.club.web.dto.ClubDTO;
+import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.infrastructure.club.web.dto.ClubCreateRequest;
+import es.dimecresalessis.scoutbase.infrastructure.club.web.dto.ClubDTO;
 import es.dimecresalessis.scoutbase.infrastructure.club.web.mapper.ClubMapper;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
@@ -43,6 +44,7 @@ public class ClubController {
     private final CreateClubUseCase createClubUseCase;
     private final UpdateClubUseCase updateClubUseCase;
     private final DeleteClubUseCase deleteClubUseCase;
+    private final UserAuthService userAuthService;
 
     /**
      * Finds all clubs.
@@ -51,7 +53,7 @@ public class ClubController {
      */
     @GetMapping
     @Operation(summary = "Find all Clubs", description = "Finds all Clubs where the logged User takes part in")
-    public ResponseEntity<ApiResponse<List<ClubDTO>>> findAll() {
+    public ResponseEntity<ApiResponse<List<ClubDTO>>> findAllClubs() {
         List<Club> clubs = findAllClubsUseCase.execute();
         List<ClubDTO> clubsDto = clubs.stream().map(clubMapper::domainToDTO).toList();
         return handleResponse(clubsDto).ok();
@@ -111,6 +113,25 @@ public class ClubController {
             throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, ex.getMessage());
         }
     }
+
+//    /**
+//     * Adds a User UUID as admin of a Club
+//     *
+//     * @param id The ID of the club to be updated.
+//     * @return {@link ApiResponse} containing the updated club's details.
+//     * @throws ClubException If the club is not found.
+//     */
+//    @PutMapping(value = Routes.ID_PATHVAR + Routes.USERS + Routes.ADMIN_PATH + Routes.USER_ID_PATHVAR)
+//    @Operation(summary = "Update Club by ID", description = "Updates a Club")
+//    public ResponseEntity<ApiResponse<ClubDTO>> updateClub(@PathVariable UUID userId) {
+//        try {
+//            Club updatedClub = updateClubUseCase.execute(clubMapper.dtoToDomain(clubDto), id);
+//            ClubDTO updatedClubDto = clubMapper.domainToDTO(updatedClub);
+//            return handleResponse(updatedClubDto).ok();
+//        } catch (NoSuchElementException ex) {
+//            throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, ex.getMessage());
+//        }
+//    }
 
     /**
      * Deletes a club record by ID.

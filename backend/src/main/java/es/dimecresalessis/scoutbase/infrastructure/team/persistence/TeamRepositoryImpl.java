@@ -52,8 +52,12 @@ public class TeamRepositoryImpl implements TeamRepository {
      */
     @Override
     public List<Team> findAllByUserId(UUID userId) {
-        List<TeamEntity> teamEntities = jpaTeamRepository.findAllByUserId(userId);
+        List<TeamEntity> teamEntities = jpaTeamRepository.findAll();
+
         return teamEntities.stream()
+                .filter(t -> t.getTrainer().equals(userId))
+                .filter(t -> t.getSecondTrainer().equals(userId))
+                .filter(t -> t.getScouters().contains(userId))
                 .map(mapper::toDomain)
                 .toList();
     }
@@ -65,8 +69,12 @@ public class TeamRepositoryImpl implements TeamRepository {
      * @return An {@link Optional} containing the {@link Team} the Player belongs to.
      */
     public Optional<Team> findByPlayerId(UUID playerId) {
-        return jpaTeamRepository.findByPlayerId(playerId)
-                .map(mapper::toDomain);
+        List<TeamEntity> teamEntities = jpaTeamRepository.findAll();
+
+        return teamEntities.stream()
+                .filter(t -> t.getPlayers().contains(playerId))
+                .map(mapper::toDomain)
+                .findFirst();
     }
 
     /**

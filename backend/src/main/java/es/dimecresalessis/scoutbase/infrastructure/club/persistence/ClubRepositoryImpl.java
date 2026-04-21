@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.club.persistence;
 
+import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByUserUseCase;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.club.repository.ClubRepository;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
@@ -32,6 +33,7 @@ public class ClubRepositoryImpl implements ClubRepository {
     private final ClubEntityMapper clubMapper;
     private final TeamEntityMapper teamMapper;
     private final JpaTeamRepository jpaTeamRepository;
+    private final FindAllTeamsByUserUseCase findAllTeamsByUserUseCase;
 
     @Override
     public List<Club> findAll() {
@@ -57,25 +59,28 @@ public class ClubRepositoryImpl implements ClubRepository {
 
     @Override
     public Optional<Club> findClubByTeam(UUID teamId) {
-        return jpaClubRepository.findAllByTeam(teamId)
-                .stream()
-                .map(clubMapper::toDomain)
-                .findFirst();
+        List<ClubEntity> clubs = jpaClubRepository.findAll();
+        for (ClubEntity club : clubs) {
+            if (club.getTeams().contains(teamId)) {
+                return Optional.of(clubMapper.toDomain(club));
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     public List<Club> findAllClubsByUserId(UUID userId) {
         //ADMIN
-        ArrayList<Club> clubs = new ArrayList<>(jpaClubRepository.findAllByUserId(userId)
-                .stream()
-                .map(clubMapper::toDomain)
-                .toList());
+        ArrayList<Club> clubs = new ArrayList<>();
+        List<Club> adminClubs = findAllByUserId(userId).stream().filter(c -> c.getAdminUserIds().contains(userId)).toList();
+        clubs.add(adminClubs.get(0));
+//        ArrayList<Club> clubs = new ArrayList<>(jpaClubRepository.findAllByUserId(userId)
+//                .stream()
+//                .map(clubMapper::toDomain)
+//                .toList());
 
         //TRAINER, SUBTRAINER...
-        List<Team> teams = jpaTeamRepository.findAllByUserId(userId)
-                .stream()
-                .map(teamMapper::toDomain)
-                .toList();
+        List<Team> teams = findAllTeamsByUserUseCase.execute(userId);
         List<Club> teamClubs = teams.stream()
                 .filter(t -> findClubByTeam(t.getId()).isPresent())
                 .map(t -> findClubByTeam(t.getId()).get())
