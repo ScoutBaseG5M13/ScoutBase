@@ -9,6 +9,7 @@ import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByClubUseC
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.user.create.CreateUserUseCase;
 import es.dimecresalessis.scoutbase.application.user.delete.DeleteUserUseCase;
+import es.dimecresalessis.scoutbase.application.user.find.FindAllScoutsUseCase;
 import es.dimecresalessis.scoutbase.application.user.find.FindAllUsersUseCase;
 import es.dimecresalessis.scoutbase.application.user.find.FindUserByIdUseCase;
 import es.dimecresalessis.scoutbase.application.user.find.FindUserByUsernameUseCase;
@@ -60,6 +61,7 @@ public class UserController {
     private final FindClubByIdUseCase findClubByIdUseCase;
     private final FindTeamByIdUseCase findTeamByIdUseCase;
     private final FindAllUsersUseCase findAllUsersUseCase;
+    private final FindAllScoutsUseCase findAllScoutsUseCase;
 
     /**
      * Finds all Users. For Superadmin pursposes. Or testing now.
@@ -72,6 +74,19 @@ public class UserController {
         List<User> users = findAllUsersUseCase.execute();
         List<UserDTO> usersDTO = users.stream().map(userMapper::toDto).toList();
         return handleResponse(usersDTO).ok();
+    }
+
+    /**
+     * Finds all User Scouters. For Superadmin pursposes. Or testing now.
+     *
+     * @return {@link ApiResponse} with the current user's {@link User}.
+     */
+    @GetMapping("/scouters")
+    @Operation(summary = "Find all Scouter User [Testing]", description = "Finds all Scouter Users")
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllScouters() {
+        List<User> scouters = findAllScoutsUseCase.execute();
+        List<UserDTO> scoutersDTO = scouters.stream().map(userMapper::toDto).toList();
+        return handleResponse(scoutersDTO).ok();
     }
 
     /**
