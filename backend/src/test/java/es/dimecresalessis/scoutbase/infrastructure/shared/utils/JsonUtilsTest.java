@@ -31,7 +31,7 @@ class JsonUtilsTest {
 
     @Test
     void shouldThrowExceptionOnInvalidObject() {
-        Object emptyObject = new Object(); // Jackson falla si no hay getters o propiedades
+        Object emptyObject = new Object();
 
         assertThatThrownBy(() -> JsonUtils.toJson(emptyObject))
                 .isInstanceOf(RuntimeException.class)

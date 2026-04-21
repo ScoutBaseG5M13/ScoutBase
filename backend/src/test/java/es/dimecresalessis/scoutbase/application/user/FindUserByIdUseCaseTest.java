@@ -1,9 +1,9 @@
 package es.dimecresalessis.scoutbase.application.user;
 
+import es.dimecresalessis.scoutbase.application.user.find.FindUserByIdUseCase;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,12 +32,15 @@ class FindUserByIdUseCaseTest {
     @BeforeEach
     void setUp() {
         userId = UUID.randomUUID();
-        user = new User(userId, "scout_master", "password123", "ADMIN");
+        user = User.builder()
+                .id(userId)
+                .username("scout_master")
+                .name("Alex")
+                .build();
     }
 
     @Test
-    @DisplayName("Should return user when ID exists")
-    void shouldFindUserById() {
+    void execute_ShouldReturnUser_WhenIdExists() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         User result = findUserByIdUseCase.execute(userId);
@@ -45,18 +48,17 @@ class FindUserByIdUseCaseTest {
         assertNotNull(result);
         assertEquals(userId, result.getId());
         assertEquals("scout_master", result.getUsername());
-        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository).findById(userId);
     }
 
     @Test
-    @DisplayName("Should throw NoSuchElementException when user ID does not exist")
-    void shouldThrowException_WhenUserNotFound() {
+    void execute_ShouldThrowNoSuchElementException_WhenIdDoesNotExist() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> {
-            findUserByIdUseCase.execute(userId);
-        });
+        assertThrows(NoSuchElementException.class, () ->
+                findUserByIdUseCase.execute(userId)
+        );
 
-        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository).findById(userId);
     }
 }

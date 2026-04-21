@@ -1,12 +1,14 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.persistence;
 
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
-import es.dimecresalessis.scoutbase.infrastructure.player.persistence.mapper.PlayerEntityMapper;
+import es.dimecresalessis.scoutbase.domain.shared.domain.PositionEnum;
+import es.dimecresalessis.scoutbase.infrastructure.player.persistence.mapper.PlayerEntityMapperImpl;
+import es.dimecresalessis.scoutbase.infrastructure.team.persistence.JpaTeamRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 
 import java.util.Optional;
@@ -15,7 +17,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@Import({PlayerRepositoryImpl.class, PlayerEntityMapper.class})
+@Import({PlayerRepositoryImpl.class, PlayerEntityMapperImpl.class})
 class PlayerRepositoryImplIT {
 
     @Autowired
@@ -23,6 +25,9 @@ class PlayerRepositoryImplIT {
 
     @Autowired
     private JpaPlayerRepository jpaPlayerRepository;
+
+    @MockitoBean
+    private JpaTeamRepository jpaTeamRepository;
 
     private UUID playerId;
     private Player player;
@@ -32,45 +37,72 @@ class PlayerRepositoryImplIT {
         playerId = UUID.randomUUID();
         player = Player.builder()
                 .id(playerId)
-                .name("Lionel")
-                .team("Miami")
-                .email("leo@mesa.com")
+                .name("Ronald")
+                .surname("Araujo")
+                .age(25)
+                .email("ronald@scoutbase.es")
+                .number(4)
+                .position(PositionEnum.DEFENSA_CENTRAL)
+                .priority(1)
                 .build();
     }
 
     @Test
-    @DisplayName("save - Should persist new player in database")
     void save_ShouldPersistNewPlayer() {
-        Player savedPlayer = playerRepository.save(player);
+        playerRepository.save(player);
 
         Optional<PlayerEntity> entityInDb = jpaPlayerRepository.findById(playerId);
         assertTrue(entityInDb.isPresent());
-        assertEquals("Lionel", entityInDb.get().getName());
-        assertEquals(savedPlayer.getId(), entityInDb.get().getId());
+        assertEquals("Ronald", entityInDb.get().getName());
+        assertEquals("DEFENSA_CENTRAL", entityInDb.get().getPosition());
     }
 
     @Test
-    @DisplayName("save - Should update existing player instead of creating new one")
     void save_ShouldUpdateExistingPlayer() {
         playerRepository.save(player);
 
         Player updatedPlayer = Player.builder()
                 .id(playerId)
-                .name("Lionel Updated")
-                .team("Miami")
-                .email("leo@scout.com")
+                .name("Ronald Updated")
+                .surname("Araujo")
+                .age(25)
+                .email("ronald@scoutbase.es")
+                .number(4)
+                .position(PositionEnum.DEFENSA_CENTRAL)
+                .priority(2)
                 .build();
 
         playerRepository.save(updatedPlayer);
 
+        Optional<PlayerEntity> entityInDb = jpaPlayerRepository.findById(playerId);
         assertEquals(1, jpaPlayerRepository.count());
-        assertEquals("Lionel Updated", jpaPlayerRepository.findById(playerId).get().getName());
+        assertTrue(entityInDb.isPresent());
+        assertEquals("Ronald Updated", entityInDb.get().getName());
     }
 
     @Test
-    @DisplayName("findById - Should return empty optional if player not exists")
-    void findById_ShouldReturnEmpty() {
+    void findById_ShouldReturnPlayerWhenExists() {
+        playerRepository.save(player);
+
+        Optional<Player> result = playerRepository.findById(playerId);
+
+        assertTrue(result.isPresent());
+        assertEquals(playerId, result.get().getId());
+    }
+
+    @Test
+    void findById_ShouldReturnEmptyWhenNotExists() {
         Optional<Player> result = playerRepository.findById(UUID.randomUUID());
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void deleteById_ShouldRemovePlayer() {
+        playerRepository.save(player);
+        assertTrue(jpaPlayerRepository.existsById(playerId));
+
+        playerRepository.deleteById(playerId);
+
+        assertFalse(jpaPlayerRepository.existsById(playerId));
     }
 }

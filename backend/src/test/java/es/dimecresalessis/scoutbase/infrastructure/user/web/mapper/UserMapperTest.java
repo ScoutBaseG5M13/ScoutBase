@@ -1,64 +1,43 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web.mapper;
 
 import es.dimecresalessis.scoutbase.domain.user.model.User;
-import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDto;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import es.dimecresalessis.scoutbase.infrastructure.user.web.dto.UserDTO;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest(classes = UserMapperImpl.class)
 class UserMapperTest {
 
+    @Autowired
     private UserMapper userMapper;
-    private UUID userId;
-    private String username;
-    private String password;
-    private String role;
 
-    @BeforeEach
-    void setUp() {
-        userMapper = new UserMapper();
-        userId = UUID.randomUUID();
-        username = "scout_admin";
-        password = "secretPassword";
-        role = "ROLE_ADMIN";
+    @Test
+    void shouldMapDomainToDto() {
+        User domain = User.builder()
+                .id(UUID.randomUUID())
+                .username("scout_master")
+                .password("pass123")
+                .name("Alex")
+                .surname("Scout")
+                .email("alex@scoutbase.com")
+                .build();
+
+        UserDTO dto = userMapper.toDto(domain);
+
+        assertThat(dto).isNotNull();
+        assertThat(dto.getId()).isEqualTo(domain.getId());
+        assertThat(dto.getUsername()).isEqualTo(domain.getUsername());
+        assertThat(dto.getEmail()).isEqualTo(domain.getEmail());
     }
 
     @Test
-    @DisplayName("Should map UserDto to Domain User")
-    void shouldMapToDomain() {
-        UserDto dto = new UserDto(userId, username, password, role);
-
-        User result = userMapper.toDomain(dto);
-
-        assertNotNull(result);
-        assertEquals(userId, result.getId());
-        assertEquals(username, result.getUsername());
-        assertEquals(password, result.getPassword());
-        assertEquals(role, result.getRole());
-    }
-
-    @Test
-    @DisplayName("Should map Domain User to UserDto")
-    void shouldMapToDto() {
-        User domain = new User(userId, username, password, role);
-
-        UserDto result = userMapper.toDto(domain);
-
-        assertNotNull(result);
-        assertEquals(userId, result.getId());
-        assertEquals(username, result.getUsername());
-        assertEquals(password, result.getPassword());
-        assertEquals(role, result.getRole());
-    }
-
-    @Test
-    @DisplayName("Should return null when mapping null objects")
-    void shouldReturnNull_WhenInputsAreNull() {
-        assertNull(userMapper.toDomain(null));
-        assertNull(userMapper.toDto(null));
+    void shouldReturnNullWhenMappingNulls() {
+        assertThat(userMapper.toDomain(null)).isNull();
+        assertThat(userMapper.toDto(null)).isNull();
     }
 }

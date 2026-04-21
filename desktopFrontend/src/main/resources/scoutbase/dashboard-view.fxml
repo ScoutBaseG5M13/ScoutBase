@@ -14,7 +14,6 @@
             fx:controller="scoutbase.DashboardController"
             prefWidth="900.0"
             prefHeight="600.0"
-            stylesheets="@dark_theme.css"
             styleClass="root-container">
 
     <top>
@@ -24,13 +23,21 @@
             </padding>
 
             <HBox alignment="CENTER_LEFT" spacing="10.0">
-                <Label text="Scoutbase"
-                       styleClass="app-title" />
+                <Label fx:id="appTitleLabel"
+                       text="Scoutbase"
+                       onMouseClicked="#onInicioClick"
+                       styleClass="app-title"
+                       style="-fx-cursor: hand;" />
 
                 <Region HBox.hgrow="ALWAYS" />
 
                 <Label fx:id="userInfoLabel"
                        styleClass="user-info-label" />
+
+                <Button fx:id="themeToggleButton"
+                        text="Modo claro"
+                        onAction="#onToggleThemeClick"
+                        styleClass="menu-button" />
 
                 <Button text="Cerrar sesión"
                         onAction="#onLogoutClick"
@@ -38,37 +45,43 @@
             </HBox>
 
             <HBox spacing="10.0">
-                <Button text="Jugadores"
+                <Button fx:id="jugadoresButton"
+                        text="Jugadores"
                         onAction="#onJugadoresClick"
                         prefWidth="120.0"
                         prefHeight="34.0"
                         styleClass="menu-button" />
 
-                <Button text="Clubes"
+                <Button fx:id="clubesButton"
+                        text="Clubes"
                         onAction="#onClubesClick"
                         prefWidth="120.0"
                         prefHeight="34.0"
                         styleClass="menu-button" />
 
-                <Button text="Informes"
+                <Button fx:id="informesButton"
+                        text="Informes"
                         onAction="#onInformesClick"
                         prefWidth="120.0"
                         prefHeight="34.0"
                         styleClass="menu-button" />
 
-                <Button text="Estadísticas"
+                <Button fx:id="estadisticasButton"
+                        text="Estadísticas"
                         onAction="#onEstadisticasClick"
                         prefWidth="120.0"
                         prefHeight="34.0"
                         styleClass="menu-button" />
 
-                <Button text="Scouts"
+                <Button fx:id="scoutsButton"
+                        text="Scouts"
                         onAction="#onScoutsClick"
                         prefWidth="120.0"
                         prefHeight="34.0"
                         styleClass="menu-button" />
 
-                <Button text="Usuarios"
+                <Button fx:id="usuariosButton"
+                        text="Usuarios"
                         onAction="#onUsuariosClick"
                         prefWidth="120.0"
                         prefHeight="34.0"
@@ -79,13 +92,10 @@
 
     <center>
         <StackPane styleClass="center-panel">
-            <VBox alignment="CENTER" spacing="12.0">
-                <Label text="Menú principal provisional"
-                       styleClass="dashboard-title" />
-
-                <Label fx:id="welcomeLabel"
-                       styleClass="welcome-label" />
-            </VBox>
+            <VBox fx:id="contentContainer"
+                  spacing="12.0"
+                  fillWidth="true"
+                  style="-fx-padding: 30;" />
         </StackPane>
     </center>
 

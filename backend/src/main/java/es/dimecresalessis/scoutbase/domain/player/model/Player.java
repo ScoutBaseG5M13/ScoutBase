@@ -1,50 +1,33 @@
 package es.dimecresalessis.scoutbase.domain.player.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import es.dimecresalessis.scoutbase.domain.shared.domain.PositionEnum;
+import lombok.*;
+
 import java.util.UUID;
 
-/**
- * Domain entity representing a football base player.
- */
+@Setter
 @Getter
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor
 public class Player {
-
-    /**
-     * ID of the player.
-     */
-    private UUID id;
-
-    /**
-     *  name of the player.
-     */
+    private UUID id = UUID.randomUUID();
     private String name;
-
-    /**
-     * team of the player.
-     */
-    private String team;
-
-    /**
-     * email of the player.
-     */
+    private String surname;
+    private int age;
     private String email;
+    private int number; // "Dorsal"
+    private PositionEnum position;
+    private int priority;
 
-    /**
-     * Factory method to create a new {@link Player} instance with a generated unique ID.
-     * <p>
-     * This method is for testing.
-     * </p>
-     *
-     * @param name The name of the player.
-     * @param team The current team.
-     * @param email The player's email.
-     * @return A new {@link Player} instance with a randomized unique identifier.
-     */
-    public static Player getNewInstance(String name, String team, String email) {
-        return new Player(UUID.randomUUID(), name, team, email);
+    @Builder
+    public Player(UUID id, String name, String surname, int age, String email,
+                  int number, PositionEnum position, int priority) {
+        this.id = (id == null) ? UUID.randomUUID() : id;
+        this.name = name;
+        this.surname = surname;
+        this.age = age;
+        this.email = email;
+        this.number = number;
+        this.position = position;
+        this.priority = priority;
     }
 }

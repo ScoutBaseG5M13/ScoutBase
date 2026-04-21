@@ -1,5 +1,7 @@
 package scoutbase;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Objeto de transferencia de datos (DTO) que representa un usuario
  * obtenido desde el backend.
@@ -7,7 +9,12 @@ package scoutbase;
  * <p>Se utiliza para mapear la información devuelta por la API,
  * incluyendo el identificador, nombre de usuario, contraseña
  * (generalmente cifrada) y rol.</p>
+ *
+ * <p>La anotación {@code @JsonIgnoreProperties(ignoreUnknown = true)}
+ * permite ignorar campos adicionales que pueda devolver el backend,
+ * evitando errores durante la deserialización.</p>
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDto {
 
     /**

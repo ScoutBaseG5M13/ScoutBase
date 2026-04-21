@@ -1,22 +1,24 @@
 package es.dimecresalessis.scoutbase.infrastructure.security;
 
+import es.dimecresalessis.scoutbase.application.user.find.FindUserByUsernameUseCase;
+import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.security.handler.SecurityHandlers;
-import es.dimecresalessis.scoutbase.infrastructure.security.service.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import io.jsonwebtoken.security.SignatureException;
+import java.util.Collections;
 
 /**
  * Filter responsible for JWT authentication.
@@ -29,7 +31,7 @@ import io.jsonwebtoken.security.SignatureException;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
+    private final FindUserByUsernameUseCase findUserByUsernameUseCase;
     private final SecurityHandlers securityHandlers;
 
     /**
@@ -38,37 +40,51 @@ public class JwtFilter extends OncePerRequestFilter {
      * @param response The outgoing {@link HttpServletResponse}.
      * @param filterChain The chain of filters to be executed.
      * @throws IOException If an input or output error occurs.
-     * @throws ServletException If the request cannot be handled.
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws IOException, ServletException {
+            throws IOException {
         String authHeader = request.getHeader("Authorization");
         String bearer = "Bearer ";
 
-        if (authHeader != null && authHeader.startsWith(bearer)) {
-            String token = authHeader.substring(bearer.length());
-            try {
+        try {
+            if (authHeader != null && authHeader.startsWith(bearer)) {
+                String token = authHeader.substring(bearer.length());
                 String username = jwtService.extractUsername(token);
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    User user = findUserByUsernameUseCase.execute(username);
+                    validateToken(token, user);
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            Collections.emptyList()
+                    );
 
-                    if (jwtService.isTokenValid(token, userDetails)) {
-                        UsernamePasswordAuthenticationToken auth =
-                                new UsernamePasswordAuthenticationToken(
-                                        userDetails, null, userDetails.getAuthorities()
-                                );
-                        SecurityContextHolder.getContext().setAuthentication(auth);
-                    }
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-            } catch (SignatureException | ExpiredJwtException e) {
-                String userMessage = "Your session has expired or is invalid. Please, log in again";
-                securityHandlers.commence(request, response, new BadCredentialsException(userMessage, e));
-                return;
             }
+            filterChain.doFilter(request, response);
+        } catch (SignatureException ex) {
+            securityHandlers.commence(request, response, new BadCredentialsException("Your session token is invalid"));
+        } catch (ExpiredJwtException ex) {
+            securityHandlers.commence(request, response, new BadCredentialsException("Your session token has expired"));
+        } catch (UsernameNotFoundException ex) {
+            securityHandlers.commence(request, response, new BadCredentialsException("The user associated with this token does not exist"));
+        } catch (Exception ex) {
+            securityHandlers.commence(request, response, new BadCredentialsException("An error occurred while processing your request"));
         }
-        filterChain.doFilter(request, response);
+    }
+
+    private void validateToken(String token, User user) throws SignatureException, ExpiredJwtException {
+        if (!jwtService.isTokenValid(token, user)) {
+            throw new SignatureException(null);
+        }
+
+        if (jwtService.isTokenExpired(token)) {
+            throw new ExpiredJwtException(null, null, null);
+        }
     }
 
     /**

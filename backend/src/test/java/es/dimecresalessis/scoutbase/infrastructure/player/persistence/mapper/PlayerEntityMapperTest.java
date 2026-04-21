@@ -1,9 +1,9 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.persistence.mapper;
 
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
+import es.dimecresalessis.scoutbase.domain.shared.domain.PositionEnum;
 import es.dimecresalessis.scoutbase.infrastructure.player.persistence.PlayerEntity;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -14,48 +14,77 @@ class PlayerEntityMapperTest {
 
     private PlayerEntityMapper playerEntityMapper;
     private UUID playerId;
-    private String name;
-    private String team;
-    private String email;
+    private Player playerDomain;
+    private PlayerEntity playerEntity;
 
     @BeforeEach
     void setUp() {
-        playerEntityMapper = new PlayerEntityMapper();
+        playerEntityMapper = new PlayerEntityMapperImpl();
         playerId = UUID.randomUUID();
-        name = "Ronald McGallahan";
-        team = "Scoutbase FC";
-        email = "ronald@scoutbase.es";
+
+        playerDomain = Player.builder()
+                .id(playerId)
+                .name("Ronald")
+                .surname("Araujo")
+                .age(25)
+                .email("ronald@scoutbase.es")
+                .number(4)
+                .position(PositionEnum.DEFENSA_CENTRAL)
+                .priority(1)
+                .build();
+
+        playerEntity = PlayerEntity.builder()
+                .id(playerId)
+                .name("Ronald")
+                .surname("Araujo")
+                .age(25)
+                .email("ronald@scoutbase.es")
+                .number(4)
+                .position("DEFENSA_CENTRAL")
+                .priority(1)
+                .build();
     }
 
     @Test
-    @DisplayName("Should map Domain Player to PlayerEntity")
-    void shouldMapToEntity() {
-        Player domain = new Player(playerId, name, team, email);
-
-        PlayerEntity result = playerEntityMapper.toEntity(domain);
+    void toEntity_ShouldMapDomainToEntity() {
+        PlayerEntity result = playerEntityMapper.toEntity(playerDomain);
 
         assertNotNull(result);
-        assertEquals(playerId, result.getId());
-        assertEquals(name, result.getName());
-        assertEquals(team, result.getTeam());
-        assertEquals(email, result.getEmail());
+        assertEquals(playerDomain.getId(), result.getId());
+        assertEquals(playerDomain.getName(), result.getName());
+        assertEquals(playerDomain.getSurname(), result.getSurname());
+        assertEquals(playerDomain.getPosition().name(), result.getPosition());
+        assertEquals(playerDomain.getPriority(), result.getPriority());
     }
 
     @Test
-    @DisplayName("Should map PlayerEntity to Domain Player")
-    void shouldMapToDomain() {
-        PlayerEntity entity = new PlayerEntity();
-        entity.setId(playerId);
-        entity.setName(name);
-        entity.setTeam(team);
-        entity.setEmail(email);
-
-        Player result = playerEntityMapper.toDomain(entity);
+    void toDomain_ShouldMapEntityToDomain() {
+        Player result = playerEntityMapper.toDomain(playerEntity);
 
         assertNotNull(result);
-        assertEquals(playerId, result.getId());
-        assertEquals(name, result.getName());
-        assertEquals(team, result.getTeam());
-        assertEquals(email, result.getEmail());
+        assertEquals(playerEntity.getId(), result.getId());
+        assertEquals(playerEntity.getName(), result.getName());
+        assertEquals(playerEntity.getSurname(), result.getSurname());
+        assertEquals(PositionEnum.DEFENSA_CENTRAL, result.getPosition());
+        assertEquals(playerEntity.getPriority(), result.getPriority());
+    }
+
+    @Test
+    void updateEntityFromDomain_ShouldUpdateFieldsWithNewData() {
+        PlayerEntity entityToUpdate = PlayerEntity.builder()
+                .id(playerId)
+                .name("Old Name")
+                .surname("Old Surname")
+                .position("PORTERO")
+                .priority(5)
+                .build();
+
+        playerEntityMapper.updateEntityFromDomain(playerDomain, entityToUpdate);
+
+        assertEquals("Ronald", entityToUpdate.getName());
+        assertEquals("Araujo", entityToUpdate.getSurname());
+        assertEquals("DEFENSA_CENTRAL", entityToUpdate.getPosition());
+        assertEquals(1, entityToUpdate.getPriority());
+        assertEquals(playerId, entityToUpdate.getId());
     }
 }

@@ -5,8 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Entity representing a user in the database.
@@ -14,31 +13,31 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@SuperBuilder
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "sb_user")
 public class UserEntity extends CommonEntity {
 
-    /**
-     * Primary key for the user, represented as a {@link UUID}.
-     */
-    @Id
-    private UUID id;
-
-    /**
-     * User's username.
-     */
     @Column(nullable = false)
     private String username;
 
-    /**
-     * Hashed security credential for authentication.
-     */
     @Column(nullable = false)
     private String password;
 
-    /**
-     * The security role assigned to the user (e.g., "ROLE_USER", "ROLE_ADMIN").
-     */
     @Column(nullable = false)
-    private String role;
+    String name;
+
+    @Column
+    String surname;
+
+    @Column(nullable = false)
+    String email;
+
+    public void update(UserEntity newEntity) {
+        this.username = newEntity.getUsername();
+        this.password = newEntity.getPassword();
+        this.name = newEntity.getName();
+        this.surname = newEntity.getSurname();
+        this.email = newEntity.getEmail();
+    }
 }

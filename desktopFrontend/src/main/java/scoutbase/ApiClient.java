@@ -7,37 +7,63 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 /**
- * Clase encargada de realizar peticiones HTTP al backend.
- *
- * <p>Actualmente solo implementa peticiones GET autenticadas
- * mediante el token almacenado en {@link SessionManager}.</p>
+ * Cliente HTTP para comunicarse con el backend.
  */
 public class ApiClient {
 
-    /**
-     * Cliente HTTP utilizado para enviar las peticiones al servidor.
-     */
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    /**
-     * Realiza una petición GET a la URL indicada.
-     *
-     * @param url dirección del endpoint al que se quiere acceder
-     * @return cuerpo de la respuesta del servidor
-     * @throws IOException si ocurre un error durante la comunicación
-     * @throws InterruptedException si la petición es interrumpida
-     */
-    public String get(String url) throws IOException, InterruptedException {
-
-        HttpRequest request = HttpRequest.newBuilder()
+    private HttpRequest.Builder baseRequest(String url) {
+        return HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .header("Authorization", "Bearer " + SessionManager.getAuthToken())
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + SessionManager.getAuthToken());
+    }
+
+    public String get(String url) throws IOException, InterruptedException {
+        HttpRequest request = baseRequest(url)
                 .GET()
                 .build();
 
+        return send(request);
+    }
+
+    public String post(String url, String jsonBody) throws IOException, InterruptedException {
+        HttpRequest request = baseRequest(url)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        return send(request);
+    }
+
+    public String put(String url, String jsonBody) throws IOException, InterruptedException {
+        HttpRequest request = baseRequest(url)
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        return send(request);
+    }
+
+    public String delete(String url) throws IOException, InterruptedException {
+        HttpRequest request = baseRequest(url)
+                .DELETE()
+                .build();
+
+        return send(request);
+    }
+
+    private String send(HttpRequest request) throws IOException, InterruptedException {
         HttpResponse<String> response =
                 httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-        return response.body();
+        int status = response.statusCode();
+
+        if (status >= 200 && status < 300) {
+            return response.body();
+        } else {
+            throw new RuntimeException(
+                    "HTTP Error: " + status + " - " + response.body()
+            );
+        }
     }
 }

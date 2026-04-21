@@ -1,9 +1,9 @@
 package es.dimecresalessis.scoutbase.infrastructure.security;
 
+import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.security.config.JwtProperties;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 
@@ -37,16 +37,15 @@ public class JwtService {
     /**
      * Generates a JWT token for a user.
      *
-     * @param username The username to associate with the token.
+     * @param user The user to associate with the token.
      * @return A signed JWT token as a string.
      */
-    public String createToken(String username, String role) {
+    public String createToken(User user) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.expirationMs()))
                 .signWith(key)
-                .claim("role", role)
                 .compact();
     }
 
@@ -83,13 +82,13 @@ public class JwtService {
      * Checks if the provided JWT token is valid for the given user details.
      *
      * @param token The JWT token to validate.
-     * @param userDetails The user details to verify.
+     * @param user The user details to verify.
      * @return {@code true} if the token matches the provided user details and is not expired.
      */
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    public boolean isTokenValid(String token, User user) {
         final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        return username.equals(user.getUsername());
     }
 
     /**
@@ -103,7 +102,7 @@ public class JwtService {
      * @return {@code true} if the current system time is after the token's expiration date,
      * {@code false} otherwise.
      */
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         final Date expiration = extractExpiration(token);
         return expiration.before(new Date());
     }

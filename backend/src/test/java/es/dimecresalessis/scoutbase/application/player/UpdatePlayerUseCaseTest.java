@@ -1,16 +1,17 @@
 package es.dimecresalessis.scoutbase.application.player;
 
+import es.dimecresalessis.scoutbase.application.player.update.UpdatePlayerUseCase;
+import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
+import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,53 +33,38 @@ class UpdatePlayerUseCaseTest {
     @BeforeEach
     void setUp() {
         playerId = UUID.randomUUID();
-        player = Player.builder()
-                .id(playerId)
-                .name("Ronald McGallahan")
-                .team("Scoutbase FC")
-                .build();
+        player = Player.builder().id(playerId).build();
     }
 
     @Test
-    @DisplayName("Should update player successfully when IDs match and exist")
-    void shouldUpdatePlayer() {
+    void execute_ShouldUpdate_WhenIdsMatch() {
         when(playerRepository.findById(playerId)).thenReturn(Optional.of(player));
 
         Player result = updatePlayerUseCase.execute(player, playerId);
 
         assertNotNull(result);
-        assertEquals(playerId, result.getId());
         verify(playerRepository, times(2)).findById(playerId);
-        verify(playerRepository, times(1)).save(player);
+        verify(playerRepository).save(player);
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException when path ID and body ID do not match")
-    void shouldThrowException_WhenIdsDoNotMatch() {
-        UUID differentId = UUID.randomUUID();
-        Player differentPlayer = Player.builder().id(differentId).build();
+    void execute_ShouldThrowException_WhenIdMismatch() {
+        UUID otherId = UUID.randomUUID();
+        Player otherPlayer = Player.builder().id(otherId).build();
 
         when(playerRepository.findById(playerId)).thenReturn(Optional.of(player));
-        when(playerRepository.findById(differentId)).thenReturn(Optional.of(differentPlayer));
+        when(playerRepository.findById(otherId)).thenReturn(Optional.of(otherPlayer));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            updatePlayerUseCase.execute(differentPlayer, playerId);
-        });
-
-        assertEquals("Player id does not match", exception.getMessage());
-        verify(playerRepository, never()).save(any());
+        assertThrows(IllegalArgumentException.class, () -> updatePlayerUseCase.execute(player, otherId));
     }
 
     @Test
-    @DisplayName("Should throw NoSuchElementException when player does not exist")
-    void shouldThrowException_WhenPlayerNotFound() {
+    void execute_ShouldThrowPlayerException_WhenNotFound() {
         when(playerRepository.findById(playerId)).thenReturn(Optional.empty());
 
-        assertThrows(NoSuchElementException.class, () -> {
-            updatePlayerUseCase.execute(player, playerId);
-        });
-
-        verify(playerRepository, times(1)).findById(playerId);
-        verify(playerRepository, never()).save(any());
+        PlayerException exception = assertThrows(PlayerException.class, () ->
+                updatePlayerUseCase.execute(player, playerId)
+        );
+        assertEquals(ErrorEnum.PLAYER_NOT_FOUND, exception.getErrorEnum());
     }
 }

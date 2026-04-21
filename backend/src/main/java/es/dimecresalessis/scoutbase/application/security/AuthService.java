@@ -1,6 +1,6 @@
 package es.dimecresalessis.scoutbase.application.security;
 
-import es.dimecresalessis.scoutbase.application.user.FindUserByUsernameUseCase;
+import es.dimecresalessis.scoutbase.application.user.find.FindUserByUsernameUseCase;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.security.JwtService;
 import lombok.AllArgsConstructor;
@@ -33,6 +33,6 @@ public class AuthService {
     public String authenticateAndGenerateToken(String username, String password) {
         authManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         User user = findUserByUsernameUseCase.execute(username);
-        return jwtService.createToken(username, user.getRole());
+        return jwtService.createToken(user);
     }
 }

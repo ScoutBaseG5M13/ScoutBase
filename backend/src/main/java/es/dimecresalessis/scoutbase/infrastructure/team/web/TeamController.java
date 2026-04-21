@@ -1,0 +1,166 @@
+package es.dimecresalessis.scoutbase.infrastructure.team.web;
+
+import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserUseCase;
+import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
+import es.dimecresalessis.scoutbase.application.security.UserAuthService;
+import es.dimecresalessis.scoutbase.application.team.create.CreateTeamUseCase;
+import es.dimecresalessis.scoutbase.application.team.delete.DeleteTeamUseCase;
+import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByUserUseCase;
+import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
+import es.dimecresalessis.scoutbase.application.team.find.FindTeamByPlayerUseCase;
+import es.dimecresalessis.scoutbase.application.team.update.UpdateTeamUseCase;
+import es.dimecresalessis.scoutbase.application.user.delete.RemoveUserFromTeam;
+import es.dimecresalessis.scoutbase.domain.club.exception.ClubException;
+import es.dimecresalessis.scoutbase.domain.club.model.Club;
+import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
+import es.dimecresalessis.scoutbase.domain.team.model.Team;
+import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
+import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
+import es.dimecresalessis.scoutbase.domain.user.model.User;
+import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
+import es.dimecresalessis.scoutbase.infrastructure.security.Session;
+import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamCreateRequest;
+import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamDTO;
+import es.dimecresalessis.scoutbase.infrastructure.team.web.mapper.TeamMapper;
+import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
+import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactory.handleResponse;
+
+/**
+ * REST Controller for managing team-related operations.
+ */
+@RestController
+@AllArgsConstructor
+@ApiCommonResponses
+@Tag(name = "Teams", description = "Team management endpoints")
+@RequestMapping(Routes.API_ROOT + Routes.TEAMS)
+public class TeamController {
+
+    private final TeamMapper teamMapper;
+    private final FindTeamByIdUseCase findTeamById;
+    private final CreateTeamUseCase createTeamUseCase;
+    private final UpdateTeamUseCase updateTeamUseCase;
+    private final DeleteTeamUseCase deleteTeamUseCase;
+    private final FindAllTeamsByUserUseCase findAllTeamsByUserUseCase;
+    private final FindTeamByPlayerUseCase findTeamByPlayerUseCase;
+    private final FindClubByIdUseCase findClubByIdUseCase;
+    private final UserAuthService userAuthService;
+    private final RemoveUserFromTeam removeUserFromTeam;
+    private final FindAllClubsByUserUseCase findAllClubsByUserUseCase;
+
+    @GetMapping
+    @Operation(summary = "Find all teams related to User", description = "Retrieves all teams that the User takes part in")
+    public ResponseEntity<ApiResponse<List<TeamDTO>>> findAllTeamsByUser() {
+        List<Team> teams = findAllTeamsByUserUseCase.execute(Session.getSessionUser().getId());
+        List<TeamDTO> teamsDto = teams.stream().map(teamMapper::toDto).toList();
+        return handleResponse(teamsDto).ok();
+    }
+
+    @GetMapping(Routes.CLUBS + Routes.ID_PATHVAR)
+    @Operation(summary = "Find all teams related to a Club", description = "Retrieves all teams that the User takes part in filtered by Club")
+    public ResponseEntity<ApiResponse<List<TeamDTO>>> findAllTeamsByClub(@PathVariable(value = "id") UUID clubId) {
+        List<Club> userClubs = findAllClubsByUserUseCase.execute(Session.getSessionUser().getId());
+
+        Optional<Club> targetClub = userClubs.stream()
+                .filter(c -> c.getId().equals(clubId))
+                .findFirst();
+
+        if (targetClub.isEmpty()) {
+            return handleResponse(Collections.<TeamDTO>emptyList()).ok();
+        }
+
+        List<Team> allTeams = findAllTeamsByUserUseCase.execute(Session.getSessionUser().getId());
+
+        List<TeamDTO> teamsDto = allTeams.stream()
+                .filter(team -> targetClub.get().getTeams().contains(team.getId()))
+                .map(teamMapper::toDto)
+                .toList();
+
+        return handleResponse(teamsDto).ok();
+    }
+
+    @GetMapping(Routes.ID_PATHVAR)
+    @Operation(summary = "Find team by ID [Auth SCOUTER]", description = "Retrieves a team")
+    public ResponseEntity<ApiResponse<TeamDTO>> findTeamById(@PathVariable UUID id) {
+        Team team = findTeamById.execute(id);
+        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), team.getId(), RoleEnum.SCOUTER)) {
+            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
+        }
+        TeamDTO teamDto = teamMapper.toDto(team);
+        return handleResponse(teamDto).ok();
+    }
+
+    @GetMapping(Routes.PLAYERS + Routes.ID_PATHVAR)
+    @Operation(summary = "Find a Team by Player", description = "Retrieves the team where a player takes part")
+    public ResponseEntity<ApiResponse<TeamDTO>> findTeamByPlayerId(@PathVariable("id") UUID playerId) {
+        Team team = findTeamByPlayerUseCase.execute(playerId);
+        TeamDTO teamDto = teamMapper.toDto(team);
+        return handleResponse(teamDto).ok();
+    }
+
+    @PostMapping
+    @Operation(summary = "Create a team [Auth ADMIN]", description = "Creates a team in the DB")
+    public ResponseEntity<ApiResponse<TeamDTO>> createTeam(@RequestBody TeamCreateRequest teamRequest) {
+        if (!userAuthService.isAuthorizedByClub(Session.getSessionUser(), teamRequest.getClubId(), RoleEnum.ADMIN)) {
+            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
+        }
+
+        Club club = findClubByIdUseCase.execute(teamRequest.getClubId());
+        if (club == null) {
+            throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, teamRequest.getClubId().toString());
+        }
+
+        Team team = teamMapper.createToDomain(teamRequest);
+        Team createdTeam = createTeamUseCase.execute(team, club);
+        TeamDTO createdTeamDto = teamMapper.toDto(createdTeam);
+        return handleResponse(createdTeamDto).created();
+    }
+
+    @PutMapping(value = Routes.ID_PATHVAR)
+    @Operation(summary = "Update a team [Auth TRAINER]", description = "Updates a team in the DB")
+    public ResponseEntity<ApiResponse<TeamDTO>> updateTeam(@RequestBody TeamDTO teamDto, @PathVariable UUID id) {
+        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamDto.getId(), RoleEnum.TRAINER)) {
+            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.TRAINER.name());
+        }
+        Team team = teamMapper.dtoToDomain(teamDto);
+        Team updatedTeam = updateTeamUseCase.execute(team, id);
+        TeamDTO updatedTeamDto = teamMapper.toDto(updatedTeam);
+        return handleResponse(updatedTeamDto).ok();
+    }
+
+    @DeleteMapping(Routes.ID_PATHVAR)
+    @Operation(summary = "Delete team by ID [Auth ADMIN]", description = "Deletes a specific team by their ID")
+    public ResponseEntity<ApiResponse<Boolean>> deleteTeam(@PathVariable UUID id) {
+        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), id, RoleEnum.ADMIN)) {
+            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
+        }
+        boolean isDeleted = deleteTeamUseCase.execute(id);
+        return handleResponse(isDeleted).ok();
+    }
+
+    /**
+     * Removes a {@link User} from a {@link Team}.
+     *
+     * @param userId The ID of the user to remove.
+     * @param teamId The ID of the team from where to remove the player.
+     * @return {@link ApiResponse} containing the result of the operation.
+     */
+    @DeleteMapping(Routes.ID_TEAM_PATHVAR + Routes.USERS + Routes.ID_PATHVAR)
+    @Operation(summary = "Removes user from team [Auth ADMIN]", description = "Removes a User from a Team")
+    public ResponseEntity<ApiResponse<Boolean>> removeFromTeam(@PathVariable("team-id") UUID teamId, @PathVariable("id") UUID userId) {
+        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamId, RoleEnum.ADMIN)) {
+            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
+        }
+        boolean isDeleted = removeUserFromTeam.execute(userId, teamId);
+        return handleResponse(isDeleted).ok();
+    }
+}

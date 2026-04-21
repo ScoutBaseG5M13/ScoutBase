@@ -86,15 +86,15 @@ public class UserRepositoryImpl implements UserRepository {
      */
     @Override
     public User save(User user) {
-        UserEntity entity = jpaUserRepository.findById(user.getId())
-                .orElse(new UserEntity());
-
-        entity.setId(user.getId());
-        entity.setUsername(user.getUsername());
-        entity.setPassword(user.getPassword());
-        entity.setRole(user.getRole());
-
-        return mapper.toDomain(jpaUserRepository.save(entity));
+        return jpaUserRepository.findById(user.getId())
+                .map(existingEntity -> {
+                    mapper.updateEntityFromDomain(user, existingEntity);
+                    return mapper.toDomain(jpaUserRepository.saveAndFlush(existingEntity));
+                })
+                .orElseGet(() -> {
+                    UserEntity newEntity = mapper.toEntity(user);
+                    return mapper.toDomain(jpaUserRepository.saveAndFlush(newEntity));
+                });
     }
 
     /**

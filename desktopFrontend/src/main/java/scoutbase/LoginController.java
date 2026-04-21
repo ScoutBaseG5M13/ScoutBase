@@ -22,47 +22,22 @@ import java.io.IOException;
  */
 public class LoginController {
 
-    /**
-     * Campo de texto para el nombre de usuario.
-     */
     @FXML
     private TextField usernameField;
 
-    /**
-     * Campo de texto para la contraseña.
-     */
     @FXML
     private PasswordField passwordField;
 
-    /**
-     * Etiqueta usada para mostrar mensajes de error en pantalla.
-     */
     @FXML
     private Label errorLabel;
 
-    /**
-     * Servicio encargado de gestionar la autenticación.
-     */
     private final AuthService authService = new AuthService();
 
-    /**
-     * Inicializa la vista dejando vacía la zona de error.
-     */
     @FXML
     public void initialize() {
         errorLabel.setText("");
     }
 
-    /**
-     * Gestiona el intento de inicio de sesión del usuario.
-     *
-     * <p>Comprueba que los campos no estén vacíos, envía las credenciales
-     * al backend, extrae el token, obtiene el rol del usuario autenticado,
-     * guarda la sesión y abre el dashboard si la autenticación se realiza
-     * correctamente.</p>
-     *
-     * @param event evento generado al pulsar el botón de login
-     */
     @FXML
     private void onLoginButtonClick(ActionEvent event) {
         errorLabel.setText("");
@@ -72,7 +47,6 @@ public class LoginController {
 
         if (username == null || username.isBlank() ||
                 password == null || password.isBlank()) {
-
             errorLabel.setText("Introduce usuario y contraseña");
             return;
         }
@@ -92,27 +66,17 @@ public class LoginController {
                 return;
             }
 
-            String role;
-            try {
-                role = authService.getCurrentUserRole(token);
-            } catch (Exception e) {
-                e.printStackTrace();
-                errorLabel.setText("No se pudo completar el inicio de sesión");
-                return;
-            }
-
             SessionManager.saveSession(
                     token,
                     response.getSessionId(),
                     username,
-                    role
+                    null
             );
 
             System.out.println("LOGIN CORRECTO");
             System.out.println("TOKEN: " + token);
             System.out.println("SESSION ID: " + response.getSessionId());
             System.out.println("USERNAME: " + username);
-            System.out.println("ROLE: " + role);
 
             openDashboard(event);
 
@@ -122,18 +86,17 @@ public class LoginController {
         }
     }
 
-    /**
-     * Abre la pantalla principal del dashboard tras un login correcto.
-     *
-     * @param event evento que origina el cambio de vista
-     * @throws IOException si ocurre un error al cargar el archivo FXML
-     */
     private void openDashboard(ActionEvent event) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("dashboard-view.fxml"));
         Parent root = loader.load();
 
+        Scene scene = new Scene(root, 900, 600);
+        scene.getStylesheets().add(
+                getClass().getResource("/scoutbase/dark_theme.css").toExternalForm()
+        );
+
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root, 900, 600));
+        stage.setScene(scene);
         stage.setTitle("Scoutbase - Dashboard");
         stage.show();
     }
