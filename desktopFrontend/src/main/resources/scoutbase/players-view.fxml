@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -18,10 +20,15 @@
 
             <Label text="Gestión de jugadores" styleClass="dashboard-title" />
 
-            <Label text="Listado de jugadores del equipo seleccionado"
+            <Label text="Listado global de jugadores y gestión por equipo"
                    styleClass="section-subtitle" />
 
             <HBox spacing="10.0">
+                <ComboBox fx:id="teamFilterComboBox" promptText="Selecciona un equipo" prefWidth="260.0" />
+                <TextField fx:id="searchField" promptText="Buscar por nombre o apellido" prefWidth="260.0" />
+                <Button text="Aplicar filtros"
+                        onAction="#onApplyFiltersClick"
+                        styleClass="quick-action-button" />
                 <Button text="Recargar"
                         onAction="#onReloadClick"
                         styleClass="quick-action-button" />
@@ -33,12 +40,14 @@
                     <TableColumn fx:id="nameColumn" text="Nombre" prefWidth="160.0" />
                     <TableColumn fx:id="surnameColumn" text="Apellido" prefWidth="160.0" />
                     <TableColumn fx:id="ageColumn" text="Edad" prefWidth="90.0" />
-                    <TableColumn fx:id="positionColumn" text="Posición" prefWidth="150.0" />
+                    <TableColumn fx:id="positionColumn" text="Posición" prefWidth="180.0" />
                 </columns>
             </TableView>
+
             <Button text="Añadir jugador"
                     onAction="#onAddPlayerClick"
                     styleClass="quick-action-button" />
+
             <Label fx:id="statusLabel" styleClass="panel-text" />
         </VBox>
     </children>

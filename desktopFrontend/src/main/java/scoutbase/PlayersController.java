@@ -2,14 +2,15 @@ package scoutbase;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
-import java.util.Optional;
+import javafx.util.StringConverter;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PlayersController {
 
@@ -32,11 +33,21 @@ public class PlayersController {
     private TableColumn<PlayerDTO, String> positionColumn;
 
     @FXML
+    private ComboBox<TeamDTO> teamFilterComboBox;
+
+    @FXML
+    private TextField searchField;
+
+    @FXML
     private Label statusLabel;
 
     private final PlayerService playerService = new PlayerService();
+    private final TeamService teamService = new TeamService();
 
-    private TeamDTO selectedTeam;
+    private List<TeamDTO> loadedTeams = new ArrayList<>();
+    private List<PlayerDTO> loadedPlayers = new ArrayList<>();
+
+    private TeamDTO selectedTeamFromNavigation;
 
     @FXML
     public void initialize() {
@@ -45,39 +56,149 @@ public class PlayersController {
         surnameColumn.setCellValueFactory(new PropertyValueFactory<>("surname"));
         ageColumn.setCellValueFactory(new PropertyValueFactory<>("age"));
         positionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
+
+        configureTeamComboBox();
+        loadTeams();
+        loadAllPlayersFromVisibleTeams();
+    }
+
+    private void configureTeamComboBox() {
+        if (teamFilterComboBox == null) return;
+
+        teamFilterComboBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(TeamDTO team) {
+                return team == null ? "" : team.getName();
+            }
+
+            @Override
+            public TeamDTO fromString(String string) {
+                return null;
+            }
+        });
     }
 
     public void setSelectedTeam(TeamDTO selectedTeam) {
-        this.selectedTeam = selectedTeam;
-        loadPlayers();
+        this.selectedTeamFromNavigation = selectedTeam;
+
+        if (teamFilterComboBox != null && selectedTeam != null) {
+            for (TeamDTO team : teamFilterComboBox.getItems()) {
+                if (team.getId() != null && team.getId().equals(selectedTeam.getId())) {
+                    teamFilterComboBox.setValue(team);
+                    break;
+                }
+            }
+        }
+
+        applyFilters();
     }
 
-    private void loadPlayers() {
+    private void loadTeams() {
         try {
-            if (selectedTeam == null) {
-                statusLabel.setText("No se ha seleccionado ningún equipo");
-                playersTable.setItems(FXCollections.observableArrayList());
-                return;
-            }
+            loadedTeams = teamService.getAllTeams();
 
-            List<PlayerDTO> players = playerService.getPlayersByTeamId(selectedTeam.getId());
-            playersTable.setItems(FXCollections.observableArrayList(players));
-            statusLabel.setText("Jugadores del equipo: " + selectedTeam.getName());
+            if (teamFilterComboBox != null) {
+                teamFilterComboBox.setItems(FXCollections.observableArrayList(loadedTeams));
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
-            statusLabel.setText("Error al cargar jugadores");
+            statusLabel.setText("Error al cargar equipos");
         }
+    }
+
+    private void loadAllPlayersFromVisibleTeams() {
+        List<PlayerDTO> allPlayers = new ArrayList<>();
+
+        for (TeamDTO team : loadedTeams) {
+            try {
+                List<PlayerDTO> backendPlayers = playerService.getPlayersByTeamId(team.getId());
+                List<PlayerDTO> localPlayers = PlayerCache.getPlayersByTeamId(team.getId());
+
+                for (PlayerDTO backendPlayer : backendPlayers) {
+                    backendPlayer.setTeamId(team.getId());
+                }
+
+                allPlayers.addAll(mergePlayers(backendPlayers, localPlayers));
+
+            } catch (Exception e) {
+                List<PlayerDTO> localPlayers = PlayerCache.getPlayersByTeamId(team.getId());
+                allPlayers.addAll(localPlayers);
+            }
+        }
+
+        loadedPlayers = removeDuplicatePlayers(allPlayers);
+        applyFilters();
     }
 
     @FXML
     private void onReloadClick() {
-        loadPlayers();
+        loadTeams();
+        loadAllPlayersFromVisibleTeams();
     }
+
+    @FXML
+    private void onApplyFiltersClick() {
+        applyFilters();
+    }
+
+    private void applyFilters() {
+        TeamDTO selectedTeam = null;
+
+        if (teamFilterComboBox != null) {
+            selectedTeam = teamFilterComboBox.getValue();
+        }
+
+        if (selectedTeam == null) {
+            selectedTeam = selectedTeamFromNavigation;
+        }
+
+        String searchText = "";
+        if (searchField != null && searchField.getText() != null) {
+            searchText = searchField.getText().trim().toLowerCase();
+        }
+
+        final TeamDTO finalSelectedTeam = selectedTeam;
+        final String finalSearchText = searchText;
+
+        List<PlayerDTO> filtered = loadedPlayers.stream()
+                .filter(player -> {
+                    if (finalSelectedTeam == null) return true;
+                    return finalSelectedTeam.getId().equals(player.getTeamId());
+                })
+                .filter(player -> {
+                    if (finalSearchText.isBlank()) return true;
+
+                    String fullName = ((player.getName() == null ? "" : player.getName()) + " "
+                            + (player.getSurname() == null ? "" : player.getSurname())).toLowerCase();
+
+                    return fullName.contains(finalSearchText);
+                })
+                .collect(Collectors.toList());
+
+        playersTable.setItems(FXCollections.observableArrayList(filtered));
+
+        if (finalSelectedTeam != null) {
+            statusLabel.setText("Jugadores visibles del equipo: " + finalSelectedTeam.getName() + " (" + filtered.size() + ")");
+        } else {
+            statusLabel.setText("Jugadores visibles: " + filtered.size());
+        }
+    }
+
     @FXML
     private void onAddPlayerClick() {
+        TeamDTO selectedTeam = null;
+
+        if (teamFilterComboBox != null) {
+            selectedTeam = teamFilterComboBox.getValue();
+        }
+
         if (selectedTeam == null) {
-            statusLabel.setText("No hay un equipo seleccionado");
+            selectedTeam = selectedTeamFromNavigation;
+        }
+
+        if (selectedTeam == null) {
+            statusLabel.setText("Selecciona primero un equipo");
             return;
         }
 
@@ -95,45 +216,112 @@ public class PlayersController {
         TextField nameField = new TextField();
         TextField surnameField = new TextField();
         TextField ageField = new TextField();
+        TextField emailField = new TextField();
+        TextField numberField = new TextField();
         TextField positionField = new TextField();
+        TextField priorityField = new TextField();
 
         grid.add(new Label("Nombre:"), 0, 0);
         grid.add(nameField, 1, 0);
+
         grid.add(new Label("Apellido:"), 0, 1);
         grid.add(surnameField, 1, 1);
+
         grid.add(new Label("Edad:"), 0, 2);
         grid.add(ageField, 1, 2);
-        grid.add(new Label("Posición:"), 0, 3);
-        grid.add(positionField, 1, 3);
+
+        grid.add(new Label("Email:"), 0, 3);
+        grid.add(emailField, 1, 3);
+
+        grid.add(new Label("Dorsal:"), 0, 4);
+        grid.add(numberField, 1, 4);
+
+        grid.add(new Label("Posición:"), 0, 5);
+        grid.add(positionField, 1, 5);
+
+        grid.add(new Label("Prioridad:"), 0, 6);
+        grid.add(priorityField, 1, 6);
 
         dialog.getDialogPane().setContent(grid);
 
         Optional<ButtonType> result = dialog.showAndWait();
 
         if (result.isPresent() && result.get() == createButtonType) {
-            String name = nameField.getText().trim();
-            String surname = surnameField.getText().trim();
-            String ageText = ageField.getText().trim();
-            String position = positionField.getText().trim();
-
-            if (name.isBlank() || surname.isBlank() || ageText.isBlank() || position.isBlank()) {
-                statusLabel.setText("Todos los campos son obligatorios");
-                return;
-            }
-
             try {
-                int age = Integer.parseInt(ageText);
+                int age = Integer.parseInt(ageField.getText().trim());
+                int number = Integer.parseInt(numberField.getText().trim());
+                int priority = Integer.parseInt(priorityField.getText().trim());
 
-                playerService.createPlayer(name, surname, age, position, selectedTeam.getId());
-                loadPlayers();
+                try {
+                    PlayerDTO newPlayer = playerService.createPlayer(
+                            nameField.getText().trim(),
+                            surnameField.getText().trim(),
+                            age,
+                            emailField.getText().trim(),
+                            number,
+                            positionField.getText().trim(),
+                            priority,
+                            selectedTeam.getId()
+                    );
+
+                    PlayerCache.addPlayer(newPlayer, selectedTeam.getId());
+
+                } catch (Exception ex) {
+                    if (ex.getMessage() != null && ex.getMessage().contains("No value present")) {
+                        PlayerDTO localPlayer = playerService.createLocalPlayer(
+                                nameField.getText().trim(),
+                                surnameField.getText().trim(),
+                                age,
+                                emailField.getText().trim(),
+                                number,
+                                positionField.getText().trim(),
+                                priority,
+                                selectedTeam.getId()
+                        );
+
+                        PlayerCache.addPlayer(localPlayer, selectedTeam.getId());
+                    } else {
+                        throw ex;
+                    }
+                }
+
+                loadAllPlayersFromVisibleTeams();
                 statusLabel.setText("Jugador creado correctamente");
 
-            } catch (NumberFormatException e) {
-                statusLabel.setText("La edad debe ser un número válido");
             } catch (Exception e) {
                 e.printStackTrace();
                 statusLabel.setText("Error al crear jugador");
             }
         }
+    }
+
+    private List<PlayerDTO> mergePlayers(List<PlayerDTO> backendPlayers, List<PlayerDTO> localPlayers) {
+        List<PlayerDTO> merged = new ArrayList<>(backendPlayers);
+
+        for (PlayerDTO localPlayer : localPlayers) {
+            boolean exists = merged.stream()
+                    .anyMatch(player -> player.getId() != null && player.getId().equals(localPlayer.getId()));
+
+            if (!exists) {
+                merged.add(localPlayer);
+            }
+        }
+
+        return merged;
+    }
+
+    private List<PlayerDTO> removeDuplicatePlayers(List<PlayerDTO> players) {
+        List<PlayerDTO> uniquePlayers = new ArrayList<>();
+
+        for (PlayerDTO player : players) {
+            boolean exists = uniquePlayers.stream()
+                    .anyMatch(existing -> existing.getId() != null && existing.getId().equals(player.getId()));
+
+            if (!exists) {
+                uniquePlayers.add(player);
+            }
+        }
+
+        return uniquePlayers;
     }
 }

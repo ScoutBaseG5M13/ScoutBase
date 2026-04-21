@@ -83,11 +83,12 @@ public class DashboardController {
             return;
         }
 
-        String cleanRole = (role != null && !role.isBlank())
-                ? role.replace("ROLE_", "")
-                : "SIN ROL";
-
-        userInfoLabel.setText(username + " (" + cleanRole + ")");
+        if (role != null && !role.isBlank()) {
+            String cleanRole = role.replace("ROLE_", "");
+            userInfoLabel.setText(username + " (" + cleanRole + ")");
+        } else {
+            userInfoLabel.setText(username);
+        }
     }
 
     /**
@@ -465,25 +466,26 @@ public class DashboardController {
         }
     }
 
-    /**
-     * Gestiona la acción del menú de jugadores.
-     *
-     * @param event evento lanzado desde la interfaz
-     */
     @FXML
     private void onJugadoresClick(ActionEvent event) {
         setActiveButton(jugadoresButton);
-        loadPlaceholderSection(
-                "Gestión de jugadores",
-                "Aquí se mostrará el listado de jugadores, su búsqueda, sus filtros y las acciones de administración o consulta."
-        );
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("players-view.fxml"));
+            Parent playersView = loader.load();
+
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(playersView);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            loadPlaceholderSection(
+                    "Gestión de jugadores",
+                    "No se pudo cargar la vista de jugadores."
+            );
+        }
     }
 
-    /**
-     * Gestiona la acción del menú de clubes.
-     *
-     * @param event evento lanzado desde la interfaz
-     */
     @FXML
     private void onClubesClick(ActionEvent event) {
         setActiveButton(clubesButton);
@@ -504,11 +506,6 @@ public class DashboardController {
         }
     }
 
-    /**
-     * Gestiona la acción del menú de informes.
-     *
-     * @param event evento lanzado desde la interfaz
-     */
     @FXML
     private void onInformesClick(ActionEvent event) {
         setActiveButton(informesButton);
@@ -518,11 +515,6 @@ public class DashboardController {
         );
     }
 
-    /**
-     * Gestiona la acción del menú de estadísticas.
-     *
-     * @param event evento lanzado desde la interfaz
-     */
     @FXML
     private void onEstadisticasClick(ActionEvent event) {
         setActiveButton(estadisticasButton);
@@ -532,11 +524,6 @@ public class DashboardController {
         );
     }
 
-    /**
-     * Gestiona la acción del menú de scouts.
-     *
-     * @param event evento lanzado desde la interfaz
-     */
     @FXML
     private void onScoutsClick(ActionEvent event) {
         setActiveButton(scoutsButton);
@@ -546,11 +533,6 @@ public class DashboardController {
         );
     }
 
-    /**
-     * Gestiona la acción del menú de usuarios.
-     *
-     * @param event evento lanzado desde la interfaz
-     */
     @FXML
     private void onUsuariosClick(ActionEvent event) {
         setActiveButton(usuariosButton);
