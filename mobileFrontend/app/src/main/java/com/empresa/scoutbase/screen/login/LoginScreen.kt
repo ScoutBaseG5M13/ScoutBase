@@ -18,7 +18,7 @@ import com.empresa.scoutbase.viewmodel.login.LoginViewModel
  */
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (String, String) -> Unit
+    onLoginSuccess: (String, String, String) -> Unit   // ← AHORA ACEPTA TOKEN
 ) {
     // Estados locales para usuario y contraseña
     var usuario by remember { mutableStateOf("") }
@@ -44,10 +44,9 @@ fun LoginScreen(
         val currentRole = role
 
         if (currentToken != null && currentRole != null) {
-            onLoginSuccess(usuario, currentRole)
+            onLoginSuccess(usuario, currentRole, currentToken)   // ← AHORA ENVÍA TOKEN
         }
     }
-
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -124,6 +123,7 @@ fun LoginScreen(
         }
     }
 }
+
 
 
 

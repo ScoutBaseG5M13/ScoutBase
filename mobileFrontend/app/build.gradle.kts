@@ -65,9 +65,15 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    // Gson (KTS correcto)
+    implementation("com.google.code.gson:gson:2.10.1")
+
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // 🔥 LoggingInterceptor para ver REQUEST y RESPONSE en Logcat
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
@@ -81,10 +87,8 @@ dependencies {
     // JUnit
     testImplementation(libs.junit)
 
-    //  NECESSARI PER ALS TESTS DE COROUTINES (AIXÒ ET FALTAVA)
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 
-    // Android Tests
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
