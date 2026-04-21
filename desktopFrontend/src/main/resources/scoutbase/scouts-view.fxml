@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="scoutbase.ScoutsController"
+      spacing="18"
+      prefWidth="1000"
+      prefHeight="650"
+      styleClass="dashboard-content">
+
+    <Label text="Gestión de scouts" styleClass="dashboard-title"/>
+    <Label text="Listado de scouts y asignaciones actuales" styleClass="section-subtitle"/>
+
+    <HBox spacing="12">
+        <Button text="Recargar" onAction="#onReloadClick" styleClass="primary-button"/>
+    </HBox>
+
+    <TableView fx:id="scoutsTable" prefHeight="420">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="220"/>
+            <TableColumn fx:id="nameColumn" text="Nombre" prefWidth="120"/>
+            <TableColumn fx:id="surnameColumn" text="Apellidos" prefWidth="140"/>
+            <TableColumn fx:id="emailColumn" text="Email" prefWidth="200"/>
+            <TableColumn fx:id="clubColumn" text="Club" prefWidth="150"/>
+            <TableColumn fx:id="teamColumn" text="Equipo" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+    <Button text="Añadir scout" onAction="#onAddScoutClick" styleClass="primary-button"/>
+
+    <Label fx:id="statusLabel" text="Estado de scouts" styleClass="section-subtitle"/>
+</VBox>

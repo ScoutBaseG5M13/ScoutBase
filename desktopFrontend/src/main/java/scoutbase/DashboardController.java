@@ -61,6 +61,9 @@ public class DashboardController {
     @FXML
     private VBox contentContainer;
 
+    private final ClubService clubService = new ClubService();
+    private final TeamService teamService = new TeamService();
+
     /**
      * Inicializa la vista con los datos del usuario autenticado.
      */
@@ -235,10 +238,12 @@ public class DashboardController {
     }
 
     /**
-     * Carga la pantalla principal para administradores.
+     * Carga la pantalla principal para administradores con datos reales básicos.
      */
     private void loadAdminHome() {
         contentContainer.getChildren().clear();
+
+        DashboardStats stats = loadDashboardStats();
 
         Label title = new Label("Panel de administración");
         title.getStyleClass().add("dashboard-title");
@@ -248,18 +253,23 @@ public class DashboardController {
 
         HBox cardsRow = new HBox(15);
         cardsRow.getChildren().addAll(
-                createStatCard("Usuarios registrados", "18"),
-                createStatCard("Jugadores activos", "245"),
-                createStatCard("Clubes registrados", "12"),
-                createStatCard("Informes generados", "39")
+                createStatCard("Usuarios en sesión", "1"),
+                createStatCard("Jugadores visibles", String.valueOf(stats.totalPlayers)),
+                createStatCard("Clubes registrados", String.valueOf(stats.totalClubs)),
+                createStatCard("Equipos disponibles", String.valueOf(stats.totalTeams))
         );
+
+        String currentUser = SessionManager.getUsername() != null ? SessionManager.getUsername() : "desconocido";
+        String currentRole = SessionManager.getRole() != null && !SessionManager.getRole().isBlank()
+                ? SessionManager.getRole().replace("ROLE_", "")
+                : "SIN ROL";
 
         VBox activityBox = createInfoBox(
                 "Actividad reciente",
-                "• john_doe inició sesión\n" +
-                        "• Se creó un nuevo informe\n" +
-                        "• Se registró un nuevo club\n" +
-                        "• Se modificó un jugador"
+                "• Inicio de sesión correcto como " + currentUser + "\n" +
+                        "• Rol detectado: " + currentRole + "\n" +
+                        "• Clubs cargados: " + stats.totalClubs + "\n" +
+                        "• Equipos cargados: " + stats.totalTeams
         );
 
         VBox quickActionsBox = new VBox(10);
@@ -269,22 +279,27 @@ public class DashboardController {
         Label quickTitle = new Label("Acciones rápidas");
         quickTitle.getStyleClass().add("panel-title");
 
-        Button createUserBtn = new Button("Crear usuario");
-        Button addPlayerBtn = new Button("Añadir jugador");
-        Button registerClubBtn = new Button("Registrar club");
-        Button generateReportBtn = new Button("Generar informe");
+        Button createUserBtn = new Button("Abrir usuarios");
+        Button addPlayerBtn = new Button("Abrir jugadores");
+        Button registerClubBtn = new Button("Abrir clubes");
+        Button openScoutsBtn = new Button("Abrir scouts");
 
         styleActionButton(createUserBtn);
         styleActionButton(addPlayerBtn);
         styleActionButton(registerClubBtn);
-        styleActionButton(generateReportBtn);
+        styleActionButton(openScoutsBtn);
+
+        createUserBtn.setOnAction(this::onUsuariosClick);
+        addPlayerBtn.setOnAction(this::onJugadoresClick);
+        registerClubBtn.setOnAction(this::onClubesClick);
+        openScoutsBtn.setOnAction(this::onScoutsClick);
 
         quickActionsBox.getChildren().addAll(
                 quickTitle,
                 createUserBtn,
                 addPlayerBtn,
                 registerClubBtn,
-                generateReportBtn
+                openScoutsBtn
         );
 
         HBox bottomRow = new HBox(20, activityBox, quickActionsBox);
@@ -293,15 +308,21 @@ public class DashboardController {
     }
 
     /**
-     * Carga la pantalla principal para usuarios normales.
+     * Carga la pantalla principal para usuarios normales con datos reales básicos.
      */
     private void loadUserHome() {
         contentContainer.getChildren().clear();
+
+        DashboardStats stats = loadDashboardStats();
 
         String username = SessionManager.getUsername();
         if (username == null || username.isBlank()) {
             username = "usuario";
         }
+
+        String cleanRole = SessionManager.getRole() != null && !SessionManager.getRole().isBlank()
+                ? SessionManager.getRole().replace("ROLE_", "")
+                : "SIN ROL";
 
         Label title = new Label("Panel principal");
         title.getStyleClass().add("dashboard-title");
@@ -311,18 +332,18 @@ public class DashboardController {
 
         HBox cardsRow = new HBox(15);
         cardsRow.getChildren().addAll(
-                createStatCard("Mis informes", "6"),
-                createStatCard("Jugadores vistos", "14"),
-                createStatCard("Clubes seguidos", "4"),
-                createStatCard("Último acceso", "Hoy")
+                createStatCard("Clubes visibles", String.valueOf(stats.totalClubs)),
+                createStatCard("Equipos visibles", String.valueOf(stats.totalTeams)),
+                createStatCard("Jugadores visibles", String.valueOf(stats.totalPlayers)),
+                createStatCard("Rol actual", cleanRole)
         );
 
         VBox activityBox = createInfoBox(
                 "Mi actividad reciente",
-                "• Consultaste 3 jugadores\n" +
-                        "• Abriste el informe Sub-19\n" +
-                        "• Visitaste el club Scoutbase FC\n" +
-                        "• Último acceso hoy"
+                "• Sesión iniciada como " + username + "\n" +
+                        "• Clubs cargados: " + stats.totalClubs + "\n" +
+                        "• Equipos cargados: " + stats.totalTeams + "\n" +
+                        "• Jugadores detectados: " + stats.totalPlayers
         );
 
         VBox quickActionsBox = new VBox(10);
@@ -333,26 +354,67 @@ public class DashboardController {
         quickTitle.getStyleClass().add("panel-title");
 
         Button openPlayersBtn = new Button("Ver jugadores");
-        Button openReportsBtn = new Button("Abrir informes");
-        Button openClubsBtn = new Button("Buscar clubes");
-        Button editProfileBtn = new Button("Mi perfil");
+        Button openClubsBtn = new Button("Ver clubes");
+        Button openScoutsBtn = new Button("Ver scouts");
+        Button openUsersBtn = new Button("Ver usuarios");
 
         styleActionButton(openPlayersBtn);
-        styleActionButton(openReportsBtn);
         styleActionButton(openClubsBtn);
-        styleActionButton(editProfileBtn);
+        styleActionButton(openScoutsBtn);
+        styleActionButton(openUsersBtn);
+
+        openPlayersBtn.setOnAction(this::onJugadoresClick);
+        openClubsBtn.setOnAction(this::onClubesClick);
+        openScoutsBtn.setOnAction(this::onScoutsClick);
+        openUsersBtn.setOnAction(this::onUsuariosClick);
 
         quickActionsBox.getChildren().addAll(
                 quickTitle,
                 openPlayersBtn,
-                openReportsBtn,
                 openClubsBtn,
-                editProfileBtn
+                openScoutsBtn,
+                openUsersBtn
         );
 
         HBox bottomRow = new HBox(20, activityBox, quickActionsBox);
 
         contentContainer.getChildren().addAll(title, subtitle, cardsRow, bottomRow);
+    }
+
+    /**
+     * Obtiene estadísticas básicas reales a partir de los servicios disponibles.
+     *
+     * @return estadísticas calculadas para el dashboard
+     */
+    private DashboardStats loadDashboardStats() {
+        DashboardStats stats = new DashboardStats();
+
+        try {
+            List<ClubDTO> clubs = clubService.getAllClubs();
+            stats.totalClubs = clubs != null ? clubs.size() : 0;
+        } catch (Exception e) {
+            stats.totalClubs = 0;
+        }
+
+        try {
+            List<TeamDTO> teams = teamService.getAllTeams();
+            stats.totalTeams = teams != null ? teams.size() : 0;
+
+            int totalPlayers = 0;
+            if (teams != null) {
+                for (TeamDTO team : teams) {
+                    if (team.getPlayers() != null) {
+                        totalPlayers += team.getPlayers().size();
+                    }
+                }
+            }
+            stats.totalPlayers = totalPlayers;
+        } catch (Exception e) {
+            stats.totalTeams = 0;
+            stats.totalPlayers = 0;
+        }
+
+        return stats;
     }
 
     /**
@@ -527,18 +589,49 @@ public class DashboardController {
     @FXML
     private void onScoutsClick(ActionEvent event) {
         setActiveButton(scoutsButton);
-        loadPlaceholderSection(
-                "Gestión de scouts",
-                "Aquí se mostrará el listado de scouts, sus datos y las funciones de gestión asociadas."
-        );
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("scouts-view.fxml"));
+            Parent scoutsView = loader.load();
+
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(scoutsView);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            loadPlaceholderSection(
+                    "Gestión de scouts",
+                    "No se pudo cargar la vista de scouts."
+            );
+        }
     }
 
     @FXML
     private void onUsuariosClick(ActionEvent event) {
         setActiveButton(usuariosButton);
-        loadPlaceholderSection(
-                "Gestión de usuarios",
-                "Aquí se mostrará el listado de usuarios, sus roles, su estado y las opciones de administración."
-        );
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("users-view.fxml"));
+            Parent usersView = loader.load();
+
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(usersView);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            loadPlaceholderSection(
+                    "Gestión de usuarios",
+                    "No se pudo cargar la vista de usuarios."
+            );
+        }
+    }
+
+    /**
+     * Clase interna para encapsular estadísticas del dashboard.
+     */
+    private static class DashboardStats {
+        private int totalClubs;
+        private int totalTeams;
+        private int totalPlayers;
     }
 }

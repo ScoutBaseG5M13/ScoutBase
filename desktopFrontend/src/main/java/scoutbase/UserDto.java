@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * obtenido desde el backend.
  *
  * <p>Se utiliza para mapear la información devuelta por la API,
- * incluyendo el identificador, nombre de usuario, contraseña
- * (generalmente cifrada) y rol.</p>
+ * incluyendo identificador, nombre de usuario, contraseña,
+ * rol y datos personales básicos.</p>
  *
  * <p>La anotación {@code @JsonIgnoreProperties(ignoreUnknown = true)}
  * permite ignorar campos adicionales que pueda devolver el backend,
@@ -36,6 +36,21 @@ public class UserDto {
      * Rol del usuario dentro del sistema.
      */
     private String role;
+
+    /**
+     * Nombre real del usuario.
+     */
+    private String name;
+
+    /**
+     * Apellidos del usuario.
+     */
+    private String surname;
+
+    /**
+     * Correo electrónico del usuario.
+     */
+    private String email;
 
     /**
      * Constructor vacío necesario para la deserialización.
@@ -97,5 +112,47 @@ public class UserDto {
      */
     public void setRole(String role) {
         this.role = role;
+    }
+
+    /**
+     * @return nombre real del usuario
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name nombre real a establecer
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return apellidos del usuario
+     */
+    public String getSurname() {
+        return surname;
+    }
+
+    /**
+     * @param surname apellidos a establecer
+     */
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    /**
+     * @return correo electrónico del usuario
+     */
+    public String getEmail() {
+        return email;
+    }
+
+    /**
+     * @param email correo electrónico a establecer
+     */
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
