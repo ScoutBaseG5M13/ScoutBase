@@ -9,6 +9,7 @@ import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByClubUseC
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.user.create.CreateUserUseCase;
 import es.dimecresalessis.scoutbase.application.user.delete.DeleteUserUseCase;
+import es.dimecresalessis.scoutbase.application.user.find.FindAllUsersUseCase;
 import es.dimecresalessis.scoutbase.application.user.find.FindUserByIdUseCase;
 import es.dimecresalessis.scoutbase.application.user.find.FindUserByUsernameUseCase;
 import es.dimecresalessis.scoutbase.application.user.update.UpdateUserUseCase;
@@ -58,6 +59,20 @@ public class UserController {
     private final FindAllTeamsByClubUseCase findAllTeamsByClubUseCase;
     private final FindClubByIdUseCase findClubByIdUseCase;
     private final FindTeamByIdUseCase findTeamByIdUseCase;
+    private final FindAllUsersUseCase findAllUsersUseCase;
+
+    /**
+     * Finds all Users. For Superadmin pursposes. Or testing now.
+     *
+     * @return {@link ApiResponse} with the current user's {@link UserDTO}.
+     */
+    @GetMapping
+    @Operation(summary = "Find all Users User [Testing]", description = "Finds all Users")
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllUsers() {
+        List<User> users = findAllUsersUseCase.execute();
+        List<UserDTO> usersDTO = users.stream().map(userMapper::toDto).toList();
+        return handleResponse(usersDTO).ok();
+    }
 
     /**
      * Finds a user by their ID.
