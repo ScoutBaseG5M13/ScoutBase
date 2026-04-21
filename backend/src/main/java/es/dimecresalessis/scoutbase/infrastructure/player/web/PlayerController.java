@@ -8,6 +8,7 @@ import es.dimecresalessis.scoutbase.application.player.update.UpdatePlayerUseCas
 import es.dimecresalessis.scoutbase.application.security.UserAuthService;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByPlayerUseCase;
+import es.dimecresalessis.scoutbase.application.team.update.UpdateTeamUseCase;
 import es.dimecresalessis.scoutbase.domain.team.exception.TeamException;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
@@ -54,6 +55,7 @@ public class PlayerController {
     private final FindTeamByPlayerUseCase findTeamByPlayerUseCase;
     private final UserAuthService userAuthService;
     private final FindTeamByIdUseCase findTeamByIdUseCase;
+    private final UpdateTeamUseCase updateTeamUseCase;
 
     /**
      * Finds all players.
@@ -116,6 +118,8 @@ public class PlayerController {
         }
         Player player = playerMapper.createToDomain(playerRequest);
         Player createdPlayer = createPlayerUseCase.execute(player);
+        team.getPlayers().add(createdPlayer.getId());
+        updateTeamUseCase.execute(team, teamId);
         PlayerDTO createdPlayerDTO = playerMapper.toDto(createdPlayer);
         return handleResponse(createdPlayerDTO).created();
     }
@@ -166,8 +170,9 @@ public class PlayerController {
             if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), team.getId(), RoleEnum.SCOUTER)) {
                 throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
             }
-
             boolean isDeleted = deletePlayerUseCase.execute(playerId);
+            team.getPlayers().remove(playerId);
+            updateTeamUseCase.execute(team, team.getId());
             return handleResponse(isDeleted).ok();
         } catch (NoSuchElementException ex) {
             throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, playerId.toString());
