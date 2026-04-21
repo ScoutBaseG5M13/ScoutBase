@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Use case for finding all {@link Team}.
+ */
 @Service
 @AllArgsConstructor
 public class FindAllTeamsUseCase {
@@ -17,9 +20,10 @@ public class FindAllTeamsUseCase {
     private final TeamRepository teamRepository;
 
     /**
-     * Executes the operation for getting all teams from the repository.
+     * Executes the operation to fetch all Teams.
      *
-     * @return A list of all {@link Team} entities.
+     * @return A {@link List} containing all {@link Team} entities.
+     * Returns an empty list if no teams are registered.
      */
     public List<Team> execute() {
         List<Team> teams = teamRepository.findAll();

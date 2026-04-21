@@ -11,7 +11,7 @@ import es.dimecresalessis.scoutbase.domain.user.model.User;
 import java.util.UUID;
 
 /**
- * Use case for deleting a {@link User} entity from the system.
+ * Use case for deleting a {@link User}.
  */
 @Service
 @AllArgsConstructor
@@ -21,7 +21,7 @@ public class DeleteUserUseCase {
     private final UserRepository userRepository;
 
     /**
-     * Executes the operation to delete a {@link User} from the repository.
+     * Executes the operation to delete a {@link User}.
      *
      * @param id The ID of the user to be deleted.
      * @return {@code true} if the user was successfully deleted, {@code false} otherwise.

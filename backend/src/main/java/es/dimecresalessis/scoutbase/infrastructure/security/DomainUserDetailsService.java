@@ -8,19 +8,29 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Infrastructure implementation of Spring Security's {@link UserDetailsService}.
+ */
 @Service
 @AllArgsConstructor
 public class DomainUserDetailsService implements UserDetailsService {
 
     private final FindUserByUsernameUseCase findUserByUsernameUseCase;
 
+    /**
+     * Locates the user based on the username and converts the domain {@link User}
+     * into a Spring Security {@link UserDetails} object.
+     *
+     * @param username The username identifying the user whose data is required.
+     * @return A {@link UserDetails}.
+     * @throws UsernameNotFoundException if the user could not be found or the
+     * use case throws an exception.
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
-            // El caso de uso devuelve tu objeto de DOMINIO 'User'
             User user = findUserByUsernameUseCase.execute(username);
 
-            // Debes convertir tu User de dominio a un UserDetails de Spring
             return org.springframework.security.core.userdetails.User
                     .withUsername(user.getUsername())
                     .password(user.getPassword())

@@ -59,7 +59,7 @@ public class UserController {
      * @return {@link ApiResponse} containing the user's information.
      */
     @GetMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Find user by ID [Auth ADMIN]", description = "Finds a user by ID")
+    @Operation(summary = "Find User by ID [Auth ADMIN]", description = "Finds a User")
     public ResponseEntity<ApiResponse<UserDTO>> findUserById(@PathVariable(value = "id") UUID userId) {
         // ¿En qué Clubs están ambos Users?
         List<Club> clubsOfLookedUpUser = findAllClubsByUserUseCase.execute(userId);
@@ -89,9 +89,14 @@ public class UserController {
         throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
     }
 
+    /**
+     * Retrieves the profile of the currently authenticated user.
+     *
+     * @return {@link ApiResponse} with the current user's {@link UserDTO}.
+     */
     @GetMapping(Routes.ME_PATH)
-    @Operation(summary = "Find my user", description = "Finds own User")
-    public ResponseEntity<ApiResponse<UserDTO>> findUserById() {
+    @Operation(summary = "Find authenticated User [Auth OWN]", description = "Finds own authenticated User")
+    public ResponseEntity<ApiResponse<UserDTO>> findMyUser() {
         User user = findUserByIdUseCase.execute(Session.getSessionUser().getId());
         return handleResponse(userMapper.toDto(user)).ok();
     }
@@ -103,8 +108,8 @@ public class UserController {
      * @return {@link ApiResponse} containing the user's information.
      */
     @GetMapping(Routes.USERNAME_PATH + Routes.USERNAME_PATHVAR)
-    @Operation(summary = "Find user by username", description = "Returns a User through a 'username'.")
-    public ResponseEntity<ApiResponse<UserDTO>> findByUsername(@PathVariable String username) {
+    @Operation(summary = "Find User by username [Auth ADMIN]", description = "Finds a User by 'username'")
+    public ResponseEntity<ApiResponse<UserDTO>> findUserByUsername(@PathVariable String username) {
         // ¿En qué Clubs están ambos Users?
         try {
             User user = findUserByUsernameUseCase.execute(username);
@@ -140,7 +145,7 @@ public class UserController {
      * @return {@link ApiResponse} containing the user's information.
      */
     @PostMapping
-    @Operation(summary = "Create a user", description = "Creates a user")
+    @Operation(summary = "Create User", description = "Creates a user")
     public ResponseEntity<ApiResponse<Boolean>> createUser(@RequestBody UserCreateRequest createRequest) {
         createUserUseCase.execute(userMapper.createToDomain(createRequest));
         return handleResponse(true).created();
@@ -153,7 +158,7 @@ public class UserController {
      * @return {@link ApiResponse} containing the user's information.
      */
     @PutMapping(value = Routes.ID_PATHVAR)
-    @Operation(summary = "Updates a user", description = "Creates a user through a UserDto body.")
+    @Operation(summary = "Update User [Auth OWN]", description = "Updates a User")
     public ResponseEntity<ApiResponse<UserDTO>> updateUser(@RequestBody UserDTO userDto, @PathVariable UUID id) {
         try {
             User updatedUser = updateUserUseCase.execute(userMapper.toDomain(userDto), id);
@@ -171,8 +176,8 @@ public class UserController {
      * @return {@link ApiResponse} containing the user's information.
      */
     @DeleteMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Deletes a user by ID", description = "Deletes a user through an ID path parameter.")
-    public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
+    @Operation(summary = "Delete User by ID [Auth OWN]", description = "Deletes a User")
+    public ResponseEntity<ApiResponse<Boolean>> deleteUser(@PathVariable UUID id) {
         try {
             boolean isDeleted = deleteUserUseCase.execute(id);
             return handleResponse(isDeleted).ok();
@@ -187,8 +192,8 @@ public class UserController {
      * @param loginRequest The login credentials of the user.
      * @return {@link ApiResponse} containing an authentication token.
      */
-    @PostMapping(value = Routes.AUTH_LOGIN)
-    @Operation(summary = "Login", description = "Returns an authentification token if a user and its password exists in the database")
+    @PostMapping(Routes.AUTH_LOGIN)
+    @Operation(summary = "Login [Auth OWN]", description = "Authenticates himself and returns a JWT Auth token")
     public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody LoginRequest loginRequest) {
         String token = authService.authenticateAndGenerateToken(
                 loginRequest.getUsername(),
@@ -204,7 +209,7 @@ public class UserController {
      * @return {@link ApiResponse} containing the user's role.
      */
     @GetMapping(value =  Routes.TEAMS + Routes.ID_PATHVAR + Routes.ROLE_PATH)
-    @Operation(summary = "Get user role in the team", description = "Returns the role in the team of the user currently logged")
+    @Operation(summary = "Get User role inside Team [Auth ADMIN]", description = "Find the role in the Team of the User currently logged in")
     public ResponseEntity<ApiResponse<String>> getTeamRole(@PathVariable(value = "id") UUID teamId) {
         RoleEnum role = userAuthService.findTeamUserRole(Session.getSessionUser(), teamId);
         return handleResponse(role != null ? role.getRoleName() : "No role found").ok();
@@ -217,7 +222,7 @@ public class UserController {
      * @return {@link ApiResponse} containing the user's role.
      */
     @GetMapping(value =  Routes.CLUBS + Routes.ID_PATHVAR + Routes.ROLE_PATH)
-    @Operation(summary = "Get user role in the club", description = "Returns the role in the club of the user currently logged")
+    @Operation(summary = "Get User role inside Club [Auth ADMIN]", description = "Find the role in the Club of the User currently logged in")
     public ResponseEntity<ApiResponse<String>> getClubRole(@PathVariable(value = "id") UUID clubId) {
         RoleEnum role = userAuthService.findClubUserRole(Session.getSessionUser(), clubId);
         return handleResponse(role != null ? role.getRoleName() : "No role found").ok();

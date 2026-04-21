@@ -71,6 +71,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(ex.getMessage(), ex, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles custom MethodArgumentNotValidException failures.
+     * @param ex The caught {@link MethodArgumentNotValidException}.
+     * @return A response with serialized error details depending on the error.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<String>> handleValidationErrors(MethodArgumentNotValidException ex) {
         String errorMessage = ex.getBindingResult()

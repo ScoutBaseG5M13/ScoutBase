@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Use case for retrieving all {@link Stat} entities from the system.
+ * Use case for finding all {@link Stat}.
  */
 @Service
 @AllArgsConstructor

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Use case for retrieving all {@link Player} entities from the system.
+ * Use case for retrieving all {@link Player}.
  */
 @Service
 @AllArgsConstructor

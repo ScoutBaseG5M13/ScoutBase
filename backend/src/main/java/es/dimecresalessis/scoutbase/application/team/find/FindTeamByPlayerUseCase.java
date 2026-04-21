@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.application.team.find;
 
+import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Use case for finding a {@link Team} by {@link Player} {@link UUID}.
+ */
 @Service
 @AllArgsConstructor
 public class FindTeamByPlayerUseCase {
@@ -18,7 +22,7 @@ public class FindTeamByPlayerUseCase {
     private final TeamRepository teamRepository;
 
     /**
-     * Executes the operation for getting the team where the player plays from the repository.
+     * Executes the operation for getting the team where the Player plays.
      *
      * @return A list of all {@link Team} entities.
      */

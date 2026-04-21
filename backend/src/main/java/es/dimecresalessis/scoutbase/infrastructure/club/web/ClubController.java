@@ -50,7 +50,7 @@ public class ClubController {
      * @return {@link ApiResponse} containing a list of all {@link Club}.
      */
     @GetMapping
-    @Operation(summary = "Find all clubs", description = "Retrieves all registered clubs in the DB")
+    @Operation(summary = "Find all Clubs", description = "Finds all Clubs where the logged User takes part in")
     public ResponseEntity<ApiResponse<List<ClubDTO>>> findAll() {
         List<Club> clubs = findAllClubsUseCase.execute();
         List<ClubDTO> clubsDto = clubs.stream().map(clubMapper::domainToDTO).toList();
@@ -65,8 +65,8 @@ public class ClubController {
      * @throws ClubException If the requested club does not exist.
      */
     @GetMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Find club by ID", description = "Finds and returns a club by their ID")
-    public ResponseEntity<ApiResponse<ClubDTO>> findById(@PathVariable UUID id) throws ClubException {
+    @Operation(summary = "Find Club by ID", description = "Finds and returns a Club by ID")
+    public ResponseEntity<ApiResponse<ClubDTO>> findClubById(@PathVariable UUID id) throws ClubException {
         try {
             Club club = findClubByIdUseCase.execute(id);
             ClubDTO clubDto = clubMapper.domainToDTO(club);
@@ -84,8 +84,8 @@ public class ClubController {
      * @throws ClubException If an error occurs during club creation.
      */
     @PostMapping
-    @Operation(summary = "Create a new club", description = "Adds a new club to the DB")
-    public ResponseEntity<ApiResponse<ClubDTO>> create(@Valid @RequestBody ClubCreateRequest clubRequest) throws ClubException {
+    @Operation(summary = "Create a Club", description = "Creates a new Club")
+    public ResponseEntity<ApiResponse<ClubDTO>> createClub(@Valid @RequestBody ClubCreateRequest clubRequest) throws ClubException {
         Club club = clubMapper.createToDomain(clubRequest);
         Club createdClub = createClubUseCase.execute(club);
         ClubDTO createdClubDTO = clubMapper.domainToDTO(createdClub);
@@ -101,8 +101,8 @@ public class ClubController {
      * @throws ClubException If the club is not found.
      */
     @PutMapping(value = Routes.ID_PATHVAR)
-    @Operation(summary = "Update club by ID", description = "Updates the data for a specific club")
-    public ResponseEntity<ApiResponse<ClubDTO>> update(@Valid @RequestBody ClubDTO clubDto, @PathVariable UUID id) {
+    @Operation(summary = "Update Club by ID", description = "Updates a Club")
+    public ResponseEntity<ApiResponse<ClubDTO>> updateClub(@Valid @RequestBody ClubDTO clubDto, @PathVariable UUID id) {
         try {
             Club updatedClub = updateClubUseCase.execute(clubMapper.dtoToDomain(clubDto), id);
             ClubDTO updatedClubDto = clubMapper.domainToDTO(updatedClub);
@@ -120,8 +120,8 @@ public class ClubController {
      * @throws ClubException If the club is not found.
      */
     @DeleteMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Delete club by ID", description = "Deletes a specific club by their ID")
-    public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
+    @Operation(summary = "Delete Club by ID", description = "Deletes a Club")
+    public ResponseEntity<ApiResponse<Boolean>> deleteClub(@PathVariable UUID id) {
         try {
             boolean isDeleted = deleteClubUseCase.execute(id);
             return handleResponse(isDeleted).ok();

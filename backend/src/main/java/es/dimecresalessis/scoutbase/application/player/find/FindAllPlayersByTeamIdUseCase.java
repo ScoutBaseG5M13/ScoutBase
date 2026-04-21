@@ -1,7 +1,6 @@
 package es.dimecresalessis.scoutbase.application.player.find;
 
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
-import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
 import lombok.AllArgsConstructor;
@@ -14,16 +13,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Use case for finding a {@link List<Player>} by {@link Team} {@link UUID}.
+ */
 @Service
 @AllArgsConstructor
 public class FindAllPlayersByTeamIdUseCase {
 
     private static final Logger logger = LoggerFactory.getLogger(FindAllPlayersByTeamIdUseCase.class);
-    private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
-    private final FindAllPlayersUseCase findAllPlayersUseCase;
     private final FindPlayerByIdUseCase findPlayerByIdUseCase;
 
+    /**
+     * Executes the operation for getting all players from the repository, filtering by Team id.
+     *
+     * @return A list of all {@link Player} entities.
+     */
     public List<Player> execute(UUID teamId) {
         Optional<Team> team = teamRepository.findById(teamId);
         if (!team.isPresent()) {

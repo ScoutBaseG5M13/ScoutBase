@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Use case for finding a user entity by their username.
+ * Use case for finding a {@link User} entity by their username.
  */
 @Service
 @AllArgsConstructor
