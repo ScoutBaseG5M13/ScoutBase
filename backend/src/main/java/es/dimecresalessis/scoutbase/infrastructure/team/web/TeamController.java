@@ -2,6 +2,7 @@ package es.dimecresalessis.scoutbase.infrastructure.team.web;
 
 import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserUseCase;
 import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
+import es.dimecresalessis.scoutbase.application.club.update.UpdateClubUseCase;
 import es.dimecresalessis.scoutbase.application.security.UserAuthService;
 import es.dimecresalessis.scoutbase.application.team.create.CreateTeamUseCase;
 import es.dimecresalessis.scoutbase.application.team.delete.DeleteTeamUseCase;
@@ -52,6 +53,7 @@ public class TeamController {
     private final FindClubByIdUseCase findClubByIdUseCase;
     private final UserAuthService userAuthService;
     private final FindAllClubsByUserUseCase findAllClubsByUserUseCase;
+    private final UpdateClubUseCase updateClubUseCase;
 
     /**
      * Retrieves all teams associated with the currently authenticated user.
@@ -135,21 +137,21 @@ public class TeamController {
      * @throws UserException if the user is not a club admin.
      * @throws ClubException if the specified club does not exist.
      */
-    @PostMapping
+    @PostMapping(Routes.CLUBS + Routes.ID_PATHVAR)
     @Operation(summary = "Create a Team [Auth ADMIN]", description = "Creates a Team")
-    public ResponseEntity<ApiResponse<TeamDTO>> createTeam(@RequestBody TeamCreateRequest teamRequest) {
-        if (!userAuthService.isAuthorizedByClub(Session.getSessionUser(), teamRequest.getClubId(), RoleEnum.ADMIN)) {
+    public ResponseEntity<ApiResponse<TeamDTO>> createTeam(@RequestBody TeamCreateRequest teamRequest, @PathVariable UUID clubId) {
+        if (!userAuthService.isAuthorizedByClub(Session.getSessionUser(), clubId, RoleEnum.ADMIN)) {
             throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
         }
-
-        Club club = findClubByIdUseCase.execute(teamRequest.getClubId());
+        Club club = findClubByIdUseCase.execute(clubId);
         if (club == null) {
-            throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, teamRequest.getClubId().toString());
+            throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, clubId.toString());
         }
-
         Team team = teamMapper.createToDomain(teamRequest);
         Team createdTeam = createTeamUseCase.execute(team, club);
         TeamDTO createdTeamDto = teamMapper.toDto(createdTeam);
+        club.getTeams().add(createdTeam.getId());
+        updateClubUseCase.execute(club, clubId);
         return handleResponse(createdTeamDto).created();
     }
 
@@ -175,16 +177,19 @@ public class TeamController {
     /**
      * Deletes a team.
      *
-     * @param id The {@link UUID} of the team to delete.
+     * @param teamId The {@link UUID} of the team to delete.
      * @return {@link ApiResponse} indicating success.
      */
     @DeleteMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Delete Team [Auth ADMIN]", description = "Deletes a Team")
-    public ResponseEntity<ApiResponse<Boolean>> deleteTeam(@PathVariable UUID id) {
-        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), id, RoleEnum.ADMIN)) {
+    public ResponseEntity<ApiResponse<Boolean>> deleteTeam(@PathVariable UUID teamId) {
+        Club club = findClubByIdUseCase.execute(teamId);
+        if (!userAuthService.isAuthorizedByClub(Session.getSessionUser(), teamId, RoleEnum.ADMIN)) {
             throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
         }
-        boolean isDeleted = deleteTeamUseCase.execute(id);
+        boolean isDeleted = deleteTeamUseCase.execute(teamId);
+        club.getTeams().remove(teamId);
+        updateClubUseCase.execute(club, club.getId());
         return handleResponse(isDeleted).ok();
     }
 }

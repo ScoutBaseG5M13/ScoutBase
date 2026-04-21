@@ -1,6 +1,7 @@
 package es.dimecresalessis.scoutbase.infrastructure.security;
 
 import es.dimecresalessis.scoutbase.domain.user.model.User;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
@@ -16,8 +17,12 @@ public class Session {
      * @throws NullPointerException if there is no active authentication in the context.
      */
     public static User getSessionUser() {
-        return (User) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+        try {
+            return (User) SecurityContextHolder.getContext()
+                    .getAuthentication()
+                    .getPrincipal();
+        } catch (Exception ex) {
+            throw new BadCredentialsException("Must be authenticated to access this resource");
+        }
     }
 }
