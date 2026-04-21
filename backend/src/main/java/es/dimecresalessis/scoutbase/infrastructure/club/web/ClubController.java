@@ -68,7 +68,7 @@ public class ClubController {
      */
     @GetMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Find Club by ID", description = "Finds and returns a Club by ID")
-    public ResponseEntity<ApiResponse<ClubDTO>> findClubById(@PathVariable UUID id) throws ClubException {
+    public ResponseEntity<ApiResponse<ClubDTO>> findClubById(@PathVariable("id") UUID id) throws ClubException {
         try {
             Club club = findClubByIdUseCase.execute(id);
             ClubDTO clubDto = clubMapper.domainToDTO(club);

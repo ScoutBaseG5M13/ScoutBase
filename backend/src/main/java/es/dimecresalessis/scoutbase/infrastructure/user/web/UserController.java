@@ -97,7 +97,7 @@ public class UserController {
      */
     @GetMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Find User by ID [Auth ADMIN]", description = "Finds a User")
-    public ResponseEntity<ApiResponse<UserDTO>> findUserById(@PathVariable(value = "id") UUID userId) {
+    public ResponseEntity<ApiResponse<UserDTO>> findUserById(@PathVariable("id") UUID userId) {
         // ¿En qué Clubs están ambos Users?
         List<Club> clubsOfLookedUpUser = findAllClubsByUserUseCase.execute(userId);
         List<Club> clubsOfCurrentUser = findAllClubsByUserUseCase.execute(Session.getSessionUser().getId());
@@ -134,7 +134,7 @@ public class UserController {
      */
     @GetMapping(Routes.CLUBS + Routes.ID_PATHVAR)
     @Operation(summary = "Finds all Users by Club ID [Auth ADMIN]", description = "Finds all Users by Club")
-    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllUsersByClub(@PathVariable(value = "id") UUID clubId) {
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllUsersByClub(@PathVariable("id") UUID clubId) {
         if (userAuthService.isAuthorizedByClub(Session.getSessionUser(), clubId, RoleEnum.ADMIN)) {
             List<UUID> userIds = new ArrayList<>();
             Club clubs = findClubByIdUseCase.execute(clubId);
@@ -169,7 +169,7 @@ public class UserController {
      */
     @GetMapping(Routes.TEAMS + Routes.ID_PATHVAR)
     @Operation(summary = "Finds all Users by Team ID [Auth ADMIN]", description = "Finds all Users by Team")
-    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllUsersByTeam(@PathVariable(value = "id") UUID teamId) {
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllUsersByTeam(@PathVariable("id") UUID teamId) {
         if (userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamId, RoleEnum.SCOUTER)) {
             List<UUID> userIds = new ArrayList<>();
             Team team = findTeamByIdUseCase.execute(teamId);

@@ -64,7 +64,7 @@ public class PlayerController {
      */
     @GetMapping(Routes.TEAMS + Routes.ID_PATHVAR)
     @Operation(summary = "Find all players of team [Auth SCOUTER]", description = "Find all Players of the requested Team")
-    public ResponseEntity<ApiResponse<List<PlayerDTO>>> findAllPlayersByTeam(@PathVariable(value = "id") UUID teamId) {
+    public ResponseEntity<ApiResponse<List<PlayerDTO>>> findAllPlayersByTeam(@PathVariable("id") UUID teamId) {
         if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamId, RoleEnum.SCOUTER)) {
             throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
         }

@@ -68,7 +68,7 @@ public class StatController {
      */
     @GetMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Find stat by ID [Auth SCOUTER]", description = "Finds a Stat")
-    public ResponseEntity<ApiResponse<StatDTO>> findStatById(@PathVariable(name = "id") UUID id) {
+    public ResponseEntity<ApiResponse<StatDTO>> findStatById(@PathVariable("id") UUID id) {
         Stat stat = findStatByIdUseCase.execute(id);
         StatDTO statDto = statMapper.toDto(stat);
         return handleResponse(statDto).ok();
