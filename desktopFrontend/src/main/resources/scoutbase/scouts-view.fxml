@@ -16,24 +16,23 @@
       styleClass="dashboard-content">
 
     <Label text="Gestión de scouts" styleClass="dashboard-title"/>
-    <Label text="Listado de scouts y asignaciones actuales" styleClass="section-subtitle"/>
+    <Label text="Listado de scouts registrados en el sistema" styleClass="section-subtitle"/>
 
     <HBox spacing="12">
         <Button text="Recargar" onAction="#onReloadClick" styleClass="primary-button"/>
+        <Button text="Añadir scout" onAction="#onAddScoutClick" styleClass="primary-button"/>
     </HBox>
 
     <TableView fx:id="scoutsTable" prefHeight="420">
         <columns>
             <TableColumn fx:id="idColumn" text="ID" prefWidth="220"/>
+            <TableColumn fx:id="usernameColumn" text="Username" prefWidth="140"/>
             <TableColumn fx:id="nameColumn" text="Nombre" prefWidth="120"/>
             <TableColumn fx:id="surnameColumn" text="Apellidos" prefWidth="140"/>
-            <TableColumn fx:id="emailColumn" text="Email" prefWidth="200"/>
-            <TableColumn fx:id="clubColumn" text="Club" prefWidth="150"/>
-            <TableColumn fx:id="teamColumn" text="Equipo" prefWidth="150"/>
+            <TableColumn fx:id="emailColumn" text="Email" prefWidth="220"/>
+            <TableColumn fx:id="roleColumn" text="Rol" prefWidth="120"/>
         </columns>
     </TableView>
 
-    <Button text="Añadir scout" onAction="#onAddScoutClick" styleClass="primary-button"/>
-
-    <Label fx:id="statusLabel" text="Estado de scouts" styleClass="section-subtitle"/>
+    <Label fx:id="statusLabel" text="" styleClass="section-subtitle"/>
 </VBox>

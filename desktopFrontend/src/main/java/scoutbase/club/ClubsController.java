@@ -18,6 +18,13 @@ import scoutbase.user.UserDto;
 import java.util.Optional;
 import java.util.List;
 
+/**
+ * Controlador de la vista de gestión de clubes.
+ *
+ * <p>Se encarga de inicializar la tabla de clubes, cargar los datos
+ * desde el backend, recargar la información mostrada, abrir la vista
+ * de equipos del club seleccionado y permitir la creación de nuevos clubes.</p>
+ */
 public class ClubsController {
 
     @FXML
@@ -32,8 +39,17 @@ public class ClubsController {
     @FXML
     private Label statusLabel;
 
+    /**
+     * Servicio encargado de gestionar las operaciones relacionadas con clubes.
+     */
     private final ClubService clubService = new ClubService();
 
+    /**
+     * Método de inicialización del controlador.
+     *
+     * <p>Configura las columnas de la tabla y carga la lista inicial
+     * de clubes al abrir la vista.</p>
+     */
     @FXML
     public void initialize() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -41,6 +57,13 @@ public class ClubsController {
         loadClubs();
     }
 
+    /**
+     * Carga la lista de clubes desde el backend y la muestra en la tabla.
+     *
+     * <p>Si la operación se completa correctamente, actualiza la tabla
+     * y muestra un mensaje informativo en la interfaz. En caso de error,
+     * informa del problema mediante la etiqueta de estado.</p>
+     */
     private void loadClubs() {
         try {
             List<ClubDTO> clubs = clubService.getAllClubs();
@@ -52,11 +75,21 @@ public class ClubsController {
         }
     }
 
+    /**
+     * Recarga manualmente la lista de clubes mostrada en la tabla.
+     */
     @FXML
     private void onReloadClick() {
         loadClubs();
     }
 
+    /**
+     * Abre la vista de equipos del club seleccionado.
+     *
+     * <p>Obtiene el club seleccionado en la tabla, carga la vista de equipos
+     * y la inserta en el contenedor principal de contenido. Si no hay ningún
+     * club seleccionado o se produce un error, se muestra un mensaje en la interfaz.</p>
+     */
     @FXML
     private void onViewTeamsClick() {
         ClubDTO selectedClub = clubsTable.getSelectionModel().getSelectedItem();
@@ -87,6 +120,15 @@ public class ClubsController {
             statusLabel.setText("Error al abrir los equipos del club");
         }
     }
+
+    /**
+     * Muestra un cuadro de diálogo para crear un nuevo club.
+     *
+     * <p>Solicita el nombre del club al usuario, valida que no esté vacío,
+     * obtiene el usuario autenticado actual y envía la petición de creación
+     * al backend. Tras ello, recarga la tabla de clubes y actualiza el mensaje
+     * de estado según el resultado.</p>
+     */
     @FXML
     private void onAddClubClick() {
         TextInputDialog dialog = new TextInputDialog();

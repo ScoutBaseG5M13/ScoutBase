@@ -26,14 +26,28 @@ import java.util.List;
 /**
  * Controlador de la vista principal del dashboard.
  *
- * <p>Se encarga de mostrar la información del usuario autenticado
- * y de gestionar las acciones generales disponibles desde el menú.</p>
+ * <p>Gestiona la pantalla principal de la aplicación una vez que el usuario
+ * ha iniciado sesión, mostrando información contextual, estadísticas básicas
+ * y accesos a las distintas secciones del sistema.</p>
+ *
+ * <p>También adapta la interfaz según el rol del usuario autenticado
+ * y permite cambiar entre tema oscuro y claro.</p>
  */
 public class DashboardController {
 
+    /**
+     * Ruta de la hoja de estilos del tema oscuro.
+     */
     private static final String DARK_THEME = "/scoutbase/dark_theme.css";
+
+    /**
+     * Ruta de la hoja de estilos del tema claro.
+     */
     private static final String LIGHT_THEME = "/scoutbase/light_theme.css";
 
+    /**
+     * Indica si el tema oscuro está actualmente activo.
+     */
     private boolean darkThemeActive = true;
 
     @FXML
@@ -66,11 +80,21 @@ public class DashboardController {
     @FXML
     private VBox contentContainer;
 
+    /**
+     * Servicio encargado de obtener información de clubes.
+     */
     private final ClubService clubService = new ClubService();
+
+    /**
+     * Servicio encargado de obtener información de equipos.
+     */
     private final TeamService teamService = new TeamService();
 
     /**
-     * Inicializa la vista con los datos del usuario autenticado.
+     * Inicializa la vista del dashboard con los datos del usuario autenticado.
+     *
+     * <p>Carga la información de sesión, configura el menú según el rol
+     * del usuario y establece el texto inicial del botón de cambio de tema.</p>
      */
     @FXML
     public void initialize() {
@@ -81,6 +105,9 @@ public class DashboardController {
 
     /**
      * Muestra en pantalla el nombre y el rol del usuario autenticado.
+     *
+     * <p>Si no existe un usuario identificado en sesión, se muestra
+     * un texto indicativo en la interfaz.</p>
      */
     private void loadUserInfo() {
         String username = SessionManager.getUsername();
@@ -101,6 +128,9 @@ public class DashboardController {
 
     /**
      * Configura el dashboard según el rol del usuario autenticado.
+     *
+     * <p>En función del rol almacenado en sesión, ajusta la visibilidad
+     * de las opciones del menú y carga la vista de inicio correspondiente.</p>
      */
     private void configureDashboardByRole() {
         String role = SessionManager.getRole();
@@ -118,7 +148,8 @@ public class DashboardController {
      * Comprueba si el rol corresponde a un administrador.
      *
      * @param role rol del usuario autenticado
-     * @return true si es administrador; false en caso contrario
+     * @return {@code true} si el rol corresponde a un administrador;
+     * {@code false} en caso contrario
      */
     private boolean isAdmin(String role) {
         if (role == null || role.isBlank()) {
@@ -157,7 +188,7 @@ public class DashboardController {
      * Muestra u oculta un botón y evita que deje hueco visual cuando está oculto.
      *
      * @param button botón a modificar
-     * @param visible indica si debe mostrarse o no
+     * @param visible indica si el botón debe mostrarse o no
      */
     private void setButtonVisible(Button button, boolean visible) {
         button.setVisible(visible);
@@ -165,9 +196,9 @@ public class DashboardController {
     }
 
     /**
-     * Marca visualmente el botón activo del menú.
+     * Marca visualmente el botón activo del menú de navegación.
      *
-     * @param activeButton botón que debe quedar marcado
+     * @param activeButton botón que debe quedar marcado como activo
      */
     private void setActiveButton(Button activeButton) {
         for (Button button : getMenuButtons()) {
@@ -180,9 +211,9 @@ public class DashboardController {
     }
 
     /**
-     * Devuelve la lista de botones de navegación actualmente disponibles.
+     * Devuelve la lista de botones de navegación disponibles en el menú.
      *
-     * @return lista de botones del menú
+     * @return lista de botones del menú actualmente gestionados
      */
     private List<Button> getMenuButtons() {
         List<Button> buttons = new ArrayList<>();
@@ -205,6 +236,9 @@ public class DashboardController {
 
     /**
      * Vuelve a la pantalla principal correspondiente al rol del usuario autenticado.
+     *
+     * <p>Desmarca cualquier botón activo y recarga la vista inicial
+     * del dashboard según el rol actual del usuario.</p>
      */
     @FXML
     private void onInicioClick() {
@@ -218,7 +252,7 @@ public class DashboardController {
     }
 
     /**
-     * Alterna entre el tema oscuro y el tema claro.
+     * Alterna entre el tema oscuro y el tema claro de la interfaz.
      *
      * @param event evento generado al pulsar el botón de cambio de tema
      */
@@ -243,7 +277,8 @@ public class DashboardController {
     }
 
     /**
-     * Carga la pantalla principal para administradores con datos reales básicos.
+     * Carga la pantalla principal para administradores con estadísticas
+     * y accesos rápidos relevantes.
      */
     private void loadAdminHome() {
         contentContainer.getChildren().clear();
@@ -313,7 +348,8 @@ public class DashboardController {
     }
 
     /**
-     * Carga la pantalla principal para usuarios normales con datos reales básicos.
+     * Carga la pantalla principal para usuarios normales con estadísticas
+     * y accesos rápidos relevantes.
      */
     private void loadUserHome() {
         contentContainer.getChildren().clear();
@@ -389,7 +425,7 @@ public class DashboardController {
     /**
      * Obtiene estadísticas básicas reales a partir de los servicios disponibles.
      *
-     * @return estadísticas calculadas para el dashboard
+     * @return objeto con las estadísticas calculadas para el dashboard
      */
     private DashboardStats loadDashboardStats() {
         DashboardStats stats = new DashboardStats();
@@ -423,11 +459,11 @@ public class DashboardController {
     }
 
     /**
-     * Crea una tarjeta estadística reutilizable.
+     * Crea una tarjeta estadística reutilizable para mostrar información resumida.
      *
      * @param titleText texto descriptivo de la tarjeta
-     * @param valueText valor principal de la tarjeta
-     * @return VBox con el contenido de la tarjeta
+     * @param valueText valor principal mostrado en la tarjeta
+     * @return contenedor visual con el contenido de la tarjeta
      */
     private VBox createStatCard(String titleText, String valueText) {
         Label title = new Label(titleText);
@@ -448,11 +484,11 @@ public class DashboardController {
     }
 
     /**
-     * Crea un bloque informativo reutilizable.
+     * Crea un bloque informativo reutilizable con título y contenido.
      *
      * @param titleText título del bloque
      * @param contentText contenido del bloque
-     * @return VBox con título y contenido
+     * @return contenedor visual con el bloque informativo
      */
     private VBox createInfoBox(String titleText, String contentText) {
         Label title = new Label(titleText);
@@ -474,7 +510,7 @@ public class DashboardController {
     /**
      * Aplica un estilo base a los botones de acciones rápidas.
      *
-     * @param button botón a estilizar
+     * @param button botón al que se le aplicará el estilo
      */
     private void styleActionButton(Button button) {
         button.setPrefWidth(180);
@@ -484,6 +520,9 @@ public class DashboardController {
 
     /**
      * Carga una sección provisional en el contenedor central.
+     *
+     * <p>Se utiliza como alternativa cuando una vista aún no está implementada
+     * o cuando no ha podido cargarse correctamente.</p>
      *
      * @param titleText título principal de la sección
      * @param descriptionText descripción secundaria
@@ -502,8 +541,8 @@ public class DashboardController {
     }
 
     /**
-     * Cierra la sesión actual, limpia los datos almacenados
-     * y vuelve a la pantalla de login.
+     * Cierra la sesión actual, elimina los datos almacenados
+     * y vuelve a la pantalla de inicio de sesión.
      *
      * @param event evento generado al pulsar el botón de cerrar sesión
      */
@@ -533,6 +572,11 @@ public class DashboardController {
         }
     }
 
+    /**
+     * Carga la vista de gestión de jugadores en el contenedor principal.
+     *
+     * @param event evento generado al pulsar la opción de jugadores
+     */
     @FXML
     private void onJugadoresClick(ActionEvent event) {
         setActiveButton(jugadoresButton);
@@ -553,6 +597,11 @@ public class DashboardController {
         }
     }
 
+    /**
+     * Carga la vista de gestión de clubes en el contenedor principal.
+     *
+     * @param event evento generado al pulsar la opción de clubes
+     */
     @FXML
     private void onClubesClick(ActionEvent event) {
         setActiveButton(clubesButton);
@@ -573,6 +622,11 @@ public class DashboardController {
         }
     }
 
+    /**
+     * Muestra la sección de gestión de informes.
+     *
+     * @param event evento generado al pulsar la opción de informes
+     */
     @FXML
     private void onInformesClick(ActionEvent event) {
         setActiveButton(informesButton);
@@ -582,6 +636,11 @@ public class DashboardController {
         );
     }
 
+    /**
+     * Muestra la sección de estadísticas del sistema.
+     *
+     * @param event evento generado al pulsar la opción de estadísticas
+     */
     @FXML
     private void onEstadisticasClick(ActionEvent event) {
         setActiveButton(estadisticasButton);
@@ -591,6 +650,11 @@ public class DashboardController {
         );
     }
 
+    /**
+     * Carga la vista de gestión de scouts en el contenedor principal.
+     *
+     * @param event evento generado al pulsar la opción de scouts
+     */
     @FXML
     private void onScoutsClick(ActionEvent event) {
         setActiveButton(scoutsButton);
@@ -611,6 +675,11 @@ public class DashboardController {
         }
     }
 
+    /**
+     * Carga la vista de gestión de usuarios en el contenedor principal.
+     *
+     * @param event evento generado al pulsar la opción de usuarios
+     */
     @FXML
     private void onUsuariosClick(ActionEvent event) {
         setActiveButton(usuariosButton);
@@ -632,11 +701,23 @@ public class DashboardController {
     }
 
     /**
-     * Clase interna para encapsular estadísticas del dashboard.
+     * Clase interna utilizada para encapsular estadísticas básicas del dashboard.
      */
     private static class DashboardStats {
+
+        /**
+         * Número total de clubes disponibles.
+         */
         private int totalClubs;
+
+        /**
+         * Número total de equipos disponibles.
+         */
         private int totalTeams;
+
+        /**
+         * Número total de jugadores detectados a partir de los equipos cargados.
+         */
         private int totalPlayers;
     }
 }

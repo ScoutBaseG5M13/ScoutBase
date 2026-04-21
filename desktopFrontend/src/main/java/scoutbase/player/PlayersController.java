@@ -14,6 +14,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Controlador de la vista de gestión de jugadores.
+ *
+ * <p>Se encarga de cargar los jugadores visibles en la aplicación,
+ * aplicar filtros por equipo y por texto, recargar la información
+ * mostrada y permitir la creación de nuevos jugadores.</p>
+ *
+ * <p>También integra los datos obtenidos del backend con la caché local
+ * de jugadores creados temporalmente para mantener la información visible
+ * aunque el backend no devuelva aún todos los jugadores correctamente.</p>
+ */
 public class PlayersController {
 
     @FXML
@@ -43,14 +54,35 @@ public class PlayersController {
     @FXML
     private Label statusLabel;
 
+    /**
+     * Servicio encargado de gestionar las operaciones relacionadas con jugadores.
+     */
     private final PlayerService playerService = new PlayerService();
+
+    /**
+     * Servicio encargado de gestionar las operaciones relacionadas con equipos.
+     */
     private final TeamService teamService = new TeamService();
 
+    /**
+     * Lista de equipos cargados y disponibles para filtrar jugadores.
+     */
     private List<TeamDTO> loadedTeams = new ArrayList<>();
+
+    /**
+     * Lista de jugadores actualmente cargados en memoria.
+     */
     private List<PlayerDTO> loadedPlayers = new ArrayList<>();
 
+    /**
+     * Equipo seleccionado desde una navegación previa.
+     */
     private TeamDTO selectedTeamFromNavigation;
 
+    /**
+     * Inicializa el controlador configurando la tabla, el selector de equipos
+     * y cargando los datos iniciales.
+     */
     @FXML
     public void initialize() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -64,6 +96,12 @@ public class PlayersController {
         loadAllPlayersFromVisibleTeams();
     }
 
+    /**
+     * Configura el comportamiento visual del selector de equipos.
+     *
+     * <p>Define cómo se representa cada equipo dentro del {@link ComboBox}
+     * mostrando únicamente su nombre.</p>
+     */
     private void configureTeamComboBox() {
         if (teamFilterComboBox == null) return;
 
@@ -80,6 +118,14 @@ public class PlayersController {
         });
     }
 
+    /**
+     * Establece un equipo seleccionado desde otra vista o navegación previa.
+     *
+     * <p>Si el equipo existe entre los cargados en el selector, lo marca
+     * automáticamente y aplica los filtros correspondientes.</p>
+     *
+     * @param selectedTeam equipo que debe quedar seleccionado
+     */
     public void setSelectedTeam(TeamDTO selectedTeam) {
         this.selectedTeamFromNavigation = selectedTeam;
 
@@ -95,6 +141,9 @@ public class PlayersController {
         applyFilters();
     }
 
+    /**
+     * Carga la lista de equipos desde el backend y la asigna al selector.
+     */
     private void loadTeams() {
         try {
             loadedTeams = teamService.getAllTeams();
@@ -109,6 +158,13 @@ public class PlayersController {
         }
     }
 
+    /**
+     * Carga todos los jugadores visibles a partir de los equipos disponibles.
+     *
+     * <p>Para cada equipo, intenta obtener los jugadores desde el backend
+     * y combinarlos con los almacenados en la caché local, evitando duplicados.
+     * Finalmente actualiza la lista cargada y aplica los filtros activos.</p>
+     */
     private void loadAllPlayersFromVisibleTeams() {
         List<PlayerDTO> allPlayers = new ArrayList<>();
 
@@ -133,17 +189,29 @@ public class PlayersController {
         applyFilters();
     }
 
+    /**
+     * Recarga la información de equipos y jugadores mostrada en la vista.
+     */
     @FXML
     private void onReloadClick() {
         loadTeams();
         loadAllPlayersFromVisibleTeams();
     }
 
+    /**
+     * Aplica manualmente los filtros configurados en la interfaz.
+     */
     @FXML
     private void onApplyFiltersClick() {
         applyFilters();
     }
 
+    /**
+     * Aplica los filtros de equipo y texto sobre la lista de jugadores cargados.
+     *
+     * <p>Actualiza la tabla con los jugadores que coinciden con el equipo
+     * seleccionado y con el texto introducido en el campo de búsqueda.</p>
+     */
     private void applyFilters() {
         TeamDTO selectedTeam = null;
 
@@ -187,6 +255,13 @@ public class PlayersController {
         }
     }
 
+    /**
+     * Muestra un formulario para crear un nuevo jugador en el equipo seleccionado.
+     *
+     * <p>Recoge los datos desde un cuadro de diálogo, intenta crear el jugador
+     * mediante el servicio correspondiente y, si el backend no devuelve la
+     * información esperada, lo almacena localmente en caché como alternativa.</p>
+     */
     @FXML
     private void onAddPlayerClick() {
         TeamDTO selectedTeam = null;
@@ -297,6 +372,14 @@ public class PlayersController {
         }
     }
 
+    /**
+     * Combina los jugadores obtenidos del backend con los almacenados localmente,
+     * evitando duplicados por identificador.
+     *
+     * @param backendPlayers jugadores recuperados desde el backend
+     * @param localPlayers jugadores almacenados en caché local
+     * @return lista combinada de jugadores sin duplicados
+     */
     private List<PlayerDTO> mergePlayers(List<PlayerDTO> backendPlayers, List<PlayerDTO> localPlayers) {
         List<PlayerDTO> merged = new ArrayList<>(backendPlayers);
 
@@ -312,6 +395,12 @@ public class PlayersController {
         return merged;
     }
 
+    /**
+     * Elimina jugadores duplicados de una lista en función de su identificador.
+     *
+     * @param players lista de jugadores a depurar
+     * @return lista de jugadores única sin elementos repetidos
+     */
     private List<PlayerDTO> removeDuplicatePlayers(List<PlayerDTO> players) {
         List<PlayerDTO> uniquePlayers = new ArrayList<>();
 

@@ -36,6 +36,7 @@
         <Button text="Añadir usuario" onAction="#onAddUserClick"/>
         <Button text="Buscar" onAction="#onSearchUserClick"/>
         <Button text="Mi usuario" onAction="#onLoadMeClick"/>
+        <Button text="Recargar" onAction="#onReloadClick"/>
     </HBox>
 
     <TableView fx:id="usersTable" prefHeight="300">
@@ -46,4 +47,5 @@
         </columns>
     </TableView>
 
+    <Label fx:id="statusLabel" text=""/>
 </VBox>

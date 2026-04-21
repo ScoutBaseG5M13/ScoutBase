@@ -18,9 +18,12 @@ import java.io.IOException;
 /**
  * Controlador de la pantalla de inicio de sesión.
  *
- * <p>Se encarga de validar los datos introducidos por el usuario,
- * realizar la autenticación contra el backend y abrir el dashboard
- * cuando el login es correcto.</p>
+ * <p>Gestiona la interacción del usuario con la vista de login,
+ * validando los datos introducidos, realizando la autenticación
+ * contra el backend y redirigiendo al dashboard en caso de éxito.</p>
+ *
+ * <p>También se encarga de mostrar mensajes de error cuando las
+ * credenciales no son válidas o ocurre algún problema durante el proceso.</p>
  */
 public class LoginController {
 
@@ -33,13 +36,31 @@ public class LoginController {
     @FXML
     private Label errorLabel;
 
+    /**
+     * Servicio encargado de realizar las operaciones de autenticación.
+     */
     private final AuthService authService = new AuthService();
 
+    /**
+     * Método de inicialización del controlador.
+     *
+     * <p>Se ejecuta automáticamente al cargar el FXML y limpia
+     * cualquier mensaje de error previo.</p>
+     */
     @FXML
     public void initialize() {
         errorLabel.setText("");
     }
 
+    /**
+     * Maneja el evento de clic sobre el botón de login.
+     *
+     * <p>Valida los campos introducidos, realiza la petición de login
+     * al backend y, si la autenticación es correcta, guarda la sesión
+     * y abre la pantalla principal de la aplicación.</p>
+     *
+     * @param event evento de acción generado por el botón de login
+     */
     @FXML
     private void onLoginButtonClick(ActionEvent event) {
         errorLabel.setText("");
@@ -88,6 +109,15 @@ public class LoginController {
         }
     }
 
+    /**
+     * Carga y muestra la pantalla principal (dashboard) tras un login exitoso.
+     *
+     * <p>Reemplaza la escena actual por la vista del dashboard,
+     * aplicando la hoja de estilos correspondiente.</p>
+     *
+     * @param event evento de acción que permite obtener el escenario actual
+     * @throws IOException si ocurre un error al cargar el archivo FXML
+     */
     private void openDashboard(ActionEvent event) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/dashboard-view.fxml"));
         Parent root = loader.load();

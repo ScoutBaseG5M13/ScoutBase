@@ -3,16 +3,14 @@ package scoutbase.user;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * Objeto de transferencia de datos (DTO) que representa un usuario
- * obtenido desde el backend.
+ * Objeto de transferencia de datos (DTO) que representa un usuario.
  *
- * <p>Se utiliza para mapear la información devuelta por la API,
- * incluyendo identificador, nombre de usuario, contraseña,
- * rol y datos personales básicos.</p>
+ * <p>Se utiliza para mapear la información de usuarios obtenida desde el backend,
+ * incluyendo datos de identificación, credenciales, rol y datos personales.</p>
  *
- * <p>La anotación {@code @JsonIgnoreProperties(ignoreUnknown = true)}
- * permite ignorar campos adicionales que pueda devolver el backend,
- * evitando errores durante la deserialización.</p>
+ * <p>La anotación {@code @JsonIgnoreProperties(ignoreUnknown = true)} permite
+ * ignorar campos adicionales presentes en la respuesta de la API, evitando
+ * errores durante la deserialización.</p>
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDto {
@@ -23,12 +21,12 @@ public class UserDto {
     private String id;
 
     /**
-     * Nombre de usuario.
+     * Nombre de usuario utilizado para autenticación.
      */
     private String username;
 
     /**
-     * Contraseña del usuario (generalmente en formato cifrado).
+     * Contraseña del usuario (normalmente en formato cifrado).
      */
     private String password;
 
@@ -53,12 +51,14 @@ public class UserDto {
     private String email;
 
     /**
-     * Constructor vacío necesario para la deserialización.
+     * Constructor vacío necesario para la deserialización desde JSON.
      */
     public UserDto() {
     }
 
     /**
+     * Devuelve el identificador del usuario.
+     *
      * @return identificador del usuario
      */
     public String getId() {
@@ -66,6 +66,8 @@ public class UserDto {
     }
 
     /**
+     * Establece el identificador del usuario.
+     *
      * @param id identificador a establecer
      */
     public void setId(String id) {
@@ -73,6 +75,8 @@ public class UserDto {
     }
 
     /**
+     * Devuelve el nombre de usuario.
+     *
      * @return nombre de usuario
      */
     public String getUsername() {
@@ -80,6 +84,8 @@ public class UserDto {
     }
 
     /**
+     * Establece el nombre de usuario.
+     *
      * @param username nombre de usuario a establecer
      */
     public void setUsername(String username) {
@@ -87,6 +93,8 @@ public class UserDto {
     }
 
     /**
+     * Devuelve la contraseña del usuario.
+     *
      * @return contraseña del usuario
      */
     public String getPassword() {
@@ -94,6 +102,8 @@ public class UserDto {
     }
 
     /**
+     * Establece la contraseña del usuario.
+     *
      * @param password contraseña a establecer
      */
     public void setPassword(String password) {
@@ -101,6 +111,8 @@ public class UserDto {
     }
 
     /**
+     * Devuelve el rol del usuario.
+     *
      * @return rol del usuario
      */
     public String getRole() {
@@ -108,6 +120,8 @@ public class UserDto {
     }
 
     /**
+     * Establece el rol del usuario.
+     *
      * @param role rol a establecer
      */
     public void setRole(String role) {
@@ -115,27 +129,35 @@ public class UserDto {
     }
 
     /**
-     * @return nombre real del usuario
+     * Devuelve el nombre real del usuario.
+     *
+     * @return nombre real
      */
     public String getName() {
         return name;
     }
 
     /**
-     * @param name nombre real a establecer
+     * Establece el nombre real del usuario.
+     *
+     * @param name nombre a establecer
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * @return apellidos del usuario
+     * Devuelve los apellidos del usuario.
+     *
+     * @return apellidos
      */
     public String getSurname() {
         return surname;
     }
 
     /**
+     * Establece los apellidos del usuario.
+     *
      * @param surname apellidos a establecer
      */
     public void setSurname(String surname) {
@@ -143,14 +165,18 @@ public class UserDto {
     }
 
     /**
-     * @return correo electrónico del usuario
+     * Devuelve el correo electrónico del usuario.
+     *
+     * @return correo electrónico
      */
     public String getEmail() {
         return email;
     }
 
     /**
-     * @param email correo electrónico a establecer
+     * Establece el correo electrónico del usuario.
+     *
+     * @param email correo a establecer
      */
     public void setEmail(String email) {
         this.email = email;

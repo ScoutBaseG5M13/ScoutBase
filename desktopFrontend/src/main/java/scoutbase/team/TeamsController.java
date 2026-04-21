@@ -17,6 +17,13 @@ import scoutbase.user.UserDto;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Controlador de la vista de gestión de equipos.
+ *
+ * <p>Se encarga de mostrar los equipos disponibles, recargar su listado,
+ * abrir la vista de jugadores del equipo seleccionado y permitir la creación
+ * de nuevos equipos asociados a un club concreto.</p>
+ */
 public class TeamsController {
 
     @FXML
@@ -37,10 +44,20 @@ public class TeamsController {
     @FXML
     private Label statusLabel;
 
+    /**
+     * Servicio encargado de gestionar las operaciones relacionadas con equipos.
+     */
     private final TeamService teamService = new TeamService();
 
+    /**
+     * Club actualmente seleccionado desde la navegación previa.
+     */
     private ClubDTO selectedClub;
 
+    /**
+     * Inicializa la tabla de equipos configurando las columnas
+     * con las propiedades correspondientes del DTO.
+     */
     @FXML
     public void initialize() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -49,11 +66,22 @@ public class TeamsController {
         subcategoryColumn.setCellValueFactory(new PropertyValueFactory<>("subcategory"));
     }
 
+    /**
+     * Establece el club seleccionado y carga los equipos asociados.
+     *
+     * @param selectedClub club seleccionado desde la vista anterior
+     */
     public void setSelectedClub(ClubDTO selectedClub) {
         this.selectedClub = selectedClub;
         loadTeams();
     }
 
+    /**
+     * Carga el listado de equipos visibles y lo muestra en la tabla.
+     *
+     * <p>Si existe un club seleccionado, actualiza también el mensaje
+     * de estado indicando el contexto actual.</p>
+     */
     private void loadTeams() {
         try {
             List<TeamDTO> teams = teamService.getAllTeams();
@@ -71,11 +99,21 @@ public class TeamsController {
         }
     }
 
+    /**
+     * Recarga manualmente el listado de equipos.
+     */
     @FXML
     private void onReloadClick() {
         loadTeams();
     }
 
+    /**
+     * Abre la vista de jugadores del equipo seleccionado.
+     *
+     * <p>Carga la vista correspondiente, pasa el equipo seleccionado
+     * al controlador de jugadores y sustituye el contenido actual
+     * del contenedor principal.</p>
+     */
     @FXML
     private void onViewPlayersClick() {
         TeamDTO selectedTeam = teamsTable.getSelectionModel().getSelectedItem();
@@ -107,6 +145,13 @@ public class TeamsController {
         }
     }
 
+    /**
+     * Muestra un cuadro de diálogo para crear un nuevo equipo en el club seleccionado.
+     *
+     * <p>Solicita al usuario el nombre, la categoría y la subcategoría del equipo,
+     * valida que todos los campos estén informados, obtiene el usuario autenticado
+     * actual y envía la petición de creación al backend.</p>
+     */
     @FXML
     private void onAddTeamClick() {
         if (selectedClub == null) {

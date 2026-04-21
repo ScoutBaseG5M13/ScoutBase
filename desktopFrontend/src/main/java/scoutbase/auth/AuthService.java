@@ -13,27 +13,29 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 /**
- * Servicio encargado de gestionar la autenticación contra el backend.
+ * Servicio encargado de gestionar la autenticación y la obtención
+ * de datos del usuario contra el backend de ScoutBase.
  *
- * <p>Permite iniciar sesión, obtener datos del usuario autenticado
- * y extraer el token devuelto por la API.</p>
+ * <p>Esta clase encapsula las llamadas HTTP relacionadas con el inicio
+ * de sesión y la recuperación de información del usuario autenticado,
+ * así como la extracción del token devuelto por la API.</p>
  */
 public class AuthService {
 
     /**
-     * URL base de la API backend.
+     * URL base de la API backend para la gestión de usuarios.
      */
     private static final String BASE_URL =
             "https://scoutbase-dev-6r6d.onrender.com/api/v1/users";
 
     /**
-     * URL del endpoint de login del backend.
+     * URL del endpoint de autenticación para el inicio de sesión.
      */
     private static final String LOGIN_URL =
             BASE_URL + "/auth/login";
 
     /**
-     * Cliente HTTP usado para comunicarse con la API.
+     * Cliente HTTP utilizado para comunicarse con la API.
      */
     private final HttpClient httpClient;
 
@@ -46,7 +48,7 @@ public class AuthService {
      * Crea una nueva instancia del servicio de autenticación.
      *
      * <p>Inicializa el cliente HTTP con un tiempo de espera para la conexión
-     * y el mapper necesario para trabajar con respuestas JSON.</p>
+     * y el objeto necesario para serializar y deserializar respuestas JSON.</p>
      */
     public AuthService() {
         this.httpClient = HttpClient.newBuilder()
@@ -58,15 +60,17 @@ public class AuthService {
     /**
      * Obtiene los datos de un usuario a partir de su nombre de usuario.
      *
-     * <p>Este método puede requerir permisos específicos según la configuración
-     * del backend. No debe usarse como parte obligatoria del flujo de login.</p>
+     * <p>Este método realiza una petición autenticada al backend para recuperar
+     * la información asociada a un usuario concreto. Puede requerir permisos
+     * específicos según la configuración del servidor.</p>
      *
      * @param username nombre de usuario a consultar
      * @param token token de autenticación necesario para acceder al endpoint
-     * @return objeto {@link UserDto} con los datos del usuario
-     * @throws IOException si ocurre un error durante la comunicación
-     * @throws InterruptedException si la petición es interrumpida
-     * @throws RuntimeException si la respuesta no contiene datos válidos o se produce un error HTTP
+     * @return objeto {@link UserDto} con los datos del usuario solicitado
+     * @throws IOException si ocurre un error durante la comunicación con la API
+     * @throws InterruptedException si la petición HTTP es interrumpida
+     * @throws RuntimeException si la respuesta no contiene datos válidos
+     *                          o si se produce un error HTTP
      */
     public UserDto getUserByUsername(String username, String token) throws IOException, InterruptedException {
         String url = BASE_URL + "/username/" + username;
@@ -100,16 +104,16 @@ public class AuthService {
     /**
      * Obtiene los datos del usuario autenticado a partir del token actual.
      *
-     * <p>Este método consulta el endpoint {@code /users/me} para recuperar
-     * la información del usuario en sesión, incluyendo su identificador,
-     * que puede ser necesario para operaciones como la creación de clubes
-     * o equipos.</p>
+     * <p>Este método consulta el endpoint {@code /me} para recuperar
+     * la información del usuario en sesión, incluyendo datos que pueden
+     * ser necesarios en otras operaciones de la aplicación.</p>
      *
      * @param token token de autenticación del usuario actual
      * @return objeto {@link UserDto} con los datos del usuario autenticado
-     * @throws IOException si ocurre un error durante la comunicación
-     * @throws InterruptedException si la petición es interrumpida
-     * @throws RuntimeException si la respuesta no contiene datos válidos o se produce un error HTTP
+     * @throws IOException si ocurre un error durante la comunicación con la API
+     * @throws InterruptedException si la petición HTTP es interrumpida
+     * @throws RuntimeException si la respuesta no contiene datos válidos
+     *                          o si se produce un error HTTP
      */
     public UserDto getCurrentUser(String token) throws IOException, InterruptedException {
         String url = BASE_URL + "/me";
@@ -142,14 +146,19 @@ public class AuthService {
     }
 
     /**
-     * Realiza el login del usuario contra el backend.
+     * Realiza el inicio de sesión del usuario contra el backend.
+     *
+     * <p>Envía las credenciales al endpoint de autenticación y devuelve
+     * la respuesta procesada como un objeto {@link ApiResponse} si la
+     * operación se completa correctamente.</p>
      *
      * @param username nombre de usuario introducido
      * @param password contraseña introducida
      * @return respuesta de la API convertida a {@link ApiResponse}
-     * @throws IOException si ocurre un error durante la comunicación
-     * @throws InterruptedException si la petición es interrumpida
-     * @throws RuntimeException si las credenciales son incorrectas o se produce un error HTTP
+     * @throws IOException si ocurre un error durante la comunicación con la API
+     * @throws InterruptedException si la petición HTTP es interrumpida
+     * @throws RuntimeException si las credenciales son incorrectas
+     *                          o si se produce un error HTTP
      */
     public ApiResponse login(String username, String password) throws IOException, InterruptedException {
         LoginRequest loginRequest = new LoginRequest(username, password);
@@ -193,14 +202,15 @@ public class AuthService {
     }
 
     /**
-     * Construye una excepción a partir del mensaje devuelto por la API.
+     * Construye una excepción a partir del mensaje de error devuelto por la API.
      *
-     * <p>Si la respuesta contiene un mensaje de error válido, se usa ese texto.
-     * En caso contrario, se devuelve una excepción con un mensaje por defecto.</p>
+     * <p>Si la respuesta contiene un mensaje válido, se utiliza dicho texto
+     * como descripción de la excepción. En caso contrario, se emplea
+     * el mensaje por defecto proporcionado.</p>
      *
      * @param responseBody cuerpo de la respuesta HTTP
-     * @param defaultMessage mensaje por defecto si no se puede leer el error de la API
-     * @return excepción con el mensaje más adecuado
+     * @param defaultMessage mensaje por defecto si no puede extraerse uno válido
+     * @return excepción con el mensaje más adecuado según la respuesta recibida
      */
     private RuntimeException buildApiException(String responseBody, String defaultMessage) {
         try {
@@ -219,11 +229,12 @@ public class AuthService {
     /**
      * Extrae el token de autenticación contenido en la respuesta de login.
      *
-     * <p>Se contemplan varios nombres posibles del campo para adaptarse
-     * a distintas respuestas del backend.</p>
+     * <p>Este método contempla distintos nombres posibles del campo que
+     * almacena el token, para adaptarse a posibles variaciones en la
+     * estructura de respuesta del backend.</p>
      *
-     * @param response respuesta devuelta por la API
-     * @return token de autenticación, o {@code null} si no se encuentra
+     * @param response respuesta devuelta por la API tras el login
+     * @return token de autenticación extraído, o {@code null} si no se encuentra
      */
     public String extractToken(ApiResponse response) {
         JsonNode data = response.getData();
