@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -6,6 +6,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import scoutbase.common.ApiClient;
+import scoutbase.common.ApiResponse;
 
 /**
  * Controlador de la vista de gestión de usuarios.

@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.auth;
 
 /**
  * Solicitud de login enviada al backend.

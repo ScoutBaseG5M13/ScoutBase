@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.dashboard;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +13,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import scoutbase.club.ClubDTO;
+import scoutbase.club.ClubService;
+import scoutbase.team.TeamDTO;
+import scoutbase.team.TeamService;
+import scoutbase.app.SessionManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -507,7 +512,7 @@ public class DashboardController {
         SessionManager.clear();
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("login-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/login-view.fxml"));
             Parent root = loader.load();
 
             Scene scene = new Scene(root, 900, 600);
@@ -533,7 +538,7 @@ public class DashboardController {
         setActiveButton(jugadoresButton);
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("players-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/players-view.fxml"));
             Parent playersView = loader.load();
 
             contentContainer.getChildren().clear();
@@ -553,7 +558,7 @@ public class DashboardController {
         setActiveButton(clubesButton);
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("clubs-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/clubs-view.fxml"));
             Parent clubsView = loader.load();
 
             contentContainer.getChildren().clear();
@@ -591,7 +596,7 @@ public class DashboardController {
         setActiveButton(scoutsButton);
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("scouts-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/scouts-view.fxml"));
             Parent scoutsView = loader.load();
 
             contentContainer.getChildren().clear();
@@ -611,7 +616,7 @@ public class DashboardController {
         setActiveButton(usuariosButton);
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("users-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/users-view.fxml"));
             Parent usersView = loader.load();
 
             contentContainer.getChildren().clear();

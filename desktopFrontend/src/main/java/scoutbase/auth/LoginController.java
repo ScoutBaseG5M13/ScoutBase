@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.auth;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -10,6 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import scoutbase.common.ApiResponse;
+import scoutbase.app.SessionManager;
 
 import java.io.IOException;
 
@@ -87,7 +89,7 @@ public class LoginController {
     }
 
     private void openDashboard(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("dashboard-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/dashboard-view.fxml"));
         Parent root = loader.load();
 
         Scene scene = new Scene(root, 900, 600);

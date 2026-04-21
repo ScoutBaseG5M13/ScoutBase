@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.scout;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;

@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.team;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -8,6 +8,11 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import scoutbase.app.SessionManager;
+import scoutbase.auth.AuthService;
+import scoutbase.club.ClubDTO;
+import scoutbase.player.PlayersController;
+import scoutbase.user.UserDto;
 
 import java.util.List;
 import java.util.Optional;

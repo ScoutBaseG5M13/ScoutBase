@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.app;
 
 /**
  * Gestiona la información de sesión del usuario autenticado.

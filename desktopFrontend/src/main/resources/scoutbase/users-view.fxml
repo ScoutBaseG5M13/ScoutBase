@@ -11,7 +11,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="scoutbase.UsersController"
+      fx:controller="scoutbase.user.UsersController"
       spacing="18"
       prefWidth="1000"
       prefHeight="650"

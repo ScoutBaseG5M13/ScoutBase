@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.scout;
 
 /**
  * DTO que representa un scout en la aplicación.

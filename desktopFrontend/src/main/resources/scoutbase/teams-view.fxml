@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="scoutbase.TeamsController">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="scoutbase.team.TeamsController">
     <children>
         <VBox spacing="15.0"
               AnchorPane.topAnchor="20.0"

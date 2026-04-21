@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="scoutbase.ClubsController">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="scoutbase.club.ClubsController">
     <children>
         <VBox spacing="15.0"
               AnchorPane.topAnchor="20.0"

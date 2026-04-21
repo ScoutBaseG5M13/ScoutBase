@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.team;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

@@ -1,6 +1,8 @@
 package scoutbase;
 
 import org.junit.jupiter.api.Test;
+import scoutbase.auth.AuthService;
+import scoutbase.common.ApiResponse;
 
 import static org.junit.jupiter.api.Assertions.*;
 

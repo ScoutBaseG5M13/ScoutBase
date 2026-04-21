@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="scoutbase.PlayersController">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="scoutbase.player.PlayersController">
     <children>
         <VBox spacing="15.0"
               AnchorPane.topAnchor="20.0"

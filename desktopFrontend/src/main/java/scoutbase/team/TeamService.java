@@ -1,7 +1,9 @@
-package scoutbase;
+package scoutbase.team;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import scoutbase.common.ApiClient;
+import scoutbase.common.ApiResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;

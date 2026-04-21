@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.common;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

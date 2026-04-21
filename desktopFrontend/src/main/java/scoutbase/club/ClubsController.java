@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.club;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -10,6 +10,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.TextInputDialog;
+import scoutbase.team.TeamsController;
+import scoutbase.app.SessionManager;
+import scoutbase.auth.AuthService;
+import scoutbase.user.UserDto;
+
 import java.util.Optional;
 import java.util.List;
 

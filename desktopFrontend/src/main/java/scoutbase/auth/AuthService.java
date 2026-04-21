@@ -1,7 +1,9 @@
-package scoutbase;
+package scoutbase.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import scoutbase.common.ApiResponse;
+import scoutbase.user.UserDto;
 
 import java.io.IOException;
 import java.net.URI;

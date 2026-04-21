@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.player;
 
 import java.util.ArrayList;
 import java.util.List;

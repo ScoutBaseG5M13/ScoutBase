@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.player;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -6,6 +6,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
+import scoutbase.team.TeamDTO;
+import scoutbase.team.TeamService;
 
 import java.util.ArrayList;
 import java.util.List;

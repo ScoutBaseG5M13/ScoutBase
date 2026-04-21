@@ -11,7 +11,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="scoutbase.DashboardController"
+            fx:controller="scoutbase.dashboard.DashboardController"
             prefWidth="900.0"
             prefHeight="600.0"
             styleClass="root-container">

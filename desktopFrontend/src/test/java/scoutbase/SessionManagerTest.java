@@ -2,6 +2,7 @@ package scoutbase;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import scoutbase.app.SessionManager;
 
 import static org.junit.jupiter.api.Assertions.*;
 

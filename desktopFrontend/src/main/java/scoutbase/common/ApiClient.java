@@ -1,4 +1,6 @@
-package scoutbase;
+package scoutbase.common;
+
+import scoutbase.app.SessionManager;
 
 import java.io.IOException;
 import java.net.URI;

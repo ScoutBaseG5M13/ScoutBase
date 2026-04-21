@@ -1,4 +1,4 @@
-package scoutbase;
+package scoutbase.scout;
 
 import java.util.ArrayList;
 import java.util.List;
