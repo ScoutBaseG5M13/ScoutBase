@@ -21,4 +21,3 @@ Aquest directori conté les proves unitàries del client mòbil de ScoutBase.
 Aquestes proves no depenen del backend i permeten validar el comportament bàsic
 del ViewModel sense necessitat de connexió amb el servidor.
 
-ff
