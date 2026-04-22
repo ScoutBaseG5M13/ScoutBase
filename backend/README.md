@@ -1,10 +1,16 @@
 # Scoutbase API
 
-### Swagger of Scoutbase API
+## Entorno DEVELOPMENT
+### Swagger
 https://scoutbase-dev-6r6d.onrender.com/swagger-ui/index.html
-
-### Download de YAML for Postman:
+### YAML de Swagger:
 https://scoutbase-dev-6r6d.onrender.com/v3/api-docs.yaml
+
+## Entorno PRODUCTION
+### Swagger
+https://scoutbase-pro-sjz0.onrender.com/swagger-ui/index.html
+### YAML de Swagger:
+https://scoutbase-pro-sjz0.onrender.com/v3/api-docs.yaml
 
 ### API Response format
 ##### · Status 200 OK responses from the API will always be enveloped like:
