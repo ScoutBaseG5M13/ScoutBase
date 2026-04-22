@@ -1,32 +1,33 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: scoutbase-postgresql
+    container_name: ${PROJECT_NAME}-db
     environment:
-      POSTGRES_DB: scoutbase-db
-      POSTGRES_USER: scoutbadmin
-      POSTGRES_PASSWORD: grup5ioc
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5431:5432"
+      - "${DB_PORT_EXTERNAL}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
 
   app:
-    image: eclipse-temurin:24-jdk
-    container_name: scoutbase-api
+    image: eclipse-temurin:21-jre
+    container_name: ${PROJECT_NAME}-api
     ports:
       - "8080:8080"
     volumes:
-      # This maps your local target folder into the container
       - ./target:/app
     working_dir: /app
-    command: java -jar scoutbase-backend-0.0.1-SNAPSHOT.jar
+    # Dynamically uses the version from .env
+    command: java -jar ${PROJECT_NAME}-${APP_VERSION}.jar
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: jdbc:postgresql://postgres:5431/scoutbase-db
-      DATABASE_USERNAME: scoutbadmin
-      DATABASE_PASSWORD: grup5ioc
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE}
 
 volumes:
   postgres_data:

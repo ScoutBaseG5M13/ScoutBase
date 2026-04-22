@@ -1,9 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ScoutbaseApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <module name="scoutbase-backend" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="es.dimecresalessis.scoutbase.ScoutbaseApplication" />
-    <method v="2">
-      <option name="Make" enabled="true" />
-    </method>
-  </configuration>
-</component>

@@ -1,0 +1,85 @@
+PROVES FUNCIONALS – CLIENT MÒBIL (ANDROID)
+Projecte: ScoutBase
+Autor: Sergi
+Data: Abril 2026
+
+Aquest document descriu les proves funcionals implementades amb JUnit
+per validar la comunicació real entre el client mòbil i el servidor.
+Totes les proves utilitzen crides HTTP reals al backend desplegat.
+
+=====================================================================
+TEST 1 — LOGIN CORRECTE
+Fitxer: LoginTest.kt
+Descripció:
+    Comprova que l’usuari pot iniciar sessió amb credencials vàlides.
+    Es fa una crida POST a /users/auth/login amb l’usuari john_doe.
+    El servidor ha de retornar success = true i un token vàlid.
+Resultat esperat:
+    - Codi HTTP 200
+    - success = true
+    - token no buit
+
+=====================================================================
+TEST 2 — LOGIN INCORRECTE
+Fitxer: LoginIncorrectTest.kt
+Descripció:
+    Comprova que el servidor rebutja credencials incorrectes.
+    Es fa una crida POST a /users/auth/login amb contrasenya errònia.
+Resultat esperat:
+    - Codi HTTP 401 o error equivalent
+    - success = false
+
+=====================================================================
+TEST 3 — OBTENIR EQUIPS
+Fitxer: GetTeamsTest.kt
+Descripció:
+    Comprova que després de fer login, l’usuari pot obtenir la llista
+    d’equips associats al seu compte.
+    Es fa una crida GET a /teams amb el token obtingut al login.
+Resultat esperat:
+    - Codi HTTP 200
+    - success = true
+    - data és un array (pot ser buit o amb equips)
+
+=====================================================================
+TEST 4 — CREAR JUGADOR
+Fitxer: CreatePlayerTest.kt
+Descripció:
+    Comprova que el servidor permet crear un jugador nou.
+    Es fa una crida POST a /players amb les dades del jugador.
+    El servidor ha de retornar un objecte amb un id generat.
+Resultat esperat:
+    - Codi HTTP 200
+    - success = true
+    - data.id no buit
+
+=====================================================================
+TEST 5 — EDITAR JUGADOR
+Fitxer: EditPlayerTest.kt
+Descripció:
+    Comprova que es pot editar un jugador existent.
+    Primer es crea un jugador temporal.
+    Després es fa una crida PUT a /players/{id} amb les dades noves.
+Resultat esperat:
+    - Codi HTTP 200
+    - success = true
+    - Les dades retornades coincideixen amb les modificades
+
+=====================================================================
+TEST 6 — ELIMINAR JUGADOR
+Fitxer: DeletePlayerTest.kt
+Descripció:
+    Comprova que es pot eliminar un jugador existent.
+    Primer es crea un jugador temporal.
+    Després es fa una crida DELETE a /players/{id}.
+Resultat esperat:
+    - Codi HTTP 200
+    - success = true
+
+=====================================================================
+
+NOTES FINALS:
+- Totes les proves utilitzen crides reals al backend.
+- S’han implementat utilitats internes per fer login i crear jugadors
+  temporals quan és necessari.
+- Les proves són independents entre elles i poden executar-se en bloc.

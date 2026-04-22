@@ -1,17 +1,23 @@
 package es.dimecresalessis.scoutbase;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import es.dimecresalessis.scoutbase.infrastructure.security.config.JwtProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
+/**
+ * Main entry point for the Scoutbase application.
+ */
 @SpringBootApplication
+@EnableConfigurationProperties(JwtProperties.class)
 public class ScoutbaseApplication {
 
-	private static final Logger logger = LoggerFactory.getLogger(ScoutbaseApplication.class);
-
+	/**
+	 * The main method that launches the application.
+	 *
+	 * @param args Command-line arguments passed to the application.
+	 */
 	public static void main(String[] args) {
-		logger.info("--- APPLICATION STARTING LOGGER OUCH! 14:47h---");
 		SpringApplication.run(ScoutbaseApplication.class, args);
 	}
 }

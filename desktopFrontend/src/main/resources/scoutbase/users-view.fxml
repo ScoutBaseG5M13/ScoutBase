@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="scoutbase.user.UsersController"
+      spacing="18"
+      prefWidth="1000"
+      prefHeight="650"
+      styleClass="dashboard-content">
+
+    <Label text="Gestión de usuarios" styleClass="dashboard-title"/>
+    <Label text="Creación y gestión básica de usuarios" styleClass="section-subtitle"/>
+
+    <HBox spacing="10">
+        <TextField fx:id="usernameField" promptText="Username"/>
+        <PasswordField fx:id="passwordField" promptText="Password"/>
+        <TextField fx:id="roleField" promptText="Rol"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <TextField fx:id="nameField" promptText="Nombre"/>
+        <TextField fx:id="surnameField" promptText="Apellidos"/>
+        <TextField fx:id="emailField" promptText="Email"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <Button text="Añadir usuario" onAction="#onAddUserClick"/>
+        <Button text="Buscar" onAction="#onSearchUserClick"/>
+        <Button text="Mi usuario" onAction="#onLoadMeClick"/>
+        <Button text="Recargar" onAction="#onReloadClick"/>
+    </HBox>
+
+    <TableView fx:id="usersTable" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="250"/>
+            <TableColumn fx:id="usernameColumn" text="Username" prefWidth="200"/>
+            <TableColumn fx:id="roleColumn" text="Rol" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+    <Label fx:id="statusLabel" text=""/>
+</VBox>

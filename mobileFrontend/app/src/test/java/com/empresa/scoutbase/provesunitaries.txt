@@ -1,0 +1,23 @@
+Aquest directori conté les proves unitàries del client mòbil de ScoutBase.
+
+1. LoginViewModelInitialStateTest.kt
+   Comprova que l'estat inicial del LoginViewModel és correcte:
+   - loading = false
+   - error = null
+   - token = null
+   - role = null
+
+2. LoginViewModelSetErrorTest.kt
+   Comprova que la funció setError() actualitza correctament el missatge d'error.
+
+3. LoginViewModelLoadingTest.kt
+   Comprova que loading passa a true quan es crida la funció login().
+
+4. LoginViewModelLogoutTest.kt
+   Comprova que logout() esborra el token i el rol de l'usuari.
+   Per a la prova s'utilitza la funció setFakeAuth(), creada exclusivament
+   per permetre simular un usuari autenticat durant els tests.
+
+Aquestes proves no depenen del backend i permeten validar el comportament bàsic
+del ViewModel sense necessitat de connexió amb el servidor.
+
