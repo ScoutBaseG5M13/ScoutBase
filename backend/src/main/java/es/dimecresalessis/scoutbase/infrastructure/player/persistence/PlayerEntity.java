@@ -23,7 +23,7 @@ public class PlayerEntity extends CommonEntity {
     @Column(nullable = false)
     private String surname;
 
-    private int age;
+    private int birthYear;
 
     @Column(nullable = false)
     private String email;

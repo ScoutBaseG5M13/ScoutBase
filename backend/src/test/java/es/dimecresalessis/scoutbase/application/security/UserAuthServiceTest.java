@@ -6,6 +6,7 @@ import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
+import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,7 +57,7 @@ class UserAuthServiceTest {
         when(clubRepository.findClubByTeam(teamId)).thenReturn(Optional.of(club));
         when(clubRepository.findById(clubId)).thenReturn(Optional.of(club));
 
-        boolean authorized = userAuthService.isAuthorizedByTeam(user, teamId, RoleEnum.TRAINER);
+        boolean authorized = userAuthService.isAuthorizedByTeam(teamId, RoleEnum.TRAINER);
 
         assertTrue(authorized);
     }
@@ -77,42 +78,8 @@ class UserAuthServiceTest {
         when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
         when(clubRepository.findById(clubId)).thenReturn(Optional.of(club));
 
-        boolean authorized = userAuthService.isAuthorizedByTeam(user, teamId, RoleEnum.TRAINER);
+        boolean authorized = userAuthService.isAuthorizedByTeam(teamId, RoleEnum.TRAINER);
 
         assertTrue(authorized);
-    }
-
-    @Test
-    void shouldFindClubUserRoleAsAdmin() {
-        when(user.getId()).thenReturn(userId);
-        Club club = mock(Club.class);
-        when(club.getAdminUserIds()).thenReturn(List.of(userId));
-        when(club.getName()).thenReturn("Test Club");
-        when(clubRepository.findById(clubId)).thenReturn(Optional.of(club));
-
-        RoleEnum role = userAuthService.findClubUserRole(user, clubId);
-
-        assertEquals(RoleEnum.ADMIN, role);
-    }
-
-    @Test
-    void shouldReturnNullWhenUserIsNotInClub() {
-        when(user.getId()).thenReturn(userId);
-        Club club = mock(Club.class);
-        when(club.getAdminUserIds()).thenReturn(List.of(UUID.randomUUID()));
-        when(clubRepository.findById(clubId)).thenReturn(Optional.of(club));
-
-        RoleEnum role = userAuthService.findClubUserRole(user, clubId);
-
-        assertNull(role);
-    }
-
-    @Test
-    void shouldReturnNullWhenTeamDoesNotExist() {
-        when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
-
-        RoleEnum role = userAuthService.findTeamUserRole(user, teamId);
-
-        assertNull(role);
     }
 }

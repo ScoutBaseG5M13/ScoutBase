@@ -33,6 +33,9 @@ public class UserEntity extends CommonEntity {
     @Column(nullable = false)
     String email;
 
+    @Column(nullable = false)
+    boolean isSuperAdmin;
+
     public void update(UserEntity newEntity) {
         this.username = newEntity.getUsername();
         this.password = newEntity.getPassword();

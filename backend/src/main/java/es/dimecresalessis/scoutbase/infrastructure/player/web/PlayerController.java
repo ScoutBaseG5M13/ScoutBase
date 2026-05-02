@@ -5,17 +5,15 @@ import es.dimecresalessis.scoutbase.application.player.delete.DeletePlayerUseCas
 import es.dimecresalessis.scoutbase.application.player.find.FindAllPlayersByTeamIdUseCase;
 import es.dimecresalessis.scoutbase.application.player.find.FindPlayerByIdUseCase;
 import es.dimecresalessis.scoutbase.application.player.update.UpdatePlayerUseCase;
-import es.dimecresalessis.scoutbase.application.security.UserAuthService;
+import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByPlayerUseCase;
 import es.dimecresalessis.scoutbase.application.team.update.UpdateTeamUseCase;
 import es.dimecresalessis.scoutbase.domain.team.exception.TeamException;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
-import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
-import es.dimecresalessis.scoutbase.infrastructure.security.Session;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
@@ -46,6 +44,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @RequestMapping(Routes.API_ROOT + Routes.PLAYERS)
 public class PlayerController {
 
+    private final UserAuthService userAuthService;
     private final PlayerMapper playerMapper;
     private final FindPlayerByIdUseCase findPlayerByIdUseCase;
     private final UpdatePlayerUseCase updatePlayerUseCase;
@@ -53,7 +52,6 @@ public class PlayerController {
     private final DeletePlayerUseCase deletePlayerUseCase;
     private final FindAllPlayersByTeamIdUseCase findAllPlayersByTeamIdUseCase;
     private final FindTeamByPlayerUseCase findTeamByPlayerUseCase;
-    private final UserAuthService userAuthService;
     private final FindTeamByIdUseCase findTeamByIdUseCase;
     private final UpdateTeamUseCase updateTeamUseCase;
 
@@ -65,9 +63,7 @@ public class PlayerController {
     @GetMapping(Routes.TEAMS + Routes.ID_PATHVAR)
     @Operation(summary = "Find all players of team [Auth SCOUTER]", description = "Find all Players of the requested Team")
     public ResponseEntity<ApiResponse<List<PlayerDTO>>> findAllPlayersByTeam(@PathVariable("id") UUID teamId) {
-        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamId, RoleEnum.SCOUTER)) {
-            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
-        }
+        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.SCOUTER);
         List<Player> players = findAllPlayersByTeamIdUseCase.execute(teamId);
         List<PlayerDTO> playersDto = players.stream().map(playerMapper::toDto).toList();
         return handleResponse(playersDto).ok();
@@ -83,13 +79,11 @@ public class PlayerController {
     @GetMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Find Player by ID [Auth SCOUTER]", description = "Finds a Player")
     public ResponseEntity<ApiResponse<PlayerDTO>> findPlayerById(@PathVariable(value = "id") UUID playerId) throws PlayerException {
+        userAuthService.hasMinimumTeamAuthorization(playerId, RoleEnum.SCOUTER);
         try {
             Team team = findTeamByPlayerUseCase.execute(playerId);
             if (team == null) {
                 throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, playerId.toString());
-            }
-            if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), team.getId(), RoleEnum.SCOUTER)) {
-                throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
             }
             Player player = findPlayerByIdUseCase.execute(playerId);
             PlayerDTO playerDto = playerMapper.toDto(player);
@@ -109,12 +103,10 @@ public class PlayerController {
     @PostMapping(Routes.TEAMS + Routes.ID_PATHVAR)
     @Operation(summary = "Create Player [Auth SCOUTER]", description = "Creates a new Player")
     public ResponseEntity<ApiResponse<PlayerDTO>> createPlayer(@PathVariable("id") UUID teamId, @Valid @RequestBody PlayerCreateRequest playerRequest) throws PlayerException {
+        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.SCOUTER);
         Team team = findTeamByIdUseCase.execute(teamId);
         if (team == null) {
             throw new TeamException(ErrorEnum.TEAM_NOT_FOUND, teamId.toString());
-        }
-        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamId, RoleEnum.SCOUTER)) {
-            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
         }
         Player player = playerMapper.createToDomain(playerRequest);
         Player createdPlayer = createPlayerUseCase.execute(player);
@@ -140,9 +132,7 @@ public class PlayerController {
             if (team == null) {
                 throw new TeamException(ErrorEnum.TEAM_IS_NULL);
             }
-            if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), team.getId(), RoleEnum.SCOUTER)) {
-                throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
-            }
+            userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
             Player player = playerMapper.dtoToDomain(playerDto);
             Player updatedPlayer = updatePlayerUseCase.execute(player, playerId);
             PlayerDTO updatedPlayerDTO = playerMapper.toDto(updatedPlayer);
@@ -162,14 +152,13 @@ public class PlayerController {
     @DeleteMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Delete player [Auth SCOUTER]", description = "Deletes a Player")
     public ResponseEntity<ApiResponse<Boolean>> deletePlayer(@PathVariable("id") UUID playerId) {
+
         try {
             Team team = findTeamByPlayerUseCase.execute(playerId);
             if (team == null) {
                 throw new TeamException(ErrorEnum.TEAM_BY_PLAYER_NOT_FOUND, playerId.toString());
             }
-            if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), team.getId(), RoleEnum.SCOUTER)) {
-                throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
-            }
+            userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
             boolean isDeleted = deletePlayerUseCase.execute(playerId);
             team.getPlayers().remove(playerId);
             updateTeamUseCase.execute(team, team.getId());

@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 /**
  * Use case for creating {@link Stat}.
  */
@@ -28,12 +30,15 @@ public class CreateStatUseCase {
      * @return The created {@link Stat} object after being persisted.
      * @throws StatException If the provided stat object is null.
      */
-    public Stat execute(Stat stat) throws StatException {
+    public Stat execute(Stat stat, UUID playerId) throws StatException {
         if (stat == null) {
             throw new StatException(ErrorEnum.STAT_IS_NULL);
         }
         if (stat.getId() == null) {
             throw new StatException(ErrorEnum.STAT_ID_IS_NULL);
+        }
+        if (!stat.getPlayerId().equals(playerId)) {
+            throw new StatException(ErrorEnum.USER_ID_DOES_NOT_MATCH, stat.getPlayerId().toString(), playerId.toString());
         }
         if (checkIfStatAlreadyExistsOnPlayer.execute(stat)) {
             throw new StatException(ErrorEnum.STAT_CODE_ALREADY_EXISTS, stat.getId().toString(), stat.getPlayerId().toString());

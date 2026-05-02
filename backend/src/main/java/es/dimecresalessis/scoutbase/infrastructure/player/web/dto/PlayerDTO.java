@@ -24,7 +24,7 @@ public class PlayerDTO {
     @NotBlank
     private String surname;
 
-    private int age;
+    private int birthYear;
 
     @NotBlank
     private String email;

@@ -3,7 +3,7 @@ package es.dimecresalessis.scoutbase.infrastructure.team.web;
 import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserUseCase;
 import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.club.update.UpdateClubUseCase;
-import es.dimecresalessis.scoutbase.application.security.UserAuthService;
+import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
 import es.dimecresalessis.scoutbase.application.team.create.CreateTeamUseCase;
 import es.dimecresalessis.scoutbase.application.team.delete.DeleteTeamUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByUserUseCase;
@@ -100,17 +100,15 @@ public class TeamController {
     /**
      * Finds a team by its ID.
      *
-     * @param id The {@link UUID} of the team.
+     * @param teamId The {@link UUID} of the team.
      * @return {@link ApiResponse} with the {@link TeamDTO}.
      * @throws UserException if the user lacks sufficient permissions.
      */
     @GetMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Find Team by ID [Auth SCOUTER]", description = "Finds a Team")
-    public ResponseEntity<ApiResponse<TeamDTO>> findTeamById(@PathVariable UUID id) {
-        Team team = findTeamById.execute(id);
-        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), team.getId(), RoleEnum.SCOUTER)) {
-            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.SCOUTER.name());
-        }
+    public ResponseEntity<ApiResponse<TeamDTO>> findTeamById(@PathVariable(value = "id") UUID teamId) {
+        Team team = findTeamById.execute(teamId);
+        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.SCOUTER);
         TeamDTO teamDto = teamMapper.toDto(team);
         return handleResponse(teamDto).ok();
     }
@@ -125,6 +123,7 @@ public class TeamController {
     @Operation(summary = "Find Team by Player [Auth SCOUTER]", description = "Finds the Team by User")
     public ResponseEntity<ApiResponse<TeamDTO>> findTeamByPlayerId(@PathVariable("id") UUID playerId) {
         Team team = findTeamByPlayerUseCase.execute(playerId);
+        userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
         TeamDTO teamDto = teamMapper.toDto(team);
         return handleResponse(teamDto).ok();
     }
@@ -140,13 +139,11 @@ public class TeamController {
     @PostMapping(Routes.CLUBS + Routes.ID_PATHVAR)
     @Operation(summary = "Create a Team [Auth ADMIN]", description = "Creates a Team")
     public ResponseEntity<ApiResponse<TeamDTO>> createTeam(@RequestBody TeamCreateRequest teamRequest, @PathVariable("id") UUID clubId) {
-        if (!userAuthService.isAuthorizedByClub(Session.getSessionUser(), clubId, RoleEnum.ADMIN)) {
-            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
-        }
         Club club = findClubByIdUseCase.execute(clubId);
         if (club == null) {
             throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, clubId.toString());
         }
+        userAuthService.hasMinimumClubAuthorization(club.getId(), RoleEnum.ADMIN);
         Team team = teamMapper.createToDomain(teamRequest);
         Team createdTeam = createTeamUseCase.execute(team, club);
         TeamDTO createdTeamDto = teamMapper.toDto(createdTeam);
@@ -159,17 +156,15 @@ public class TeamController {
      * Updates an existing team.
      *
      * @param teamDto The updated data.
-     * @param id The {@link UUID} of the team to update.
+     * @param teamId The {@link UUID} of the team to update.
      * @return {@link ApiResponse} with the updated {@link TeamDTO}.
      */
     @PutMapping(value = Routes.ID_PATHVAR)
     @Operation(summary = "Update Team [Auth TRAINER]", description = "Updates a Team")
-    public ResponseEntity<ApiResponse<TeamDTO>> updateTeam(@RequestBody TeamDTO teamDto, @PathVariable("id") UUID id) {
-        if (!userAuthService.isAuthorizedByTeam(Session.getSessionUser(), teamDto.getId(), RoleEnum.TRAINER)) {
-            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.TRAINER.name());
-        }
+    public ResponseEntity<ApiResponse<TeamDTO>> updateTeam(@RequestBody TeamDTO teamDto, @PathVariable("id") UUID teamId) {
         Team team = teamMapper.dtoToDomain(teamDto);
-        Team updatedTeam = updateTeamUseCase.execute(team, id);
+        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.TRAINER);
+        Team updatedTeam = updateTeamUseCase.execute(team, teamId);
         TeamDTO updatedTeamDto = teamMapper.toDto(updatedTeam);
         return handleResponse(updatedTeamDto).ok();
     }
@@ -184,9 +179,7 @@ public class TeamController {
     @Operation(summary = "Delete Team [Auth ADMIN]", description = "Deletes a Team")
     public ResponseEntity<ApiResponse<Boolean>> deleteTeam(@PathVariable("id") UUID teamId) {
         Club club = findClubByIdUseCase.execute(teamId);
-        if (!userAuthService.isAuthorizedByClub(Session.getSessionUser(), teamId, RoleEnum.ADMIN)) {
-            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, RoleEnum.ADMIN.name());
-        }
+        userAuthService.hasMinimumClubAuthorization(club.getId(), RoleEnum.ADMIN);
         boolean isDeleted = deleteTeamUseCase.execute(teamId);
         club.getTeams().remove(teamId);
         updateClubUseCase.execute(club, club.getId());
