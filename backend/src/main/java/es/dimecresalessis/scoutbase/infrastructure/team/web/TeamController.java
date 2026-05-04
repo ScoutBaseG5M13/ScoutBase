@@ -1,12 +1,11 @@
 package es.dimecresalessis.scoutbase.infrastructure.team.web;
 
-import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserUseCase;
 import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.club.update.UpdateClubUseCase;
+import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByClubUseCase;
 import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
 import es.dimecresalessis.scoutbase.application.team.create.CreateTeamUseCase;
 import es.dimecresalessis.scoutbase.application.team.delete.DeleteTeamUseCase;
-import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByUserUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByPlayerUseCase;
 import es.dimecresalessis.scoutbase.application.team.update.UpdateTeamUseCase;
@@ -17,7 +16,6 @@ import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
-import es.dimecresalessis.scoutbase.infrastructure.security.Session;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamDTO;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.mapper.TeamMapper;
@@ -48,25 +46,11 @@ public class TeamController {
     private final CreateTeamUseCase createTeamUseCase;
     private final UpdateTeamUseCase updateTeamUseCase;
     private final DeleteTeamUseCase deleteTeamUseCase;
-    private final FindAllTeamsByUserUseCase findAllTeamsByUserUseCase;
     private final FindTeamByPlayerUseCase findTeamByPlayerUseCase;
     private final FindClubByIdUseCase findClubByIdUseCase;
     private final UserAuthService userAuthService;
-    private final FindAllClubsByUserUseCase findAllClubsByUserUseCase;
     private final UpdateClubUseCase updateClubUseCase;
-
-    /**
-     * Retrieves all teams associated with the currently authenticated user.
-     *
-     * @return {@link ApiResponse} containing the list of {@link TeamDTO}.
-     */
-    @GetMapping
-    @Operation(summary = "Find all teams [Auth SCOUTER]", description = "Finds all Teams")
-    public ResponseEntity<ApiResponse<List<TeamDTO>>> findAllTeamsByUser() {
-        List<Team> teams = findAllTeamsByUserUseCase.execute(Session.getSessionUser().getId());
-        List<TeamDTO> teamsDto = teams.stream().map(teamMapper::toDto).toList();
-        return handleResponse(teamsDto).ok();
-    }
+    private final FindAllTeamsByClubUseCase findAllTeamsByClubUseCase;
 
     /**
      * Retrieves all teams belonging to a specific club, filtered by user access.
@@ -77,20 +61,9 @@ public class TeamController {
     @GetMapping(Routes.CLUBS + Routes.ID_PATHVAR)
     @Operation(summary = "Find all Teams by Club [Auth SCOUTER]", description = "Finds all Teams by Club")
     public ResponseEntity<ApiResponse<List<TeamDTO>>> findAllTeamsByClub(@PathVariable("id") UUID clubId) {
-        List<Club> userClubs = findAllClubsByUserUseCase.execute(Session.getSessionUser().getId());
-
-        Optional<Club> targetClub = userClubs.stream()
-                .filter(c -> c.getId().equals(clubId))
-                .findFirst();
-
-        if (targetClub.isEmpty()) {
-            return handleResponse(Collections.<TeamDTO>emptyList()).ok();
-        }
-
-        List<Team> allTeams = findAllTeamsByUserUseCase.execute(Session.getSessionUser().getId());
-
-        List<TeamDTO> teamsDto = allTeams.stream()
-                .filter(team -> targetClub.get().getTeams().contains(team.getId()))
+        userAuthService.hasMinimumClubAuthorization(clubId, RoleEnum.SCOUTER);
+        List<Team> teams = findAllTeamsByClubUseCase.execute(clubId);
+        List<TeamDTO> teamsDto = teams.stream()
                 .map(teamMapper::toDto)
                 .toList();
 

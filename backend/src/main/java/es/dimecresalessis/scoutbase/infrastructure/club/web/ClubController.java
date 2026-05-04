@@ -2,17 +2,14 @@ package es.dimecresalessis.scoutbase.infrastructure.club.web;
 
 import es.dimecresalessis.scoutbase.application.club.create.CreateClubUseCase;
 import es.dimecresalessis.scoutbase.application.club.delete.DeleteClubUseCase;
-import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserUseCase;
-import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsUseCase;
+import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserClubIdUseCase;
 import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.club.update.UpdateClubUseCase;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
-import es.dimecresalessis.scoutbase.infrastructure.security.Session;
 import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
 import es.dimecresalessis.scoutbase.domain.club.exception.ClubException;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
-import es.dimecresalessis.scoutbase.infrastructure.club.web.dto.ClubCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.club.web.dto.ClubDTO;
 import es.dimecresalessis.scoutbase.infrastructure.club.web.mapper.ClubMapper;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
@@ -43,23 +40,23 @@ public class ClubController {
 
     private final ClubMapper clubMapper;
     private final FindClubByIdUseCase findClubByIdUseCase;
-    private final CreateClubUseCase createClubUseCase;
     private final UpdateClubUseCase updateClubUseCase;
     private final DeleteClubUseCase deleteClubUseCase;
     private final UserAuthService userAuthService;
-    private final FindAllClubsByUserUseCase findAllClubsByUserUseCase;
+    private final FindAllClubsByUserClubIdUseCase findAllClubsByUserClubIdUseCase;
 
     /**
      * Finds all clubs.
      *
      * @return {@link ApiResponse} containing a list of all {@link Club}.
      */
-    @GetMapping
-    @Operation(summary = "Find all Clubs", description = "Finds all Clubs where the logged User takes part in")
-    public ResponseEntity<ApiResponse<List<ClubDTO>>> findAllClubs() {
-        List<Club> clubs = findAllClubsByUserUseCase.execute(Session.getSessionUser().getId());
-        List<ClubDTO> clubsDto = clubs.stream().map(clubMapper::domainToDTO).toList();
-        return handleResponse(clubsDto).ok();
+    @GetMapping(Routes.USER_CLUBS + Routes.ID_PATHVAR)
+    @Operation(summary = "Find all clubs from a user club", description = "Finds all Clubs created by a User Club")
+    public ResponseEntity<ApiResponse<List<ClubDTO>>> findAllClubs(@PathVariable(value = "id") UUID clubId) {
+        userAuthService.isAuthorizedByClub(clubId, RoleEnum.SCOUTER);
+        List<Club> clubs = findAllClubsByUserClubIdUseCase.execute(clubId);
+        List<ClubDTO> clubDtos = clubs.stream().map(clubMapper::domainToDTO).toList();
+        return handleResponse(clubDtos).ok();
     }
 
     /**
@@ -80,22 +77,6 @@ public class ClubController {
         } catch (NoSuchElementException ex) {
             throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, clubId.toString());
         }
-    }
-
-    /**
-     * Creates a new club record.
-     *
-     * @param clubRequest The club details submitted by the client.
-     * @return {@link ApiResponse} containing the created club's details.
-     * @throws ClubException If an error occurs during club creation.
-     */
-    @PostMapping
-    @Operation(summary = "Create a Club", description = "Creates a new Club")
-    public ResponseEntity<ApiResponse<ClubDTO>> createClub(@Valid @RequestBody ClubCreateRequest clubRequest) throws ClubException {
-        Club club = clubMapper.createToDomain(clubRequest);
-        Club createdClub = createClubUseCase.execute(club);
-        ClubDTO createdClubDTO = clubMapper.domainToDTO(createdClub);
-        return handleResponse(createdClubDTO).created();
     }
 
     /**

@@ -3,7 +3,7 @@ package es.dimecresalessis.scoutbase.infrastructure.player.persistence;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.shared.domain.PositionEnum;
 import es.dimecresalessis.scoutbase.infrastructure.player.persistence.mapper.PlayerEntityMapperImpl;
-import es.dimecresalessis.scoutbase.infrastructure.team.persistence.JpaTeamRepository;
+import es.dimecresalessis.scoutbase.infrastructure.userteam.persistence.JpaUserTeamRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ class PlayerRepositoryImplIT {
     private JpaPlayerRepository jpaPlayerRepository;
 
     @MockitoBean
-    private JpaTeamRepository jpaTeamRepository;
+    private JpaUserTeamRepository jpaUserTeamRepository;
 
     private UUID playerId;
     private Player player;

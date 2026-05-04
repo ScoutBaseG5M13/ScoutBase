@@ -1,8 +1,8 @@
 package es.dimecresalessis.scoutbase.application.user.find;
 
-import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserUseCase;
-import es.dimecresalessis.scoutbase.domain.team.model.Team;
-import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
+import es.dimecresalessis.scoutbase.application.userclub.find.FindAllUserClubsByUserUseCase;
+import es.dimecresalessis.scoutbase.domain.userteam.model.UserTeam;
+import es.dimecresalessis.scoutbase.domain.userteam.repository.UserTeamRepository;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -20,15 +20,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FindAllScoutsUseCase {
 
-    private static final Logger logger = LoggerFactory.getLogger(FindAllClubsByUserUseCase.class);
-    private final TeamRepository teamRepository;
+    private final UserTeamRepository userTeamRepository;
     private final FindUserByIdUseCase findUserByIdUseCase;
 
     public List<User> execute() {
-        List<Team> teams = teamRepository.findAll();
+        List<UserTeam> userTeams = userTeamRepository.findAll();
         List<User> scouters = new ArrayList<>();
-        for (Team team : teams) {
-            for (UUID scoutId : team.getScouters()) {
+        for (UserTeam userTeam : userTeams) {
+            for (UUID scoutId : userTeam.getScouters()) {
                 scouters.add(findUserByIdUseCase.execute(scoutId));
             }
         }

@@ -17,7 +17,7 @@ public class User {
     String name;
     String surname;
     String email;
-    boolean isSuperAdmin = false;
+    boolean superAdmin = false;
 
     public static class UserBuilder {
         public UserBuilder id(UUID id) {

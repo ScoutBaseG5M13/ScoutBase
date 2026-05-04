@@ -2,7 +2,6 @@ package es.dimecresalessis.scoutbase.infrastructure.club.persistence;
 
 import es.dimecresalessis.scoutbase.infrastructure.web.persistence.CommonEntity;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -28,13 +27,10 @@ import java.util.UUID;
 @Table(name = "club")
 public class ClubEntity extends CommonEntity {
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = false, columnDefinition = "uuid[]")
-    private List<UUID> adminUserIds;
-
     @Column(nullable = false)
     private String name;
 
-    @ElementCollection
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(nullable = true, columnDefinition = "uuid[]")
     private List<UUID> teams;
 }

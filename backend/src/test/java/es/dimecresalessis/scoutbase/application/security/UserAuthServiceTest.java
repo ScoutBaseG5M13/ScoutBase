@@ -1,9 +1,9 @@
 package es.dimecresalessis.scoutbase.application.security;
 
-import es.dimecresalessis.scoutbase.domain.club.model.Club;
-import es.dimecresalessis.scoutbase.domain.club.repository.ClubRepository;
-import es.dimecresalessis.scoutbase.domain.team.model.Team;
-import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
+import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
+import es.dimecresalessis.scoutbase.domain.userclub.repository.UserClubRepository;
+import es.dimecresalessis.scoutbase.domain.userteam.model.UserTeam;
+import es.dimecresalessis.scoutbase.domain.userteam.repository.UserTeamRepository;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
@@ -26,10 +26,10 @@ import static org.mockito.Mockito.*;
 class UserAuthServiceTest {
 
     @Mock
-    private TeamRepository teamRepository;
+    private UserTeamRepository userTeamRepository;
 
     @Mock
-    private ClubRepository clubRepository;
+    private UserClubRepository userClubRepository;
 
     @InjectMocks
     private UserAuthService userAuthService;
@@ -50,12 +50,12 @@ class UserAuthServiceTest {
     @Test
     void shouldAuthorizeByTeamWhenUserIsClubAdmin() {
         when(user.getId()).thenReturn(userId);
-        Club club = mock(Club.class);
-        when(club.getId()).thenReturn(clubId);
-        when(club.getAdminUserIds()).thenReturn(List.of(userId));
+        UserClub userClub = mock(UserClub.class);
+        when(userClub.getId()).thenReturn(clubId);
+        when(userClub.getAdminUserIds()).thenReturn(List.of(userId));
 
-        when(clubRepository.findClubByTeam(teamId)).thenReturn(Optional.of(club));
-        when(clubRepository.findById(clubId)).thenReturn(Optional.of(club));
+        when(userClubRepository.findUserClubByTeam(teamId)).thenReturn(Optional.of(userClub));
+        when(userClubRepository.findUserClubById(clubId)).thenReturn(Optional.of(userClub));
 
         boolean authorized = userAuthService.isAuthorizedByTeam(teamId, RoleEnum.TRAINER);
 
@@ -65,18 +65,18 @@ class UserAuthServiceTest {
     @Test
     void shouldAuthorizeByTeamWhenUserIsTrainer() {
         when(user.getId()).thenReturn(userId);
-        Team team = mock(Team.class);
-        Club club = mock(Club.class);
+        UserTeam userTeam = mock(UserTeam.class);
+        UserClub userClub = mock(UserClub.class);
 
-        when(team.getTrainer()).thenReturn(userId);
-        when(team.getName()).thenReturn("Test Team");
-        when(club.getName()).thenReturn("Test Club");
-        when(club.getId()).thenReturn(clubId);
-        when(club.getAdminUserIds()).thenReturn(Collections.emptyList());
+        when(userTeam.getTrainer()).thenReturn(userId);
+        when(userTeam.getName()).thenReturn("Test Team");
+        when(userClub.getName()).thenReturn("Test Club");
+        when(userClub.getId()).thenReturn(clubId);
+        when(userClub.getAdminUserIds()).thenReturn(Collections.emptyList());
 
-        when(clubRepository.findClubByTeam(teamId)).thenReturn(Optional.of(club));
-        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
-        when(clubRepository.findById(clubId)).thenReturn(Optional.of(club));
+        when(userClubRepository.findUserClubByTeam(teamId)).thenReturn(Optional.of(userClub));
+        when(userTeamRepository.findById(teamId)).thenReturn(Optional.of(userTeam));
+        when(userClubRepository.findUserClubById(clubId)).thenReturn(Optional.of(userClub));
 
         boolean authorized = userAuthService.isAuthorizedByTeam(teamId, RoleEnum.TRAINER);
 

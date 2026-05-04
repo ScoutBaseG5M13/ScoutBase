@@ -1,9 +1,9 @@
 package es.dimecresalessis.scoutbase.application.user.find;
 
-import es.dimecresalessis.scoutbase.domain.club.model.Club;
-import es.dimecresalessis.scoutbase.domain.club.repository.ClubRepository;
-import es.dimecresalessis.scoutbase.domain.team.model.Team;
-import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
+import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
+import es.dimecresalessis.scoutbase.domain.userclub.repository.UserClubRepository;
+import es.dimecresalessis.scoutbase.domain.userteam.model.UserTeam;
+import es.dimecresalessis.scoutbase.domain.userteam.repository.UserTeamRepository;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import lombok.AllArgsConstructor;
@@ -19,25 +19,25 @@ import java.util.UUID;
 public class FindUserRoleInTeamUseCase {
 
     private static final Logger logger = LoggerFactory.getLogger(FindUserRoleInTeamUseCase.class);
-    private final ClubRepository clubRepository;
-    private final TeamRepository teamRepository;
+    private final UserClubRepository userClubRepository;
+    private final UserTeamRepository userTeamRepository;
     private final FindUserRoleInClubUseCase findUserRoleInClubUseCase;
 
     /**
-     * Resolves the specific role of a user within a team context.
-     * This considers the club hierarchy (e.g., club admins inherit permissions in the team).
+     * Resolves the specific role of a user within a userteam context.
+     * This considers the userclub hierarchy (e.g., userclub admins inherit permissions in the userteam).
      *
      * @param user The user to evaluate.
-     * @param teamId The unique identifier of the team.
-     * @return The highest {@link RoleEnum} the user holds in the team context,
+     * @param teamId The unique identifier of the userteam.
+     * @return The highest {@link RoleEnum} the user holds in the userteam context,
      * or {@code null} if no relationship exists.
      */
 
     public RoleEnum execute(User user, UUID teamId) {
         RoleEnum teamRole = null;
-        Optional<Team> team = teamRepository.findById(teamId);
+        Optional<UserTeam> team = userTeamRepository.findById(teamId);
         if (team.isPresent()) {
-            Optional<Club> club = clubRepository.findClubByTeam(teamId);
+            Optional<UserClub> club = userClubRepository.findUserClubByTeam(teamId);
             if (club.isPresent()) {
                 RoleEnum clubRole = findUserRoleInClubUseCase.execute(user, club.get().getId());
                 if (clubRole != null) {
@@ -56,7 +56,7 @@ public class FindUserRoleInTeamUseCase {
             if (team.get().getScouters() != null && team.get().getScouters().stream().anyMatch(s -> s.equals(user.getId()))) {
                 teamRole = RoleEnum.SCOUTER;
             }
-            logger.info("[AUTH] User '{}' has role {} in team {}, of club '{}'", user.getUsername(), teamRole, team.get().getName(), club.get().getName());
+            logger.info("[AUTH] User '{}' has role {} in userteam {}, of userclub '{}'", user.getUsername(), teamRole, team.get().getName(), club.isPresent() ? club.get().getName() : null);
         }
         return null;
     }

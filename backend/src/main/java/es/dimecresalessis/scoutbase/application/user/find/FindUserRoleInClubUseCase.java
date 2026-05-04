@@ -1,7 +1,7 @@
 package es.dimecresalessis.scoutbase.application.user.find;
 
-import es.dimecresalessis.scoutbase.domain.club.model.Club;
-import es.dimecresalessis.scoutbase.domain.club.repository.ClubRepository;
+import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
+import es.dimecresalessis.scoutbase.domain.userclub.repository.UserClubRepository;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import lombok.AllArgsConstructor;
@@ -17,18 +17,18 @@ import java.util.UUID;
 public class FindUserRoleInClubUseCase {
 
     private static final Logger logger = LoggerFactory.getLogger(FindUserRoleInClubUseCase.class);
-    private final ClubRepository clubRepository;
+    private final UserClubRepository userClubRepository;
 
     /**
-     * Resolves the role of a user within a specific club.
+     * Resolves the role of a user within a specific userclub.
      *
      * @param user The user to evaluate.
-     * @param clubId The unique identifier of the club.
-     * @return {@link RoleEnum#ADMIN} if the user is in the club's admin list,
+     * @param clubId The unique identifier of the userclub.
+     * @return {@link RoleEnum#ADMIN} if the user is in the userclub's admin list,
      * or {@code null} otherwise.
      */
     public RoleEnum execute(User user, UUID clubId) {
-        Optional<Club> club = clubRepository.findById(clubId);
+        Optional<UserClub> club = userClubRepository.findUserClubById(clubId);
         if (club.isPresent()) {
             boolean clubHasUser = club.get().getAdminUserIds()
                     .stream()

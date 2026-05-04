@@ -2,7 +2,6 @@ package es.dimecresalessis.scoutbase.infrastructure.club.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -15,9 +14,6 @@ import java.util.UUID;
 public class ClubDTO {
 
     private UUID id;
-
-    @NotEmpty
-    private List<UUID> adminUserIds;
 
     @NotBlank
     private String name;

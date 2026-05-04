@@ -2,14 +2,12 @@ package es.dimecresalessis.scoutbase.infrastructure.team.persistence;
 
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
-import es.dimecresalessis.scoutbase.infrastructure.club.persistence.ClubEntity;
 import es.dimecresalessis.scoutbase.infrastructure.club.persistence.JpaClubRepository;
 import es.dimecresalessis.scoutbase.infrastructure.team.persistence.mapper.TeamEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Infrastructure implementation of the {@link TeamRepository} interface.
@@ -20,7 +18,6 @@ public class TeamRepositoryImpl implements TeamRepository {
 
     private final JpaTeamRepository jpaTeamRepository;
     private final TeamEntityMapper mapper;
-    private final JpaClubRepository jpaClubRepository;
 
     /**
      * Finds all Teams present in the system.
@@ -46,32 +43,6 @@ public class TeamRepositoryImpl implements TeamRepository {
         return jpaTeamRepository.findById(id).map(mapper::toDomain);
     }
 
-    /**
-     * Finds all Teams associated with a specific User.
-     *
-     * @param userId The {@link UUID} of the User.
-     * @return A {@link List} of {@link Team} entities linked to the User.
-     */
-    @Override
-    public List<Team> findAllByUserId(UUID userId) {
-        List<TeamEntity> allTeams = jpaTeamRepository.findAll();
-        List<ClubEntity> allClubs = jpaClubRepository.findAll();
-
-        Set<UUID> adminTeamIds = allClubs.stream()
-                .filter(club -> club.getAdminUserIds() != null && club.getAdminUserIds().contains(userId))
-                .flatMap(club -> club.getTeams().stream())
-                .collect(Collectors.toSet());
-
-        return allTeams.stream()
-                .filter(t ->
-                        Objects.equals(t.getTrainer(), userId) ||
-                                Objects.equals(t.getSecondTrainer(), userId) ||
-                                (t.getScouters() != null && t.getScouters().contains(userId)) ||
-                                adminTeamIds.contains(t.getId())
-                )
-                .map(mapper::toDomain)
-                .toList();
-    }
 
     /**
      * Finds a Team that contains a specific Player in its roster.

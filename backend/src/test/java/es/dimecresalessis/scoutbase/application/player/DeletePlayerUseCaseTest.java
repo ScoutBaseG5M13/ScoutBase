@@ -3,7 +3,7 @@ package es.dimecresalessis.scoutbase.application.player;
 import es.dimecresalessis.scoutbase.application.player.delete.DeletePlayerUseCase;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
-import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
+import es.dimecresalessis.scoutbase.domain.userteam.repository.UserTeamRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +25,7 @@ class DeletePlayerUseCaseTest {
     private PlayerRepository playerRepository;
 
     @Mock
-    private TeamRepository teamRepository;
+    private UserTeamRepository userTeamRepository;
 
     @InjectMocks
     private DeletePlayerUseCase deletePlayerUseCase;

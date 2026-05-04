@@ -26,16 +26,14 @@ public interface ClubRepository {
     Optional<Club> findById(UUID id);
 
     /**
-     * Locates all clubs where the user is in.
+     * Locates the clubs where a specific player is in.
      *
-     * @param userId The clubs of the user {@link UUID} to find.
-     * @return An {@link Optional} containing clubs, or empty if no match is found.
+     * @param playerId The club of the player {@link UUID} to find.
+     * @return An {@link Optional} containing a club, or empty if no match is found.
      */
-    List<Club> findAllByUserId(UUID userId);
+    Optional<Club> findClubByPlayerId(UUID playerId);
 
     Optional<Club> findClubByTeam(UUID teamId);
-
-    List<Club> findAllClubsByUserId(UUID userId);
 
     /**
      * Persists a player's club into the system.
@@ -47,17 +45,6 @@ public interface ClubRepository {
      * @return The saved version of the club entity.
      */
     Club save(Club club);
-
-//    /**
-//     * Updates a player's club into the system.
-//     * <p>
-//     * This method handles both the updating of new club and the updating of existing ones.
-//     * </p>
-//     *
-//     * @param club The {@link Club} domain object to be saved. Must not be {@code null}.
-//     * @return The saved version of the club entity.
-//     */
-//    Club update(Club club);
 
     /**
      * Removes a club from the system using their ID.

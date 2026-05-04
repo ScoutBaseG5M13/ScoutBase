@@ -1,19 +1,19 @@
 package es.dimecresalessis.scoutbase.infrastructure.user.web;
 
-import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserUseCase;
-import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
+import es.dimecresalessis.scoutbase.application.userclub.find.FindAllUserClubsByUserUseCase;
+import es.dimecresalessis.scoutbase.application.userclub.find.FindUserClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.security.AuthService;
 import es.dimecresalessis.scoutbase.application.security.LoginRequest;
+import es.dimecresalessis.scoutbase.domain.userteam.model.UserTeam;
 import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
-import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByClubUseCase;
-import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
+import es.dimecresalessis.scoutbase.application.userteam.find.FindAllUserTeamsByUserClubUseCase;
+import es.dimecresalessis.scoutbase.application.userteam.find.FindUserTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.user.create.CreateUserUseCase;
 import es.dimecresalessis.scoutbase.application.user.delete.DeleteUserUseCase;
 import es.dimecresalessis.scoutbase.application.user.find.*;
 import es.dimecresalessis.scoutbase.application.user.update.UpdateUserUseCase;
-import es.dimecresalessis.scoutbase.domain.club.model.Club;
+import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
-import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.infrastructure.security.Session;
@@ -53,10 +53,10 @@ public class UserController {
     private final UpdateUserUseCase updateUserUseCase;
     private final FindUserByUsernameUseCase findUserByUsernameUseCase;
     private final UserAuthService userAuthService;
-    private final FindAllClubsByUserUseCase findAllClubsByUserUseCase;
-    private final FindAllTeamsByClubUseCase findAllTeamsByClubUseCase;
-    private final FindClubByIdUseCase findClubByIdUseCase;
-    private final FindTeamByIdUseCase findTeamByIdUseCase;
+    private final FindAllUserClubsByUserUseCase findAllUserClubsByUserUseCase;
+    private final FindAllUserTeamsByUserClubUseCase findAllUserTeamsByUserClubUseCase;
+    private final FindUserClubByIdUseCase findUserClubByIdUseCase;
+    private final FindUserTeamByIdUseCase findUserTeamByIdUseCase;
     private final FindAllUsersUseCase findAllUsersUseCase;
     private final FindAllScoutsUseCase findAllScoutsUseCase;
     private final FindUserRoleInTeamUseCase findUserRoleInTeamUseCase;
@@ -100,21 +100,21 @@ public class UserController {
     @Operation(summary = "Find User by ID [Auth ADMIN]", description = "Finds a User")
     public ResponseEntity<ApiResponse<UserDTO>> findUserById(@PathVariable("id") UUID userId) {
         // ¿En qué Clubs están ambos Users?
-        List<Club> clubsOfLookedUpUser = findAllClubsByUserUseCase.execute(userId);
-        List<Club> clubsOfCurrentUser = findAllClubsByUserUseCase.execute(Session.getSessionUser().getId());
-        List<Club> sameClubs = new ArrayList<>();
-        for (Club club : clubsOfLookedUpUser) {
-            for (Club club2 : clubsOfCurrentUser) {
-                if (club.getId().equals(club2.getId()) && !sameClubs.contains(club)) {
-                    sameClubs.add(club);
+        List<UserClub> clubsOfLookedUpUser = findAllUserClubsByUserUseCase.execute(userId);
+        List<UserClub> clubsOfCurrentUser = findAllUserClubsByUserUseCase.execute(Session.getSessionUser().getId());
+        List<UserClub> sameUserClubs = new ArrayList<>();
+        for (UserClub userClub : clubsOfLookedUpUser) {
+            for (UserClub userClub2 : clubsOfCurrentUser) {
+                if (userClub.getId().equals(userClub2.getId()) && !sameUserClubs.contains(userClub)) {
+                    sameUserClubs.add(userClub);
                     break;
                 }
             }
         }
 
         // ¿En cualquiera de esos Club el usuario autentificado es ADMIN para proseguir con la acción?
-        for (Club club : sameClubs) {
-            if (userAuthService.isAuthorizedByClub(club.getId(), RoleEnum.ADMIN)) {
+        for (UserClub userClub : sameUserClubs) {
+            if (userAuthService.isAuthorizedByClub(userClub.getId(), RoleEnum.ADMIN)) {
                 try {
                     User user = findUserByIdUseCase.execute(userId);
                     UserDTO userDto = userMapper.toDto(user);
@@ -130,7 +130,7 @@ public class UserController {
     /**
      * Finds all users in the Club.
      *
-     * @param clubId The ID of the club.
+     * @param clubId The ID of the userclub.
      * @return {@link ApiResponse} containing the user's information.
      */
     @GetMapping(Routes.CLUBS + Routes.ID_PATHVAR)
@@ -138,18 +138,18 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<UserDTO>>> findAllUsersByClub(@PathVariable("id") UUID clubId) {
         userAuthService.isAuthorizedByClub(clubId, RoleEnum.ADMIN);
         List<UUID> userIds = new ArrayList<>();
-        Club clubs = findClubByIdUseCase.execute(clubId);
+        UserClub clubs = findUserClubByIdUseCase.execute(clubId);
         userIds.addAll(clubs.getAdminUserIds());
-        List<Team> teams = findAllTeamsByClubUseCase.execute(clubs.getId());
-        for (Team team : teams) {
-            if (team.getTrainer() != null) {
-                userIds.add(team.getTrainer());
+        List<UserTeam> userTeams = findAllUserTeamsByUserClubUseCase.execute(clubs.getId());
+        for (UserTeam userTeam : userTeams) {
+            if (userTeam.getTrainer() != null) {
+                userIds.add(userTeam.getTrainer());
             }
-            if (team.getSecondTrainer() != null) {
-                userIds.add(team.getSecondTrainer());
+            if (userTeam.getSecondTrainer() != null) {
+                userIds.add(userTeam.getSecondTrainer());
             }
-            if (!team.getScouters().isEmpty()) {
-                userIds.addAll(team.getScouters());
+            if (!userTeam.getScouters().isEmpty()) {
+                userIds.addAll(userTeam.getScouters());
             }
         }
         List<UserDTO> usersDTO = new ArrayList<>();
@@ -163,7 +163,7 @@ public class UserController {
     /**
      * Finds all users in the Team.
      *
-     * @param teamId The ID of the club.
+     * @param teamId The ID of the userclub.
      * @return {@link ApiResponse} containing the user's information.
      */
     @GetMapping(Routes.TEAMS + Routes.ID_PATHVAR)
@@ -171,15 +171,15 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<UserDTO>>> findAllUsersByTeam(@PathVariable("id") UUID teamId) {
         userAuthService.isAuthorizedByTeam(teamId, RoleEnum.ADMIN);
             List<UUID> userIds = new ArrayList<>();
-            Team team = findTeamByIdUseCase.execute(teamId);
-                if (team.getTrainer() != null) {
-                    userIds.add(team.getTrainer());
+            UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
+                if (userTeam.getTrainer() != null) {
+                    userIds.add(userTeam.getTrainer());
                 }
-                if (team.getSecondTrainer() != null) {
-                    userIds.add(team.getSecondTrainer());
+                if (userTeam.getSecondTrainer() != null) {
+                    userIds.add(userTeam.getSecondTrainer());
                 }
-                if (!team.getScouters().isEmpty()) {
-                    userIds.addAll(team.getScouters());
+                if (!userTeam.getScouters().isEmpty()) {
+                    userIds.addAll(userTeam.getScouters());
                 }
             List<UserDTO> usersDTO = new ArrayList<>();
             for (UUID userId : userIds) {
@@ -213,21 +213,21 @@ public class UserController {
         // ¿En qué Clubs están ambos Users?
         try {
             User user = findUserByUsernameUseCase.execute(username);
-            List<Club> clubsOfLookedUpUser = findAllClubsByUserUseCase.execute(user.getId());
-            List<Club> clubsOfCurrentUser = findAllClubsByUserUseCase.execute(Session.getSessionUser().getId());
-            List<Club> sameClubs = new ArrayList<>();
-            for (Club club : clubsOfLookedUpUser) {
-                for (Club club2 : clubsOfCurrentUser) {
-                    if (club.getId().equals(club2.getId()) && !sameClubs.contains(club)) {
-                        sameClubs.add(club);
+            List<UserClub> clubsOfLookedUpUser = findAllUserClubsByUserUseCase.execute(user.getId());
+            List<UserClub> clubsOfCurrentUser = findAllUserClubsByUserUseCase.execute(Session.getSessionUser().getId());
+            List<UserClub> sameUserClubs = new ArrayList<>();
+            for (UserClub userClub : clubsOfLookedUpUser) {
+                for (UserClub userClub2 : clubsOfCurrentUser) {
+                    if (userClub.getId().equals(userClub2.getId()) && !sameUserClubs.contains(userClub)) {
+                        sameUserClubs.add(userClub);
                         break;
                     }
                 }
             }
 
             // ¿En cualquiera de esos Club el usuario autentificado es ADMIN para proseguir con la acción?
-            for (Club club : sameClubs) {
-                if (userAuthService.isAuthorizedByClub(club.getId(), RoleEnum.ADMIN)) {
+            for (UserClub userClub : sameUserClubs) {
+                if (userAuthService.isAuthorizedByClub(userClub.getId(), RoleEnum.ADMIN)) {
                         UserDTO userDto = userMapper.toDto(user);
                         return handleResponse(userDto).ok();
                 }
@@ -307,9 +307,9 @@ public class UserController {
     }
 
     /**
-     * Returns the role of the currently authenticated user inside the team.
+     * Returns the role of the currently authenticated user inside the userteam.
      *
-     * @param teamId the team from the consumer wants to check the role of the user.
+     * @param teamId the userteam from the consumer wants to check the role of the user.
      * @return {@link ApiResponse} containing the user's role.
      */
     @GetMapping(value =  Routes.TEAMS + Routes.ID_PATHVAR + Routes.ROLE_PATH)
@@ -321,9 +321,9 @@ public class UserController {
     }
 
     /**
-     * Returns the role of the currently authenticated user inside the club.
+     * Returns the role of the currently authenticated user inside the userclub.
      *
-     * @param clubId the club from the consumer wants to check the role of the user.
+     * @param clubId the userclub from the consumer wants to check the role of the user.
      * @return {@link ApiResponse} containing the user's role.
      */
     @GetMapping(value =  Routes.CLUBS + Routes.ID_PATHVAR + Routes.ROLE_PATH)

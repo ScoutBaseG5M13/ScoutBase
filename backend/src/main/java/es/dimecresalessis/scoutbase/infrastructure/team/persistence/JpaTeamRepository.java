@@ -8,5 +8,4 @@ import java.util.UUID;
  * Spring Data JPA repository for {@link TeamEntity}.
  */
 public interface JpaTeamRepository extends JpaRepository<TeamEntity, UUID> {
-
 }

@@ -14,14 +14,12 @@ import java.util.UUID;
 public class Club {
 
     private UUID id;
-    private List<UUID> adminUserIds;
     private String name;
     private List<UUID> teams;
 
     @Builder
-    public Club(UUID id, List<UUID> adminUserIds, String name, List<UUID> teams) {
+    public Club(UUID id, String name, List<UUID> teams) {
         this.id = (id == null) ? UUID.randomUUID() : id;
-        this.adminUserIds = adminUserIds;
         this.name = name;
         this.teams = teams;
     }
