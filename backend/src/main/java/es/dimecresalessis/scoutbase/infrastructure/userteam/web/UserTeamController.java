@@ -44,7 +44,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @RestController
 @AllArgsConstructor
 @ApiCommonResponses
-@Tag(name = "Teams", description = "Team management endpoints")
+@Tag(name = "User Team", description = "Team management endpoints")
 @RequestMapping(Routes.API_ROOT + Routes.USER_TEAMS)
 public class UserTeamController {
 
