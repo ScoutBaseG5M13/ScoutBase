@@ -20,11 +20,19 @@ public class UserClub {
     private List<UUID> managedClubs;
 
     @Builder
-    public UserClub(UUID id, List<UUID> adminUserIds, String name, List<UUID> userTeams, List<UUID> clubIds) {
+    public UserClub(UUID id, List<UUID> adminUserIds, String name, List<UUID> userTeams, List<UUID> managedClubs) {
         this.id = (id == null) ? UUID.randomUUID() : id;
         this.adminUserIds = adminUserIds;
         this.name = name;
         this.userTeams = userTeams;
-        this.managedClubs = clubIds;
+        this.managedClubs = managedClubs;
+    }
+
+    public void matchWithObject(UserClub incoming) {
+        this.id = this.id != null ? this.id : incoming.id;
+        this.adminUserIds = this.adminUserIds != null ? this.adminUserIds : incoming.adminUserIds;
+        this.name = this.name != null ? this.name : incoming.name;
+        this.userTeams = this.userTeams != null ? this.userTeams : incoming.userTeams;
+        this.managedClubs = this.managedClubs != null ? this.managedClubs : incoming.managedClubs;
     }
 }

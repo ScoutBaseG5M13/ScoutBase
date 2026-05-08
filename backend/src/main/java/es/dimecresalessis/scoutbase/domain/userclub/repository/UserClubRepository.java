@@ -18,6 +18,14 @@ public interface UserClubRepository {
     List<UserClub> findAll();
 
     /**
+     * Locates a user club by their ID.
+     *
+     * @param id The unique {@link UUID} of the user club to find.
+     * @return An {@link Optional} containing the found user club, or empty if no match is found.
+     */
+    Optional<UserClub> findById(UUID id);
+
+    /**
      * Locates a userclub by their ID.
      *
      * @param id The unique {@link UUID} of the userclub to find.

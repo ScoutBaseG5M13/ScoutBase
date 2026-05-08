@@ -47,7 +47,7 @@ public class CreateUserTeamUseCase {
 
         userTeamRepository.save(userTeam);
         logger.info("[CREATE] Created Team '{}'", userTeam.getId());
-        if (userClub.getUserTeams() == null) {
+        if (userClub.getUserTeams() == null || userClub.getUserTeams().isEmpty()) {
             userClub.setUserTeams(new ArrayList<>());
         }
         userClub.getUserTeams().add(userTeam.getId());

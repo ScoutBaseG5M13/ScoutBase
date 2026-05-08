@@ -6,10 +6,15 @@ import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.team.exception.TeamException;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
+import es.dimecresalessis.scoutbase.domain.userclub.exception.UserClubException;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Use case for creating a {@link Team}.
@@ -25,12 +30,12 @@ public class CreateTeamUseCase {
     /**
      * Executes the creation of a Team and updates the corresponding club.
      * @param team The {@link Team} entity to be created.
-     * @param club The {@link Club} entity that will own the new team.
+     * @param clubId The {@link Club} entity that will own the new team.
      * @return The persisted {@link Team} entity.
      * @throws TeamException if the team is null, the ID is missing, or if a team with
      * the same ID already exists.
      */
-    public Team execute(Team team, Club club) {
+    public Team execute(Team team, UUID clubId) {
         if (team == null) {
             throw new TeamException(ErrorEnum.USER_TEAM_IS_NULL);
         }
@@ -43,11 +48,21 @@ public class CreateTeamUseCase {
             throw new TeamException(ErrorEnum.USER_TEAM_ALREADY_EXISTS, team.getId().toString());
         }
 
+        Optional<Club> club = clubRepository.findById(clubId);
+        if (club.isEmpty()) {
+            throw new UserClubException(ErrorEnum.CLUB_NOT_FOUND, club.toString());
+        }
+        team.setClubId(club.get().getId());
         teamRepository.save(team);
         logger.info("[CREATE] Created Team '{}'", team.getId());
-        club.getTeams().add(team.getId());
-        clubRepository.save(club);
-        logger.info("[UPDATE] Updated Club '{}' and added the Team {}", team.getId(), club.getId());
+
+        if (club.get().getTeams() == null || club.get().getTeams().isEmpty()) {
+            club.get().setTeams(new ArrayList<>());
+        }
+        club.get().getTeams().add(team.getId());
+        clubRepository.save(club.get());
+        logger.info("[UPDATE] Updated Club '{}' and added the Team {}", team.getId(), club.get().getId());
+
         return team;
     }
 }

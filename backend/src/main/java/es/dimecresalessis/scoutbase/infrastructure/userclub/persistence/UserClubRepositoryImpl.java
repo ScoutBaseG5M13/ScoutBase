@@ -36,6 +36,17 @@ public class UserClubRepositoryImpl implements UserClubRepository {
                 .toList();
     }
 
+    /**
+     * Finds a UserClub by its unique identifier.
+     *
+     * @param id The {@link UUID} of the UserClub.
+     * @return An {@link Optional} containing the {@link UserClub} if found, or empty otherwise.
+     */
+    @Override
+    public Optional<UserClub> findById(UUID id) {
+        return jpaUserClubRepository.findById(id).map(clubMapper::toDomain);
+    }
+
     @Override
     public Optional<UserClub> findUserClubById(UUID id) {
         return jpaUserClubRepository.findById(id).map(clubMapper::toDomain);

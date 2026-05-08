@@ -21,7 +21,7 @@ class UserUserTeamMapperTest {
     private UserTeamMapper userTeamMapper;
 
     @Test
-    void shouldMapDomainToDto() {
+    void shouldMapDomainDomainToDTO() {
         UserTeam domain = UserTeam.builder()
                 .id(UUID.randomUUID())
                 .name("Juvenil A")
@@ -29,7 +29,6 @@ class UserUserTeamMapperTest {
                 .subcategory(SubcategoryEnum.SUB_SUPERIOR)
                 .trainer(UUID.randomUUID())
                 .secondTrainer(UUID.randomUUID())
-                .players(List.of(UUID.randomUUID()))
                 .scouters(List.of(UUID.randomUUID()))
                 .build();
 
@@ -49,11 +48,7 @@ class UserUserTeamMapperTest {
         UserTeamCreateRequest request = new UserTeamCreateRequest(
                 "Nuevos Talentos",
                 CategoryEnum.CADETE.name(),
-                SubcategoryEnum.SUB16.name(),
-                List.of(UUID.randomUUID()),
-                List.of(trainerId),
-                List.of(UUID.randomUUID()),
-                UUID.randomUUID()
+                SubcategoryEnum.SUB16.name()
         );
 
         UserTeam domain = userTeamMapper.createToDomain(request);
@@ -61,7 +56,6 @@ class UserUserTeamMapperTest {
         assertThat(domain.getName()).isEqualTo("Nuevos Talentos");
         assertThat(domain.getCategory()).isEqualTo(CategoryEnum.CADETE);
         assertThat(domain.getSubcategory()).isEqualTo(SubcategoryEnum.SUB16);
-        assertThat(domain.getPlayers()).hasSize(1);
     }
 
     @Test

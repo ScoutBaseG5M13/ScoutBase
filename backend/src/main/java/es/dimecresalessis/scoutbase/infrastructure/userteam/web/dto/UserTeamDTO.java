@@ -24,6 +24,8 @@ public class UserTeamDTO {
 
     private String subcategory;
 
+    private UUID userClub;
+
     private UUID trainer;
 
     private UUID secondTrainer;

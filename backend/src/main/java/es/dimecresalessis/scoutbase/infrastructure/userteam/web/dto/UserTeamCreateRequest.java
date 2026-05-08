@@ -6,9 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Setter;
 
-import java.util.List;
-import java.util.UUID;
-
 @Data
 @Setter
 @AllArgsConstructor
@@ -21,10 +18,4 @@ public class UserTeamCreateRequest {
     private String category;
 
     private String subcategory;
-
-    private UUID trainer;
-
-    private UUID secondTrainer;
-
-    private List<UUID> scouters;
 }

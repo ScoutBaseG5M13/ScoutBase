@@ -7,6 +7,8 @@ import es.dimecresalessis.scoutbase.infrastructure.userteam.web.dto.UserTeamUpda
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.UUID;
+
 /**
  * Infrastructure mapper for converting between {@link UserTeamDTO} and {@link UserTeam} domain models.
  */
@@ -15,7 +17,8 @@ public interface UserTeamMapper {
 
     UserTeam dtoToDomain(UserTeamDTO dto);
 
-    UserTeam createToDomain(UserTeamCreateRequest request);
+    @Mapping(target = "userClub", source = "clubId")
+    UserTeam createToDomain(UserTeamCreateRequest request, UUID clubId);
 
     UserTeam updateToDomain(UserTeamUpdateRequest request);
 

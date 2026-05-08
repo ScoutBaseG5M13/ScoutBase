@@ -23,6 +23,9 @@ import java.util.UUID;
 public class TeamEntity extends CommonEntity {
 
     @Column(nullable = false)
+    private UUID clubId;
+
+    @Column(nullable = false)
     private String name;
 
     @Column

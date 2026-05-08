@@ -4,9 +4,11 @@ import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import es.dimecresalessis.scoutbase.domain.stat.model.StatEnum;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatDTO;
-import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatModifyRequest;
+import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatUpdateRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import java.util.UUID;
 
 /**
  * Infrastructure mapper for converting between {@link StatDTO} and {@link Stat} domain models.
@@ -16,9 +18,9 @@ public interface StatMapper {
 
     Stat dtoToDomain(StatDTO dto);
 
-    Stat createToDomain(StatCreateRequest request);
+    Stat createToDomain(StatCreateRequest request, UUID playerId);
 
-    Stat modifyToDomain(StatModifyRequest request);
+    Stat updateToDomain(StatUpdateRequest request);
 
     @Mapping(target = "name", expression = "java(StatEnum.fromStatCode(domain.getCode()).statName)")
     StatDTO toDto(Stat domain);

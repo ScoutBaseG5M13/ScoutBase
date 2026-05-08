@@ -2,12 +2,13 @@ package es.dimecresalessis.scoutbase.infrastructure.team.persistence;
 
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
-import es.dimecresalessis.scoutbase.infrastructure.club.persistence.JpaClubRepository;
 import es.dimecresalessis.scoutbase.infrastructure.team.persistence.mapper.TeamEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Infrastructure implementation of the {@link TeamRepository} interface.
@@ -54,7 +55,7 @@ public class TeamRepositoryImpl implements TeamRepository {
         List<TeamEntity> teamEntities = jpaTeamRepository.findAll();
 
         return teamEntities.stream()
-                .filter(t -> t.getPlayers().contains(playerId))
+                .filter(t -> t.getPlayers() != null && !t.getPlayers().isEmpty() && t.getPlayers().contains(playerId))
                 .map(mapper::toDomain)
                 .findFirst();
     }

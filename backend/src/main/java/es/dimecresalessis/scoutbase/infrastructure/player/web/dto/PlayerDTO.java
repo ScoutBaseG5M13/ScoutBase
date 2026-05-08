@@ -2,8 +2,12 @@ package es.dimecresalessis.scoutbase.infrastructure.player.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -17,6 +21,9 @@ import java.util.UUID;
 public class PlayerDTO {
 
     private UUID id;
+
+    @NotBlank
+    private UUID teamId;
 
     @NotBlank
     private String name;
@@ -34,4 +41,6 @@ public class PlayerDTO {
     private String position;
 
     private int priority;
+
+    private List<UUID> stats;
 }

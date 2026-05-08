@@ -31,6 +31,9 @@ public class UserTeamEntity extends CommonEntity {
     @Column(nullable = false)
     private String subcategory;
 
+    @Column(nullable = false)
+    private UUID userClub;
+
     @Column
     private UUID trainer;
 

@@ -115,17 +115,17 @@ public class UserClubController {
     /**
      * Updates an existing userclub record.
      *
-     * @param userClubDto The updated userclub details.
+     * @param updateRequest The updated userclub details.
      * @param id The ID of the userclub to be updated.
      * @return {@link ApiResponse} containing the updated userclub's details.
      * @throws UserClubException If the userclub is not found.
      */
     @PutMapping(value = Routes.ID_PATHVAR)
     @Operation(summary = "Update a user club by ID [Auth ADMIN]", description = "Updates a UserClub")
-    public ResponseEntity<ApiResponse<UserClubDTO>> update(@Valid @RequestBody UserClubUpdateRequest userClubDto, @PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<UserClubDTO>> update(@Valid @RequestBody UserClubUpdateRequest updateRequest, @PathVariable UUID id) {
         userAuthService.isAuthorizedByClub(id, RoleEnum.ADMIN);
         try {
-            UserClub userClub = userClubMapper.updateToDomain(userClubDto);
+            UserClub userClub = userClubMapper.updateToDomain(updateRequest);
             UserClub updatedUserClub = updateUserClubUseCase.execute(userClub, id);
             UserClubDTO updatedUserClubDto = userClubMapper.domainToDTO(updatedUserClub);
             return handleResponse(updatedUserClubDto).ok();
@@ -145,12 +145,12 @@ public class UserClubController {
     @Operation(summary = "Deletes a user club by ID [Auth ADMIN]", description = "Deletes a UserClub")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
         userAuthService.isAuthorizedByClub(id, RoleEnum.ADMIN);
-        try {
-            boolean isDeleted = deleteUserClubUseCase.execute(id);
-            return handleResponse(isDeleted).ok();
-        } catch (NoSuchElementException ex) {
+        UserClub userClub = findUserClubByIdUseCase.execute(id);
+        if (userClub == null) {
             throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, id.toString());
         }
+        boolean isDeleted = deleteUserClubUseCase.execute(id);
+        return handleResponse(isDeleted).ok();
     }
 
     /**
@@ -206,7 +206,7 @@ public class UserClubController {
      * @throws UserClubException If the userclub is not found.
      */
     @PostMapping(Routes.ID_PATHVAR + Routes.CLUBS)
-    @Operation(summary = "Created a new managed [Auth ADMIN]", description = "Creates a new managed Club")
+    @Operation(summary = "Creates a new managed Club [Auth SCOUTER]", description = "Creates a new managed Club")
     public ResponseEntity<ApiResponse<ClubDTO>> createManagedClub(@PathVariable(value = "id") UUID userClubId, @RequestBody ClubCreateRequest request) {
         userAuthService.isAuthorizedByClub(userClubId, RoleEnum.SCOUTER);
         try {

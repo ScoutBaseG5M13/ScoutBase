@@ -43,7 +43,7 @@ public class CreateStatUseCase {
         if (checkIfStatAlreadyExistsOnPlayer.execute(stat)) {
             throw new StatException(ErrorEnum.STAT_CODE_ALREADY_EXISTS, stat.getId().toString(), stat.getPlayerId().toString());
         }
-
+        stat.setPlayerId(playerId);
         statRepository.save(stat);
         logger.info("[CREATE] Created Stat with id '{}'", stat.getId());
         return stat;

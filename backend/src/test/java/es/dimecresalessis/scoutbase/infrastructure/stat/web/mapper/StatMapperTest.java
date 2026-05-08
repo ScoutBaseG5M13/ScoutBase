@@ -4,7 +4,7 @@ import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import es.dimecresalessis.scoutbase.domain.stat.model.StatEnum;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatDTO;
-import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatModifyRequest;
+import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatUpdateRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,9 +48,9 @@ class StatMapperTest {
     @Test
     void shouldMapModifyRequestToDomain() {
         UUID playerId = UUID.randomUUID();
-        StatModifyRequest request = new StatModifyRequest(playerId, StatEnum.POTENCIA.statCode, 7);
+        StatUpdateRequest request = new StatUpdateRequest(playerId, StatEnum.POTENCIA.statCode, 7);
 
-        Stat domain = statMapper.modifyToDomain(request);
+        Stat domain = statMapper.updateToDomain(request);
 
         assertThat(domain.getPlayerId()).isEqualTo(playerId);
         assertThat(domain.getCode()).isEqualTo(StatEnum.POTENCIA.statCode);

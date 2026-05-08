@@ -1,9 +1,5 @@
 package es.dimecresalessis.scoutbase.domain.stat.model;
 
-import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
-import es.dimecresalessis.scoutbase.domain.stat.exception.StatException;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,10 +17,8 @@ public class Stat {
 
     private UUID playerId;
 
-    @NotBlank
     private String code;
 
-    @NotNull
     private int value;
 
     public Stat(UUID id, UUID playerId, String code, int value) {
@@ -34,15 +28,11 @@ public class Stat {
         this.value = value;
     }
 
-    public void setPlayerId(final UUID playerId) {
-        try {
-            if (UUID.fromString(playerId.toString()).toString().isEmpty()) {
-                throw new StatException(ErrorEnum.STAT_MUST_HAVE_PLAYER_ID);
-            }
-        } catch (IllegalArgumentException ex) {
-            throw new StatException(ErrorEnum.INVALID_UUID, playerId.toString());
-        }
-        this.playerId = playerId;
+    public void matchWithObject(Stat incoming) {
+        this.id = this.id != null ? this.id : incoming.id;
+        this.playerId = this.playerId != null ? this.playerId : incoming.playerId;
+        this.code = this.code != null ? this.code : incoming.code;
+        this.value = this.value >= 0 || this.value < 10 ? this.value : incoming.value;
     }
 
     public void setCode(final String code) {

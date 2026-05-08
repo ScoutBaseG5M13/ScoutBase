@@ -48,11 +48,11 @@ public class CreateClubUseCase {
         if (userClub.isEmpty()) {
             throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, userClubId.toString());
         }
-
+        club.setUserClub(userClubId);
         clubRepository.save(club);
         logger.info("[CREATE] Created Club with id '{}'", club.getId());
 
-        if (userClub.get().getManagedClubs() == null) {
+        if (userClub.get().getManagedClubs() == null || userClub.get().getManagedClubs().isEmpty()) {
             userClub.get().setManagedClubs(new ArrayList<>());
         }
         userClub.get().getManagedClubs().add(club.getId());

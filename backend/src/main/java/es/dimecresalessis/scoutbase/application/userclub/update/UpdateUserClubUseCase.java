@@ -28,17 +28,22 @@ public class UpdateUserClubUseCase {
      * Updates the details of a {@link UserClub} identified by their unique ID.
      *
      * @param userClub The updated {@link UserClub} object with the new details.
-     * @param id The ID of the userclub to be updated.
+     * @param clubId The ID of the userclub to be updated.
      * @return The updated {@link UserClub} object after being persisted.
      */
-    public UserClub execute(UserClub userClub, UUID id) {
-        validateAndRetrieveClub(userClub, id);
-        userClubRepository.save(userClub);
-        logger.info("[UPDATE] Updated Club '{}'", userClub.getId());
-        return userClub;
+    public UserClub execute(UserClub userClub, UUID clubId) {
+        validateAndRetrieveClub(userClub, clubId);
+        UserClub matchedUserClub = matchWithSavedInfo(userClub, clubId);
+        userClubRepository.save(matchedUserClub);
+        logger.info("[UPDATE] Updated Club '{}'", matchedUserClub.getId());
+        return matchedUserClub;
     }
 
     private void validateAndRetrieveClub(UserClub userClub, UUID id) {
+        if (!userClub.getId().equals(id)) {
+            throw new IllegalArgumentException("Club id '" + userClub.getId() + "' does not match the path variable '" + id + "'");
+        }
+
         UserClub bodyUserClub = userClubRepository.findUserClubById(userClub.getId()).orElseThrow(
                 () -> new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, userClub.getId().toString())
         );
@@ -58,7 +63,17 @@ public class UpdateUserClubUseCase {
 
 
         if (!bodyUserClub.getId().toString().equals(idUserClub.getId().toString())) {
-            throw new IllegalArgumentException("Club id " + bodyUserClub.getId() + " does not match " + idUserClub.getId());
+            throw new IllegalArgumentException("Body user club id '" + bodyUserClub.getId() + "' does not match '" + idUserClub.getId() + "'");
         }
+    }
+
+    private UserClub matchWithSavedInfo(UserClub userClub, UUID clubId) {
+        UserClub newUserClub = userClub;
+        UserClub savedUserClub = userClubRepository.findById(clubId).orElse(null);
+        if (savedUserClub == null) {
+            return newUserClub;
+        }
+        newUserClub.matchWithObject(savedUserClub);
+        return newUserClub;
     }
 }

@@ -21,6 +21,14 @@ public enum ErrorEnum {
     PLAYER_STAT_NOT_FOUND("PLAYER_STAT_NOT_FOUND", "The player stat with code '{}' could not be found"),
 
     ROLE_NOT_FOUND("ROLE_NOT_FOUND", "The role '{}' does not exist"),
+    ROLE_NOT_FOUND_INFO("ROLE_NOT_FOUND", "The role '{}' does not exist. Please use one of the following roles: {}"),
+    
+    NO_USER_CLUB_HAS_BEEN_FOUND("NO_USER_CLUB_HAS_BEEN_FOUND", "No userclub has been found"),
+    USER_CLUB_NOT_FOUND("USER_CLUB_NOT_FOUND", "The userclub with id '{}' could not be found"),
+    USER_CLUB_IS_NULL("USER_CLUB_IS_NULL", "The userclub can't be null"),
+    USER_CLUB_ID_IS_NULL("USER_CLUB_ID_IS_NULL", "The userclub id can't be null"),
+    USER_CLUB_ALREADY_EXISTS("USER_CLUB_ALREADY_EXISTS", "A userclub with id '{}' already exists"),
+    USER_CLUB_BAD_FORMAT("USER_CLUB_BAD_FORMAT", "The userclub has bad format in fields: {}"),
 
     USER_TEAM_NOT_FOUND("USER_TEAM_NOT_FOUND", "The userteam with id '{}' could not be found"),
     USER_TEAM_IS_NULL("USER_TEAM_IS_NULL", "The userteam can't be null"),
@@ -28,12 +36,18 @@ public enum ErrorEnum {
     USER_TEAM_ALREADY_EXISTS("USER_TEAM_ALREADY_EXISTS", "A userteam with id '{}' already exists"),
     USER_TEAM_BY_PLAYER_NOT_FOUND("USER_TEAM_BY_PLAYER_NOT_FOUND", "The userteam of the player '{}' can't be found"),
 
-    NO_USER_CLUB_HAS_BEEN_FOUND("NO_USER_CLUB_HAS_BEEN_FOUND", "No userclub has been found"),
-    USER_CLUB_NOT_FOUND("USER_CLUB_NOT_FOUND", "The userclub with id '{}' could not be found"),
-    USER_CLUB_IS_NULL("USER_CLUB_IS_NULL", "The userclub can't be null"),
-    USER_CLUB_ID_IS_NULL("USER_CLUB_ID_IS_NULL", "The userclub id can't be null"),
-    USER_CLUB_ALREADY_EXISTS("USER_CLUB_ALREADY_EXISTS", "A userclub with id '{}' already exists"),
-    USER_CLUB_BAD_FORMAT("USER_CLUB_BAD_FORMAT", "The userclub has bad format in fields: {}"),
+    NO_CLUB_HAS_BEEN_FOUND("NO_CLUB_HAS_BEEN_FOUND", "No club has been found"),
+    CLUB_NOT_FOUND("CLUB_NOT_FOUND", "The club with id '{}' could not be found"),
+    CLUB_IS_NULL("CLUB_IS_NULL", "The club can't be null"),
+    CLUB_ID_IS_NULL("CLUB_ID_IS_NULL", "The club id can't be null"),
+    CLUB_ALREADY_EXISTS("CLUB_ALREADY_EXISTS", "A club with id '{}' already exists"),
+    CLUB_BAD_FORMAT("CLUB_BAD_FORMAT", "The club has bad format in fields: {}"),
+
+    TEAM_NOT_FOUND("TEAM_NOT_FOUND", "The team with id '{}' could not be found"),
+    TEAM_IS_NULL("TEAM_IS_NULL", "The team can't be null"),
+    TEAM_ID_IS_NULL("TEAM_ID_IS_NULL", "The team id can't be null"),
+    TEAM_ALREADY_EXISTS("TEAM_ALREADY_EXISTS", "A team with id '{}' already exists"),
+    TEAM_BY_PLAYER_NOT_FOUND("TEAM_BY_PLAYER_NOT_FOUND", "The team of the player '{}' can't be found"),
 
     STAT_IS_NULL("STAT_IS_NULL", "The stat can't be null"),
     STAT_ID_IS_NULL("STAT_ID_IS_NULL", "The stat id can't be null"),

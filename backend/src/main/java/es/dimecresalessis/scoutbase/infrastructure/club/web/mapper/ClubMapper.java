@@ -3,6 +3,7 @@ package es.dimecresalessis.scoutbase.infrastructure.club.web.mapper;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.infrastructure.club.web.dto.ClubDTO;
 import es.dimecresalessis.scoutbase.infrastructure.club.web.dto.ClubCreateRequest;
+import es.dimecresalessis.scoutbase.infrastructure.club.web.dto.ClubUpdateRequest;
 import org.mapstruct.Mapper;
 
 /**
@@ -14,6 +15,8 @@ public interface ClubMapper {
     Club dtoToDomain(ClubDTO dto);
 
     Club createToDomain(ClubCreateRequest dto);
+
+    Club updateToDomain(ClubUpdateRequest dto);
 
     ClubDTO domainToDTO(Club domain);
 }

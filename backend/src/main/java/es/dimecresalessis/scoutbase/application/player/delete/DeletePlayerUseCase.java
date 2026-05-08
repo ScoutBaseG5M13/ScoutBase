@@ -2,14 +2,12 @@ package es.dimecresalessis.scoutbase.application.player.delete;
 
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
-import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -34,13 +32,12 @@ public class DeletePlayerUseCase {
         playerRepository.deleteById(id);
         logger.info("[DELETE] Deleted Player '{}'", id);
 
-        Team team = teamRepository.findByPlayerId(id).orElse(null);
-        if (team != null) {
+        teamRepository.findByPlayerId(id).ifPresent(team -> {
             team.getPlayers().remove(id);
-            team.setPlayers(team.getPlayers().stream().filter(Objects::nonNull).toList());
             teamRepository.save(team);
             logger.info("[DELETE] Removed Player '{}' from Team '{}'", id, team.getName());
-        }
+        });
+
         return true;
     }
 }

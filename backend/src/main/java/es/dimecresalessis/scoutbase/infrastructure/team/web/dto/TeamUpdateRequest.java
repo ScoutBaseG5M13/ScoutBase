@@ -1,25 +1,25 @@
-package es.dimecresalessis.scoutbase.infrastructure.club.web.dto;
+package es.dimecresalessis.scoutbase.infrastructure.team.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Setter;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
+@Setter
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ClubDTO {
+public class TeamUpdateRequest {
 
+    @NotNull
     private UUID id;
 
-    @NotBlank
     private String name;
 
-    private List<UUID> teams;
+    private String category;
 
-    @NotBlank
-    private UUID userClub;
+    private String subcategory;
 }

@@ -58,7 +58,7 @@ public class UserController {
     private final FindUserClubByIdUseCase findUserClubByIdUseCase;
     private final FindUserTeamByIdUseCase findUserTeamByIdUseCase;
     private final FindAllUsersUseCase findAllUsersUseCase;
-    private final FindAllScoutsUseCase findAllScoutsUseCase;
+    private final FindAllUsersByRoleUseCase findAllUsersByRoleUseCase;
     private final FindUserRoleInTeamUseCase findUserRoleInTeamUseCase;
     private final FindUserRoleInClubUseCase findUserRoleInClubUseCase;
 
@@ -81,13 +81,17 @@ public class UserController {
      *
      * @return {@link ApiResponse} with the current user's {@link User}.
      */
-    @GetMapping("/scouters")
+    @GetMapping(Routes.ROLE_PATH + Routes.ID_PATHVAR)
     @Operation(summary = "Find all Scouter User [Auth SUPERADMIN]", description = "Finds all Scouter Users")
-    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllScouters() {
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllUsersByRole(@PathVariable("id") String role) {
+        RoleEnum roleEnum = RoleEnum.fromName(role);
+        if (roleEnum == null) {
+            throw new UserException(ErrorEnum.ROLE_NOT_FOUND_INFO, role, Arrays.stream(RoleEnum.values()).map(RoleEnum::getRoleName).toList().toString());
+        }
         userAuthService.hasSuperadminAuthorization();
-        List<User> scouters = findAllScoutsUseCase.execute();
-        List<UserDTO> scoutersDTO = scouters.stream().map(userMapper::toDto).toList();
-        return handleResponse(scoutersDTO).ok();
+        List<User> users = findAllUsersByRoleUseCase.execute(roleEnum);
+        List<UserDTO> usersDTO = users.stream().map(userMapper::toDto).toList();
+        return handleResponse(usersDTO).ok();
     }
 
     /**

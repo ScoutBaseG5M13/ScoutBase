@@ -128,7 +128,7 @@ public class UserTeamController {
             throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, clubId.toString());
         }
         userAuthService.hasMinimumClubAuthorization(userClub.getId(), RoleEnum.SCOUTER);
-        UserTeam userTeam = userTeamMapper.createToDomain(teamRequest);
+        UserTeam userTeam = userTeamMapper.createToDomain(teamRequest, clubId);
         UserTeam createdUserTeam = createUserTeamUseCase.execute(userTeam, userClub);
         UserTeamDTO createdUserTeamDto = userTeamMapper.toDto(createdUserTeam);
         return handleResponse(createdUserTeamDto).created();
@@ -137,15 +137,15 @@ public class UserTeamController {
     /**
      * Updates an existing userteam.
      *
-     * @param userTeamUpdateRequest The updated data request.
+     * @param updateRequest The updated data request.
      * @param teamId The {@link UUID} of the userteam to update.
      * @return {@link ApiResponse} with the updated {@link UserTeamDTO}.
      */
     @PutMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Updates a user team [Auth TRAINER]", description = "Updates a UserTeam")
-    public ResponseEntity<ApiResponse<UserTeamDTO>> update(@PathVariable("id") UUID teamId, @RequestBody UserTeamUpdateRequest userTeamUpdateRequest) {
-        UserTeam userTeam = userTeamMapper.updateToDomain(userTeamUpdateRequest);
+    public ResponseEntity<ApiResponse<UserTeamDTO>> update(@RequestBody UserTeamUpdateRequest updateRequest, @PathVariable("id") UUID teamId) {
         userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.TRAINER);
+        UserTeam userTeam = userTeamMapper.updateToDomain(updateRequest);
         UserTeam updatedUserTeam = updateUserTeamUseCase.execute(userTeam, teamId);
         UserTeamDTO updatedUserTeamDto = userTeamMapper.toDto(updatedUserTeam);
         return handleResponse(updatedUserTeamDto).ok();
@@ -161,7 +161,16 @@ public class UserTeamController {
     @Operation(summary = "Delete Team [Auth ADMIN]", description = "Deletes a Team")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable("id") UUID teamId) {
         UserClub userClub = findUserClubByUserTeamUseCase.execute(teamId);
+        if (userClub == null) {
+            throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, teamId.toString());
+        }
         userAuthService.hasMinimumClubAuthorization(userClub.getId(), RoleEnum.ADMIN);
+
+        UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
+        if (userTeam == null) {
+            throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
+        }
+
         boolean isDeleted = deleteUserTeamUseCase.execute(teamId);
         userClub.getUserTeams().remove(teamId);
         updateUserClubUseCase.execute(userClub, userClub.getId());

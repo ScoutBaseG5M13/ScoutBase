@@ -1,6 +1,8 @@
 package es.dimecresalessis.scoutbase.application.player.find;
 
+import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
+import es.dimecresalessis.scoutbase.domain.team.exception.TeamException;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.team.repository.TeamRepository;
 import lombok.AllArgsConstructor;
@@ -31,8 +33,12 @@ public class FindAllPlayersByTeamIdUseCase {
      */
     public List<Player> execute(UUID teamId) {
         Optional<Team> team = teamRepository.findById(teamId);
-        if (!team.isPresent()) {
-           return null;
+        if (team.isEmpty()) {
+           throw new TeamException(ErrorEnum.TEAM_NOT_FOUND, teamId.toString());
+        }
+
+        if (team.get().getPlayers() == null || team.get().getPlayers().isEmpty()) {
+            team.get().setPlayers(new ArrayList<>());
         }
         List<UUID> playerIds = team.get().getPlayers();
         List<Player> players = new ArrayList<>();

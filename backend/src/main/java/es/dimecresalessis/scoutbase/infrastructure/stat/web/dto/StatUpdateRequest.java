@@ -10,9 +10,10 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StatModifyRequest {
+public class StatUpdateRequest {
 
-    private UUID playerId;
+    @NotNull
+    private UUID id;
 
     @NotBlank
     @Size(min = 3, max = 3, message = "Code must be exactly 3 characters long [CON, RES...]")

@@ -1,5 +1,7 @@
 package es.dimecresalessis.scoutbase.application.userclub.find;
 
+import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
+import es.dimecresalessis.scoutbase.domain.userclub.exception.UserClubException;
 import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
 import es.dimecresalessis.scoutbase.domain.userclub.repository.UserClubRepository;
 import lombok.AllArgsConstructor;
@@ -26,7 +28,8 @@ public class FindUserClubByIdUseCase {
      * @return The {@link UserClub} entity corresponding to the provided ID.
      */
     public UserClub execute(UUID id)  {
-        UserClub userClub = userClubRepository.findUserClubById(id).orElseThrow();
+        UserClub userClub = userClubRepository.findUserClubById(id)
+                .orElseThrow(() -> new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, id.toString()));
         logger.info("[FIND] Found Club with id '{}'", id);
         return userClub;
     }
