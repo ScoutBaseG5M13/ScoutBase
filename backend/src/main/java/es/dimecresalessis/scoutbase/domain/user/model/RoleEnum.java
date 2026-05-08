@@ -35,6 +35,9 @@ public enum RoleEnum {
     }
 
     public static boolean isEqualsOrHigher(RoleEnum minRole, RoleEnum userRole) {
+        if (minRole == null) {
+            return true;
+        }
         return userRole.getRoleAuthLevel() >= minRole.getRoleAuthLevel();
     }
 }
