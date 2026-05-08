@@ -44,7 +44,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @RestController
 @AllArgsConstructor
 @ApiCommonResponses
-@Tag(name = "Players", description = "Player management endpoints")
+@Tag(name = "Player", description = "Player management endpoints")
 @RequestMapping(Routes.API_ROOT + Routes.PLAYERS)
 public class PlayerController {
 

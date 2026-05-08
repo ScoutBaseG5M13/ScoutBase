@@ -38,7 +38,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @RestController
 @AllArgsConstructor
 @ApiCommonResponses
-@Tag(name = "Stats", description = "Stat management endpoints")
+@Tag(name = "Stat", description = "Stat management endpoints")
 @RequestMapping(Routes.API_ROOT + Routes.STATS)
 public class StatController {
 
@@ -93,7 +93,7 @@ public class StatController {
     /**
      * Updates an existing stat.
      *
-     * @param statRequest The updated stat details.
+     * @param updateRequest The updated stat details.
      * @param statId The ID of the stat to be updated.
      * @return {@link ApiResponse} containing the updated stat's details.
      * @throws StatException If the stat is not found.

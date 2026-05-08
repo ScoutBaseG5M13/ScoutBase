@@ -43,7 +43,7 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @RestController
 @AllArgsConstructor
 @ApiCommonResponses
-@Tag(name = "Club", description = "Club management endpoints")
+@Tag(name = "User Club", description = "Club management endpoints")
 @RequestMapping(Routes.API_ROOT + Routes.USER_CLUBS)
 public class UserClubController {
 

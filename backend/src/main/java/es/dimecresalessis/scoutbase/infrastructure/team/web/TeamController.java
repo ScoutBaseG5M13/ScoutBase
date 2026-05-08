@@ -1,10 +1,7 @@
 package es.dimecresalessis.scoutbase.infrastructure.team.web;
 
-import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.club.find.FindClubByTeamUseCase;
-import es.dimecresalessis.scoutbase.application.club.update.UpdateClubUseCase;
 import es.dimecresalessis.scoutbase.application.player.create.CreatePlayerUseCase;
-import es.dimecresalessis.scoutbase.application.team.create.CreateTeamUseCase;
 import es.dimecresalessis.scoutbase.application.team.delete.DeleteTeamUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByClubUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
@@ -46,20 +43,17 @@ import static es.dimecresalessis.scoutbase.infrastructure.web.dto.ResponseFactor
 @RestController
 @AllArgsConstructor
 @ApiCommonResponses
-@Tag(name = "Teams", description = "Team management endpoints")
+@Tag(name = "Team", description = "Team management endpoints")
 @RequestMapping(Routes.API_ROOT + Routes.TEAMS)
 public class TeamController {
 
     private final TeamMapper teamMapper;
     private final PlayerMapper playerMapper;
     private final FindTeamByIdUseCase findTeamById;
-    private final CreateTeamUseCase createTeamUseCase;
     private final UpdateTeamUseCase updateTeamUseCase;
     private final DeleteTeamUseCase deleteTeamUseCase;
     private final FindTeamByPlayerUseCase findTeamByPlayerUseCase;
-    private final FindClubByIdUseCase findClubByIdUseCase;
     private final UserAuthService userAuthService;
-    private final UpdateClubUseCase updateClubUseCase;
     private final FindAllTeamsByClubUseCase findAllTeamsByClubUseCase;
     private final FindClubByTeamUseCase findClubByTeamUseCase;
     private final CreatePlayerUseCase createPlayerUseCase;
@@ -148,7 +142,7 @@ public class TeamController {
     /**
      * Creates a Player in the Team.
      *
-     * @param playerRequest The player data create request.
+     * @param createPlayerRequest The player data create request.
      * @return {@link ApiResponse} containing the created player's details.
      * @throws PlayerException If an error occurs during player creation.
      */

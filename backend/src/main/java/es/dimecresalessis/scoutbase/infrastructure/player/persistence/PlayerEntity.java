@@ -23,10 +23,10 @@ import java.util.UUID;
 public class PlayerEntity extends CommonEntity {
 
     @Column(nullable = false)
-    private String name;
+    private String teamId;
 
     @Column(nullable = false)
-    private String teamId;
+    private String name;
 
     @Column(nullable = false)
     private String surname;
