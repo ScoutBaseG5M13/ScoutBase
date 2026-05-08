@@ -6,8 +6,6 @@ import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
 import es.dimecresalessis.scoutbase.domain.userclub.repository.UserClubRepository;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +25,6 @@ public class FindUserClubByUserTeamUseCase {
         return userClubs.stream()
                 .filter(c -> c.getUserTeams() != null && c.getUserTeams().contains(teamId))
                 .findFirst()
-                .orElseThrow(() -> new UserClubException(ErrorEnum.NO_CLUB_HAS_BEEN_FOUND));
+                .orElseThrow(() -> new UserClubException(ErrorEnum.NO_USER_CLUB_HAS_BEEN_FOUND));
     }
 }

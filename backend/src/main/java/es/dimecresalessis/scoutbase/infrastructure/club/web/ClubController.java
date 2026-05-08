@@ -1,6 +1,5 @@
 package es.dimecresalessis.scoutbase.infrastructure.club.web;
 
-import es.dimecresalessis.scoutbase.application.club.create.CreateClubUseCase;
 import es.dimecresalessis.scoutbase.application.club.delete.DeleteClubUseCase;
 import es.dimecresalessis.scoutbase.application.club.find.FindAllClubsByUserClubIdUseCase;
 import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
@@ -51,7 +50,7 @@ public class ClubController {
      * @return {@link ApiResponse} containing a list of all {@link Club}.
      */
     @GetMapping(Routes.USER_CLUBS + Routes.ID_PATHVAR)
-    @Operation(summary = "Find all clubs from a user club", description = "Finds all Clubs created by a User Club")
+    @Operation(summary = "Find all clubs from a user club [Auth SCOUTER]", description = "Finds all Clubs created by a User Club")
     public ResponseEntity<ApiResponse<List<ClubDTO>>> findAllClubs(@PathVariable(value = "id") UUID clubId) {
         userAuthService.isAuthorizedByClub(clubId, RoleEnum.SCOUTER);
         List<Club> clubs = findAllClubsByUserClubIdUseCase.execute(clubId);
@@ -75,7 +74,7 @@ public class ClubController {
             ClubDTO clubDto = clubMapper.domainToDTO(club);
             return handleResponse(clubDto).ok();
         } catch (NoSuchElementException ex) {
-            throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, clubId.toString());
+            throw new ClubException(ErrorEnum.USER_CLUB_NOT_FOUND, clubId.toString());
         }
     }
 
@@ -96,7 +95,7 @@ public class ClubController {
             ClubDTO updatedClubDto = clubMapper.domainToDTO(updatedClub);
             return handleResponse(updatedClubDto).ok();
         } catch (NoSuchElementException ex) {
-            throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, ex.getMessage());
+            throw new ClubException(ErrorEnum.USER_CLUB_NOT_FOUND, ex.getMessage());
         }
     }
 
@@ -115,7 +114,7 @@ public class ClubController {
             boolean isDeleted = deleteClubUseCase.execute(id);
             return handleResponse(isDeleted).ok();
         } catch (NoSuchElementException ex) {
-            throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, id.toString());
+            throw new ClubException(ErrorEnum.USER_CLUB_NOT_FOUND, id.toString());
         }
     }
 }

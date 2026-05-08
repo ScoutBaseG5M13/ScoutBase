@@ -41,7 +41,7 @@ class CreateUserUserTeamUseCaseTest {
     @BeforeEach
     void setUp() {
         teamId = UUID.randomUUID();
-        clubId = UUID.randomUUID(); // Assign a value
+        clubId = UUID.randomUUID();
 
         userTeam = UserTeam.builder()
                 .id(teamId)
@@ -51,7 +51,7 @@ class CreateUserUserTeamUseCaseTest {
         userClub = UserClub.builder()
                 .id(clubId)
                 .name("Club A")
-                .teams(new ArrayList<>()) // Ensure list is present
+                .userTeams(new ArrayList<>())
                 .build();
     }
 
@@ -72,7 +72,7 @@ class CreateUserUserTeamUseCaseTest {
         UserTeamException exception = assertThrows(UserTeamException.class, () ->
                 createUserTeamUseCase.execute(null, null)
         );
-        assertEquals(ErrorEnum.TEAM_IS_NULL, exception.getErrorEnum());
+        assertEquals(ErrorEnum.USER_TEAM_IS_NULL, exception.getErrorEnum());
     }
 
     @Test
@@ -83,7 +83,7 @@ class CreateUserUserTeamUseCaseTest {
         UserTeamException exception = assertThrows(UserTeamException.class, () ->
                 createUserTeamUseCase.execute(userTeamNoId, null)
         );
-        assertEquals(ErrorEnum.TEAM_ID_IS_NULL, exception.getErrorEnum());
+        assertEquals(ErrorEnum.USER_TEAM_ID_IS_NULL, exception.getErrorEnum());
     }
 
     @Test
@@ -93,7 +93,7 @@ class CreateUserUserTeamUseCaseTest {
         UserTeamException exception = assertThrows(UserTeamException.class, () ->
                 createUserTeamUseCase.execute(userTeam, null)
         );
-        assertEquals(ErrorEnum.TEAM_ALREADY_EXISTS, exception.getErrorEnum());
+        assertEquals(ErrorEnum.USER_TEAM_ALREADY_EXISTS, exception.getErrorEnum());
         verify(userTeamRepository, never()).save(any());
     }
 }

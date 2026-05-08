@@ -37,11 +37,11 @@ public class UpdateClubUseCase {
 
     private void validateAndRetrieveClub(Club club, UUID id) {
         Club bodyClub = clubRepository.findById(club.getId()).orElseThrow(
-                () -> new ClubException(ErrorEnum.CLUB_NOT_FOUND, club.getId().toString())
+                () -> new ClubException(ErrorEnum.USER_CLUB_NOT_FOUND, club.getId().toString())
         );
 
         Club idClub = clubRepository.findById(id).orElseThrow(
-                () -> new ClubException(ErrorEnum.CLUB_NOT_FOUND, id.toString())
+                () -> new ClubException(ErrorEnum.USER_CLUB_NOT_FOUND, id.toString())
         );
 
         if (!bodyClub.getId().toString().equals(idClub.getId().toString())) {

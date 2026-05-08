@@ -28,13 +28,13 @@ public class CreateUserClubUseCase {
      */
     public UserClub execute(UserClub userClub) throws UserClubException {
         if (userClub == null) {
-            throw new UserClubException(ErrorEnum.CLUB_IS_NULL);
+            throw new UserClubException(ErrorEnum.USER_CLUB_IS_NULL);
         }
         if (userClub.getId() == null) {
-            throw new UserClubException(ErrorEnum.CLUB_ID_IS_NULL);
+            throw new UserClubException(ErrorEnum.USER_CLUB_ID_IS_NULL);
         }
         if (userClubRepository.findUserClubById(userClub.getId()).isPresent()) {
-            throw new UserClubException(ErrorEnum.CLUB_ALREADY_EXISTS, userClub.getId().toString());
+            throw new UserClubException(ErrorEnum.USER_CLUB_ALREADY_EXISTS, userClub.getId().toString());
         }
         userClubRepository.save(userClub);
         logger.info("[CREATE] Created Club with id '{}'", userClub.getId());

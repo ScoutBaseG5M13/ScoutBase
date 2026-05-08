@@ -34,15 +34,15 @@ public class CreateUserTeamUseCase {
      */
     public UserTeam execute(UserTeam userTeam, UserClub userClub) {
         if (userTeam == null) {
-            throw new UserTeamException(ErrorEnum.TEAM_IS_NULL);
+            throw new UserTeamException(ErrorEnum.USER_TEAM_IS_NULL);
         }
 
         if (userTeam.getId() == null) {
-            throw new UserTeamException(ErrorEnum.TEAM_ID_IS_NULL);
+            throw new UserTeamException(ErrorEnum.USER_TEAM_ID_IS_NULL);
         }
 
         if (userTeamRepository.findById(userTeam.getId()).isPresent()) {
-            throw new UserTeamException(ErrorEnum.TEAM_ALREADY_EXISTS, userTeam.getId().toString());
+            throw new UserTeamException(ErrorEnum.USER_TEAM_ALREADY_EXISTS, userTeam.getId().toString());
         }
 
         userTeamRepository.save(userTeam);

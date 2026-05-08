@@ -1,8 +1,11 @@
 package es.dimecresalessis.scoutbase.infrastructure.userteam.web;
 
+import es.dimecresalessis.scoutbase.application.user.find.FindUserByIdUseCase;
 import es.dimecresalessis.scoutbase.application.userclub.find.FindUserClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.userclub.find.FindUserClubByUserTeamUseCase;
 import es.dimecresalessis.scoutbase.application.userclub.update.UpdateUserClubUseCase;
+import es.dimecresalessis.scoutbase.application.userteam.delete.RemoveSecondTrainerUseCase;
+import es.dimecresalessis.scoutbase.application.userteam.delete.RemoveTrainerUseCase;
 import es.dimecresalessis.scoutbase.application.userteam.find.FindAllUserTeamsByUserClubUseCase;
 import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
 import es.dimecresalessis.scoutbase.domain.userteam.exception.UserTeamException;
@@ -57,6 +60,9 @@ public class UserTeamController {
     private final FindAllUserTeamsByUserClubUseCase findAllUserTeamsByUserClubUseCase;
     private final FindUserClubByUserTeamUseCase findUserClubByUserTeamUseCase;
     private final FindUserTeamByIdUseCase findUserTeamByIdUseCase;
+    private final RemoveTrainerUseCase removeTrainerUseCase;
+    private final FindUserByIdUseCase findUserByIdUseCase;
+    private final RemoveSecondTrainerUseCase removeSecondTrainerUseCase;
 
     /**
      * Retrieves all teams associated with the currently authenticated user.
@@ -119,7 +125,7 @@ public class UserTeamController {
     public ResponseEntity<ApiResponse<UserTeamDTO>> create(@PathVariable("id") UUID clubId, @RequestBody UserTeamCreateRequest teamRequest) {
         UserClub userClub = findUserClubByIdUseCase.execute(clubId);
         if (userClub == null) {
-            throw new UserClubException(ErrorEnum.CLUB_NOT_FOUND, clubId.toString());
+            throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, clubId.toString());
         }
         userAuthService.hasMinimumClubAuthorization(userClub.getId(), RoleEnum.SCOUTER);
         UserTeam userTeam = userTeamMapper.createToDomain(teamRequest);
@@ -174,7 +180,7 @@ public class UserTeamController {
     public ResponseEntity<ApiResponse<UserTeamDTO>> setTrainer(@PathVariable("id") UUID teamId, @PathVariable(value = "id2") UUID userId) {
         UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
         if (userTeam == null) {
-            throw new UserTeamException(ErrorEnum.TEAM_NOT_FOUND, teamId.toString());
+            throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
         userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
         if (findUserTeamByIdUseCase.execute(teamId) == null) {
@@ -185,6 +191,31 @@ public class UserTeamController {
         UserTeam updatedUserTeam = updateUserTeamUseCase.execute(userTeam, teamId);
         UserTeamDTO updatedUserTeamDto = userTeamMapper.toDto(updatedUserTeam);
         return handleResponse(updatedUserTeamDto).ok();
+    }
+
+    /**
+     * Removes a User as trainer of a user team.
+     *
+     * @param teamId The team to be removed.
+     * @param userId The user to be removed as trainer.
+     * @return {@link ApiResponse} with the updated {@link UserTeamDTO}.
+     */
+    @DeleteMapping(Routes.ID_PATHVAR + Routes.TRAINER_PATH + Routes.ID_TWO_PATHVAR)
+    @Operation(summary = "Removes a trainer from a user team [Auth ADMIN]", description = "Removes trainer to a UserTeam")
+    public ResponseEntity<ApiResponse<Boolean>> removeTrainer(@PathVariable("id") UUID teamId, @PathVariable(value = "id2") UUID userId) {
+        UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
+        if (userTeam == null) {
+            throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
+        }
+        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
+        if (findUserTeamByIdUseCase.execute(teamId) == null) {
+            throw new UserException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
+        }
+        if (findUserByIdUseCase.execute(userId) == null) {
+            throw new UserException(ErrorEnum.USER_NOT_FOUND, userId.toString());
+        }
+
+        return handleResponse(removeTrainerUseCase.execute(teamId, userId)).ok();
     }
 
     /**
@@ -199,7 +230,7 @@ public class UserTeamController {
     public ResponseEntity<ApiResponse<UserTeamDTO>> setSecondTrainer(@PathVariable("id") UUID teamId, @PathVariable(value = "id2") UUID userId) {
         UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
         if (userTeam == null) {
-            throw new UserTeamException(ErrorEnum.TEAM_NOT_FOUND, teamId.toString());
+            throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
         userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
         if (findUserTeamByIdUseCase.execute(teamId) == null) {
@@ -210,6 +241,31 @@ public class UserTeamController {
         UserTeam updatedUserTeam = updateUserTeamUseCase.execute(userTeam, teamId);
         UserTeamDTO updatedUserTeamDto = userTeamMapper.toDto(updatedUserTeam);
         return handleResponse(updatedUserTeamDto).ok();
+    }
+
+    /**
+     * Removes a User as second trainer of a user team.
+     *
+     * @param teamId The team to be removed.
+     * @param userId The user to be removed as second trainer.
+     * @return {@link ApiResponse} with the updated {@link UserTeamDTO}.
+     */
+    @DeleteMapping(Routes.ID_PATHVAR + Routes.SECOND_TRAINER_PATH + Routes.ID_TWO_PATHVAR)
+    @Operation(summary = "Removes a second trainer from a user team [Auth ADMIN]", description = "Removes trainer to a UserTeam")
+    public ResponseEntity<ApiResponse<Boolean>> removeSecondTrainer(@PathVariable("id") UUID teamId, @PathVariable(value = "id2") UUID userId) {
+        UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
+        if (userTeam == null) {
+            throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
+        }
+        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
+        if (findUserTeamByIdUseCase.execute(teamId) == null) {
+            throw new UserException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
+        }
+        if (findUserByIdUseCase.execute(userId) == null) {
+            throw new UserException(ErrorEnum.USER_NOT_FOUND, userId.toString());
+        }
+
+        return handleResponse(removeSecondTrainerUseCase.execute(teamId, userId)).ok();
     }
 
     /**
@@ -224,7 +280,7 @@ public class UserTeamController {
     public ResponseEntity<ApiResponse<UserTeamDTO>> addScouter(@PathVariable("id") UUID teamId, @PathVariable(value = "id2") UUID userId) {
         UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
         if (userTeam == null) {
-            throw new UserTeamException(ErrorEnum.TEAM_NOT_FOUND, teamId.toString());
+            throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
         userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
         if (findUserTeamByIdUseCase.execute(teamId) == null) {
@@ -248,7 +304,7 @@ public class UserTeamController {
     public ResponseEntity<ApiResponse<UserTeamDTO>> removeScouter(@PathVariable("id") UUID teamId, @PathVariable(value = "id2") UUID userId) {
         UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
         if (userTeam == null) {
-            throw new UserTeamException(ErrorEnum.TEAM_NOT_FOUND, teamId.toString());
+            throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
         userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
         if (findUserTeamByIdUseCase.execute(teamId) == null) {

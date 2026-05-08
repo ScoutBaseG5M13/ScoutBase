@@ -58,7 +58,7 @@ class CreateUserUserClubUseCaseTest {
                 createUserClubUseCase.execute(null)
         );
 
-        assertEquals(ErrorEnum.CLUB_IS_NULL, exception.getErrorEnum());
+        assertEquals(ErrorEnum.USER_CLUB_IS_NULL, exception.getErrorEnum());
         verifyNoInteractions(userClubRepository);
     }
 
@@ -71,7 +71,7 @@ class CreateUserUserClubUseCaseTest {
                 createUserClubUseCase.execute(userClubWithoutId)
         );
 
-        assertEquals(ErrorEnum.CLUB_ID_IS_NULL, exception.getErrorEnum());
+        assertEquals(ErrorEnum.USER_CLUB_ID_IS_NULL, exception.getErrorEnum());
         verifyNoInteractions(userClubRepository);
     }
 
@@ -83,7 +83,7 @@ class CreateUserUserClubUseCaseTest {
                 createUserClubUseCase.execute(userClub)
         );
 
-        assertEquals(ErrorEnum.CLUB_ALREADY_EXISTS, exception.getErrorEnum());
+        assertEquals(ErrorEnum.USER_CLUB_ALREADY_EXISTS, exception.getErrorEnum());
         verify(userClubRepository).findUserClubById(clubId);
         verify(userClubRepository, never()).save(any());
     }

@@ -59,7 +59,7 @@ class UpdateUserUserClubUseCaseTest {
                 updateUserClubUseCase.execute(userClub, clubId)
         );
 
-        assertEquals(ErrorEnum.CLUB_NOT_FOUND, exception.getErrorEnum());
+        assertEquals(ErrorEnum.USER_CLUB_NOT_FOUND, exception.getErrorEnum());
         verify(userClubRepository, never()).save(any());
     }
 
@@ -88,7 +88,7 @@ class UpdateUserUserClubUseCaseTest {
                 updateUserClubUseCase.execute(userClub, pathId)
         );
 
-        assertEquals(ErrorEnum.CLUB_NOT_FOUND, exception.getErrorEnum());
+        assertEquals(ErrorEnum.USER_CLUB_NOT_FOUND, exception.getErrorEnum());
         verify(userClubRepository, never()).save(any());
     }
 }

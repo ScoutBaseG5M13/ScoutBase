@@ -54,7 +54,7 @@ class UpdateUserUserTeamUseCaseTest {
         UserTeamException exception = assertThrows(UserTeamException.class, () ->
                 updateUserTeamUseCase.execute(userTeam, teamId)
         );
-        assertEquals(ErrorEnum.TEAM_NOT_FOUND, exception.getErrorEnum());
+        assertEquals(ErrorEnum.USER_TEAM_NOT_FOUND, exception.getErrorEnum());
     }
 
     @Test

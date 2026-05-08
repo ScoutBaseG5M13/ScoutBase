@@ -92,7 +92,7 @@ public class UserClubController {
             UserClubDTO userClubDto = userClubMapper.domainToDTO(userClub);
             return handleResponse(userClubDto).ok();
         } catch (NoSuchElementException ex) {
-            throw new UserClubException(ErrorEnum.CLUB_NOT_FOUND, clubId.toString());
+            throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, clubId.toString());
         }
     }
 
@@ -130,7 +130,7 @@ public class UserClubController {
             UserClubDTO updatedUserClubDto = userClubMapper.domainToDTO(updatedUserClub);
             return handleResponse(updatedUserClubDto).ok();
         } catch (NoSuchElementException ex) {
-            throw new UserClubException(ErrorEnum.CLUB_NOT_FOUND, ex.getMessage());
+            throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, ex.getMessage());
         }
     }
 
@@ -149,7 +149,7 @@ public class UserClubController {
             boolean isDeleted = deleteUserClubUseCase.execute(id);
             return handleResponse(isDeleted).ok();
         } catch (NoSuchElementException ex) {
-            throw new UserClubException(ErrorEnum.CLUB_NOT_FOUND, id.toString());
+            throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, id.toString());
         }
     }
 
@@ -171,7 +171,7 @@ public class UserClubController {
             UserClub updatedUserClub = updateUserClubUseCase.execute(userClub, clubId);
             return handleResponse(userClubMapper.domainToDTO(updatedUserClub)).ok();
         } catch (NoSuchElementException ex) {
-            throw new UserClubException(ErrorEnum.CLUB_NOT_FOUND, clubId.toString());
+            throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, clubId.toString());
         }
     }
 
@@ -193,7 +193,7 @@ public class UserClubController {
             UserClub updatedUserClub = updateUserClubUseCase.execute(userClub, clubId);
             return handleResponse(userClubMapper.domainToDTO(updatedUserClub)).ok();
         } catch (NoSuchElementException ex) {
-            throw new UserClubException(ErrorEnum.CLUB_NOT_FOUND, clubId.toString());
+            throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, clubId.toString());
         }
     }
 
@@ -214,7 +214,7 @@ public class UserClubController {
             Club createdClub = createClubUseCase.execute(club, userClubId);
             return handleResponse(clubMapper.domainToDTO(createdClub)).ok();
         } catch (NoSuchElementException ex) {
-            throw new UserClubException(ErrorEnum.CLUB_NOT_FOUND, userClubId.toString());
+            throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, userClubId.toString());
         }
     }
 }

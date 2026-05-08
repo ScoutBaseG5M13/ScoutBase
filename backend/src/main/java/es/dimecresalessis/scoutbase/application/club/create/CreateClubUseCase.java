@@ -36,17 +36,17 @@ public class CreateClubUseCase {
      */
     public Club execute(Club club, UUID userClubId) throws ClubException {
         if (club == null) {
-            throw new ClubException(ErrorEnum.CLUB_IS_NULL);
+            throw new ClubException(ErrorEnum.USER_CLUB_IS_NULL);
         }
         if (club.getId() == null) {
-            throw new ClubException(ErrorEnum.CLUB_ID_IS_NULL);
+            throw new ClubException(ErrorEnum.USER_CLUB_ID_IS_NULL);
         }
         if (clubRepository.findById(club.getId()).isPresent()) {
-            throw new ClubException(ErrorEnum.CLUB_ALREADY_EXISTS, club.getId().toString());
+            throw new ClubException(ErrorEnum.USER_CLUB_ALREADY_EXISTS, club.getId().toString());
         }
         Optional<UserClub> userClub = userClubRepository.findUserClubById(userClubId);
         if (userClub.isEmpty()) {
-            throw new UserClubException(ErrorEnum.CLUB_NOT_FOUND, userClubId.toString());
+            throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, userClubId.toString());
         }
 
         clubRepository.save(club);

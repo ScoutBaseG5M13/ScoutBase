@@ -106,7 +106,7 @@ public class PlayerController {
         userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.SCOUTER);
         Team team = findTeamByIdUseCase.execute(teamId);
         if (team == null) {
-            throw new TeamException(ErrorEnum.TEAM_NOT_FOUND, teamId.toString());
+            throw new TeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
         Player player = playerMapper.createToDomain(playerRequest);
         Player createdPlayer = createPlayerUseCase.execute(player);
@@ -130,7 +130,7 @@ public class PlayerController {
         try {
             Team userTeam = findTeamByPlayerUseCase.execute(playerDto.getId());
             if (userTeam == null) {
-                throw new TeamException(ErrorEnum.TEAM_IS_NULL);
+                throw new TeamException(ErrorEnum.USER_TEAM_IS_NULL);
             }
             userAuthService.hasMinimumTeamAuthorization(userTeam.getId(), RoleEnum.SCOUTER);
             Player player = playerMapper.dtoToDomain(playerDto);
@@ -156,7 +156,7 @@ public class PlayerController {
         try {
             Team userTeam = findTeamByPlayerUseCase.execute(playerId);
             if (userTeam == null) {
-                throw new TeamException(ErrorEnum.TEAM_BY_PLAYER_NOT_FOUND, playerId.toString());
+                throw new TeamException(ErrorEnum.USER_TEAM_BY_PLAYER_NOT_FOUND, playerId.toString());
             }
             userAuthService.hasMinimumTeamAuthorization(userTeam.getId(), RoleEnum.SCOUTER);
             boolean isDeleted = deletePlayerUseCase.execute(playerId);

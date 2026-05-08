@@ -48,11 +48,11 @@ public class UpdateUserTeamUseCase {
      */
     private void validateAndRetrieveTeam(UserTeam userTeam, UUID id) {
         UserTeam bodyUserTeam = userTeamRepository.findById(userTeam.getId()).orElseThrow(
-                () -> new UserTeamException(ErrorEnum.TEAM_NOT_FOUND, userTeam.getId().toString())
+                () -> new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, userTeam.getId().toString())
         );
 
         UserTeam idUserTeam = userTeamRepository.findById(id).orElseThrow(
-                () -> new UserTeamException(ErrorEnum.TEAM_NOT_FOUND, id.toString())
+                () -> new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, id.toString())
         );
 
         if (!bodyUserTeam.getId().toString().equals(idUserTeam.getId().toString())) {

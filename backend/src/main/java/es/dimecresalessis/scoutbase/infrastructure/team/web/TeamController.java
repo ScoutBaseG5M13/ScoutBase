@@ -114,7 +114,7 @@ public class TeamController {
     public ResponseEntity<ApiResponse<TeamDTO>> createTeam(@RequestBody TeamCreateRequest teamRequest, @PathVariable("id") UUID clubId) {
         Club club = findClubByIdUseCase.execute(clubId);
         if (club == null) {
-            throw new ClubException(ErrorEnum.CLUB_NOT_FOUND, clubId.toString());
+            throw new ClubException(ErrorEnum.USER_CLUB_NOT_FOUND, clubId.toString());
         }
         userAuthService.hasMinimumClubAuthorization(club.getId(), RoleEnum.ADMIN);
         Team team = teamMapper.createToDomain(teamRequest);
