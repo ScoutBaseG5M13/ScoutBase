@@ -46,15 +46,15 @@ public class FindUserRoleInTeamUseCase {
             }
 
             if (team.get().getTrainer() != null && team.get().getTrainer().equals(user.getId())) {
-                teamRole = RoleEnum.TRAINER;
+                return RoleEnum.TRAINER;
             }
 
             if (team.get().getSecondTrainer() != null && team.get().getSecondTrainer().equals(user.getId())) {
-                teamRole = RoleEnum.SECOND_TRAINER;
+                return RoleEnum.SECOND_TRAINER;
             }
 
             if (team.get().getScouters() != null && team.get().getScouters().stream().anyMatch(s -> s.equals(user.getId()))) {
-                teamRole = RoleEnum.SCOUTER;
+                return RoleEnum.SCOUTER;
             }
             logger.info("[AUTH] User '{}' has role {} in userteam {}, of userclub '{}'", user.getUsername(), teamRole, team.get().getName(), club.isPresent() ? club.get().getName() : null);
         }
