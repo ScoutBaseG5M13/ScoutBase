@@ -32,21 +32,7 @@ public class UserDTO {
     @NotBlank
     private String email;
 
-    /**
-     * Generates a random instance for testing purposes.
-     *
-     * @return A random {@link UserDTO} instance.
-     */
-    public static UserDTO getRandomInstance() {
-        return new UserDTO(
-                UUID.randomUUID(),
-                shuffleAndReturnRandomString(9),
-                shuffleAndReturnRandomString(9),
-                "Test name " + new Random().nextInt(10000),
-                "Test surname " + new Random().nextInt(10000),
-                new Random().nextInt(10000) + "@test.com"
-        );
-    }
+    private boolean superAdmin;
 
     /**
      * Utility method for generating random alphanumeric strings, for testing purposes.

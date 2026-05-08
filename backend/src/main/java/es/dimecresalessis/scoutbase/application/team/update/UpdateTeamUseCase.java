@@ -32,9 +32,10 @@ public class UpdateTeamUseCase {
      */
     public Team execute(Team team, UUID teamId) {
         validateAndRetrieveTeam(team, teamId);
-        teamRepository.save(team);
-        logger.info("[UPDATE] Updated Player '{}'", team.getId());
-        return team;
+        Team matchedTeam = matchWithSavedInfo(team, teamId);
+        teamRepository.save(matchedTeam);
+        logger.info("[UPDATE] Updated Team '{}'", matchedTeam.getId());
+        return matchedTeam;
     }
 
     /**
@@ -47,6 +48,10 @@ public class UpdateTeamUseCase {
      * @throws IllegalArgumentException if there is a mismatch between the IDs.
      */
     private void validateAndRetrieveTeam(Team team, UUID id) {
+        if (!team.getId().equals(id)) {
+            throw new IllegalArgumentException("Team id '" + team.getId() + "' does not match the path variable '" + id + "'");
+        }
+
         Team bodyTeam = teamRepository.findById(team.getId()).orElseThrow(
                 () -> new TeamException(ErrorEnum.TEAM_NOT_FOUND, team.getId().toString())
         );
@@ -56,7 +61,17 @@ public class UpdateTeamUseCase {
         );
 
         if (!bodyTeam.getId().toString().equals(idTeam.getId().toString())) {
-            throw new IllegalArgumentException("Team id " + bodyTeam.getId() + " does not match " + idTeam.getId());
+            throw new IllegalArgumentException("Body team id '" + bodyTeam.getId() + "' does not match '" + idTeam.getId() + "'");
         }
+    }
+
+    private Team matchWithSavedInfo(Team team, UUID teamId) {
+        Team newTeam = team;
+        Team savedTeam = teamRepository.findById(teamId).orElse(null);
+        if (savedTeam == null) {
+            return newTeam;
+        }
+        newTeam.matchWithObject(savedTeam);
+        return newTeam;
     }
 }

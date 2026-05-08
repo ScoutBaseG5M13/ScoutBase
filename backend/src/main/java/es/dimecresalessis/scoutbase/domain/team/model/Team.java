@@ -12,23 +12,28 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Team {
     private UUID id;
+    private UUID clubId;
     private String name;
     private CategoryEnum category;
     private SubcategoryEnum subcategory;
-    private UUID trainer;
-    private UUID secondTrainer;
     private List<UUID> players;
-    private List<UUID> scouters;
 
     @Builder
-    public Team(UUID id, String name, CategoryEnum category, SubcategoryEnum subcategory, UUID trainer, UUID secondTrainer, List<UUID> players, List<UUID> scouters) {
+    public Team(UUID id, String name, CategoryEnum category, SubcategoryEnum subcategory, List<UUID> players, UUID clubId) {
         this.id = (id == null) ? UUID.randomUUID() : id;
+        this.clubId = clubId;
         this.name = name;
         this.category = category;
         this.subcategory = subcategory;
-        this.trainer = trainer;
-        this.secondTrainer = secondTrainer;
         this.players = players;
-        this.scouters = scouters;
+    }
+
+    public void matchWithObject(Team incoming) {
+        this.id = this.id != null ? this.id : incoming.id;
+        this.clubId = this.clubId != null ? this.clubId : incoming.clubId;
+        this.name = this.name != null ? this.name : incoming.name;
+        this.category = this.category != null ? this.category : incoming.category;
+        this.subcategory = this.subcategory != null ? this.subcategory : incoming.subcategory;
+        this.players = this.players != null ? this.players : incoming.players;
     }
 }

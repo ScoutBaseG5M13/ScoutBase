@@ -18,13 +18,12 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FindClubByTeamUseCase {
 
-    private static final Logger logger = LoggerFactory.getLogger(FindAllClubsByUserUseCase.class);
     private final ClubRepository clubRepository;
 
     public Club execute(UUID teamId) {
         List<Club> clubs = clubRepository.findAll();
         return clubs.stream()
-                .filter(c -> c.getTeams().equals(teamId))
+                .filter(c -> c.getTeams().contains(teamId))
                 .findFirst()
                 .orElse(null);
     }

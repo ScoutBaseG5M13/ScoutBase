@@ -33,11 +33,15 @@ public class UserEntity extends CommonEntity {
     @Column(nullable = false)
     String email;
 
+    @Column(nullable = false)
+    boolean superAdmin;
+
     public void update(UserEntity newEntity) {
         this.username = newEntity.getUsername();
         this.password = newEntity.getPassword();
         this.name = newEntity.getName();
         this.surname = newEntity.getSurname();
         this.email = newEntity.getEmail();
+        this.superAdmin = newEntity.isSuperAdmin();
     }
 }

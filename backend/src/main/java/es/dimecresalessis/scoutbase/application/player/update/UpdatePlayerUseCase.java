@@ -25,17 +25,22 @@ public class UpdatePlayerUseCase {
      * Updates the details of a {@link Player} identified by their unique ID.
      *
      * @param player The updated {@link Player} object with the new details.
-     * @param id The ID of the player to be updated.
+     * @param playerId The ID of the player to be updated.
      * @return The updated {@link Player} object after being persisted.
      */
-    public Player execute(Player player, UUID id) {
-        validateAndRetrievePlayer(player, id);
-        playerRepository.save(player);
-        logger.info("[UPDATE] Updated Player '{}'", player.getId());
-        return player;
+    public Player execute(Player player, UUID playerId) {
+        validateAndRetrievePlayer(player, playerId);
+        Player matchedPlayer = matchWithSavedInfo(player, playerId);
+        playerRepository.save(matchedPlayer);
+        logger.info("[UPDATE] Updated Player '{}'", matchedPlayer.getId());
+        return matchedPlayer;
     }
 
     private void validateAndRetrievePlayer(Player player, UUID id) {
+        if (!player.getId().equals(id)) {
+            throw new IllegalArgumentException("Player id '" + player.getId() + "' does not match the path variable '" + id + "'");
+        }
+
         Player bodyPlayer = playerRepository.findById(player.getId()).orElseThrow(
                 () -> new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, player.getId().toString())
         );
@@ -45,7 +50,17 @@ public class UpdatePlayerUseCase {
         );
 
         if (!bodyPlayer.getId().toString().equals(idPlayer.getId().toString())) {
-            throw new IllegalArgumentException("Player id " + bodyPlayer.getId() + " does not match " + idPlayer.getId());
+            throw new IllegalArgumentException("Body player id '" + bodyPlayer.getId() + "' does not match '" + idPlayer.getId() + "'");
         }
+    }
+
+    private Player matchWithSavedInfo(Player player, UUID playerId) {
+        Player newPlayer = player;
+        Player savedPlayer = playerRepository.findById(playerId).orElse(null);
+        if (savedPlayer == null) {
+            return newPlayer;
+        }
+        newPlayer.matchWithObject(savedPlayer);
+        return newPlayer;
     }
 }

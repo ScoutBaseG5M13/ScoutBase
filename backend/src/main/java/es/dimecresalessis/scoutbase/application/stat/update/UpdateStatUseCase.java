@@ -27,17 +27,22 @@ public class UpdateStatUseCase {
      * Updates the details of a {@link Stat} identified by their unique ID.
      *
      * @param stat The updated {@link Stat} object with the new details.
-     * @param id The ID of the stat to be updated.
+     * @param statId The ID of the stat to be updated.
      * @return The updated {@link Stat} object after being persisted.
      */
-    public Stat execute(Stat stat, UUID id) {
-        validateAndRetrieveStat(stat, id);
-        statRepository.update(stat);
-        logger.info("[UPDATE] Updated Stat with id '{}'", stat.getId());
-        return stat;
+    public Stat execute(Stat stat, UUID statId) {
+        validateAndRetrieveStat(stat, statId);
+        Stat matchedStat = matchWithSavedInfo(stat, statId);
+        statRepository.update(matchedStat);
+        logger.info("[UPDATE] Updated Stat with id '{}'", matchedStat.getId());
+        return matchedStat;
     }
 
     private void validateAndRetrieveStat(Stat stat, UUID id) {
+        if (!stat.getId().equals(id)) {
+            throw new IllegalArgumentException("Stat id '" + stat.getId() + "' does not match the path variable '" + id + "'");
+        }
+
         Stat bodyStat = statRepository.findById(stat.getId()).orElseThrow(
                 () -> new StatException(ErrorEnum.STAT_NOT_FOUND, stat.getId().toString())
         );
@@ -51,7 +56,17 @@ public class UpdateStatUseCase {
         }
 
         if (!bodyStat.getId().toString().equals(idStat.getId().toString())) {
-            throw new IllegalArgumentException("Stat id " + bodyStat.getId() + " does not match " + idStat.getId());
+            throw new IllegalArgumentException("Stat id '" + bodyStat.getId() + "' does not match '" + idStat.getId() + "'");
         }
+    }
+
+    private Stat matchWithSavedInfo(Stat stat, UUID statId) {
+        Stat newStat = stat;
+        Stat savedStat = statRepository.findById(statId).orElse(null);
+        if (savedStat == null) {
+            return newStat;
+        }
+        newStat.matchWithObject(savedStat);
+        return newStat;
     }
 }

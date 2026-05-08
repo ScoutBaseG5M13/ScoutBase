@@ -18,17 +18,14 @@ public class TeamDTO {
     private UUID id;
 
     @NotBlank
+    private UUID clubId;
+
+    @NotBlank
     private String name;
 
     private String category;
 
     private String subcategory;
 
-    private UUID trainer;
-
-    private UUID secondTrainer;
-
     private List<UUID> players;
-
-    private List<UUID> scouters;
 }

@@ -26,14 +26,6 @@ public interface TeamRepository {
     Optional<Team> findById(UUID id);
 
     /**
-     * Retrieves a list of teams that contain a specific User.
-     *
-     * @param userId The unique {@link UUID} of the user teams to find.
-     * @return A {@link List} containing the found teams, or empty if no match is found.
-     */
-    List<Team> findAllByUserId(UUID userId);
-
-    /**
      * Retrieves a list of teams that contain a specific player.
      *
      * @param playerId The unique {@link UUID} of the player to find.

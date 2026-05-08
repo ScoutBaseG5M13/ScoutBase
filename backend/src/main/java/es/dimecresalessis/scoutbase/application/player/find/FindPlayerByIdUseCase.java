@@ -26,7 +26,7 @@ public class FindPlayerByIdUseCase {
      * @return The {@link Player} entity corresponding to the provided ID.
      */
     public Player execute(UUID id)  {
-        Player player = playerRepository.findById(id).orElseThrow();
+        Player player = playerRepository.findById(id).orElse(null);
         logger.info("[FIND] Found Player with id '{}'", id);
         return player;
     }

@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<String>> handleBadCredentialsException(BadCredentialsException ex) {
         logException(ex);
-        String userMessage = "Your session has expired or is invalid. Please, log in again";
+        String userMessage = ex.getMessage(); //"Your session has expired or is invalid. Please, log in again";
         return buildErrorResponse(userMessage, ex, HttpStatus.UNAUTHORIZED);
     }
 

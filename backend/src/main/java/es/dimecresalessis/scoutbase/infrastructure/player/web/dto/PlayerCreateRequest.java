@@ -16,9 +16,8 @@ public class PlayerCreateRequest {
     @NotBlank
     private String surname;
 
-    private int age;
+    private int birthYear;
 
-    @NotBlank
     private String email;
 
     private int number;

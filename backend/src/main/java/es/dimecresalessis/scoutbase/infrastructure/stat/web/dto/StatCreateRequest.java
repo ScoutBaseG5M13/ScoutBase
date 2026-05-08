@@ -5,14 +5,10 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StatCreateRequest {
-
-    private UUID playerId;
 
     @NotBlank
     @Size(min = 3, max = 3, message = "Code must be exactly 3 characters long [CON, RES...]")

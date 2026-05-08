@@ -23,6 +23,9 @@ import java.util.UUID;
 public class TeamEntity extends CommonEntity {
 
     @Column(nullable = false)
+    private UUID clubId;
+
+    @Column(nullable = false)
     private String name;
 
     @Column
@@ -31,17 +34,7 @@ public class TeamEntity extends CommonEntity {
     @Column
     private String subcategory;
 
-    @Column
-    private UUID trainer;
-
-    @Column
-    private UUID secondTrainer;
-
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = false, columnDefinition = "uuid[]")
+    @Column(nullable = true, columnDefinition = "uuid[]")
     private List<UUID> players;
-
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = false, columnDefinition = "uuid[]")
-    private List<UUID> scouters;
 }
