@@ -11,6 +11,7 @@ import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
+import es.dimecresalessis.scoutbase.domain.shared.domain.CategoryEnum;
 import es.dimecresalessis.scoutbase.domain.team.exception.TeamException;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.user.exception.UserException;
@@ -20,8 +21,10 @@ import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.mapper.PlayerMapper;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
+import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.CategoryEnumDTO;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamDTO;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamUpdateRequest;
+import es.dimecresalessis.scoutbase.infrastructure.team.web.mapper.CategoryMapper;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.mapper.TeamMapper;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
 import es.dimecresalessis.scoutbase.infrastructure.web.dto.ApiResponse;
@@ -32,6 +35,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,6 +53,7 @@ public class TeamController {
 
     private final TeamMapper teamMapper;
     private final PlayerMapper playerMapper;
+    private final CategoryMapper categoryMapper;
     private final FindTeamByIdUseCase findTeamById;
     private final UpdateTeamUseCase updateTeamUseCase;
     private final DeleteTeamUseCase deleteTeamUseCase;
@@ -161,5 +166,18 @@ public class TeamController {
         updateTeamUseCase.execute(team, teamId);
         PlayerDTO createdPlayerDTO = playerMapper.toDto(createdPlayer);
         return handleResponse(createdPlayerDTO).created();
+    }
+
+    /**
+     * Returns the available Categories and its Subcategories
+     *
+     * @return {@link ApiResponse} containing all categories.
+     * @throws PlayerException If an error occurs during category retrieval.
+     */
+    @GetMapping(Routes.CATEGORIES)
+    @Operation(summary = "Gets all categories", description = "Get all CategoryEnum")
+    public ResponseEntity<ApiResponse<List<CategoryEnumDTO>>> getCategories() {
+        List<CategoryEnumDTO> categories = Arrays.stream(CategoryEnum.values()).map(categoryMapper::domainToDTO).toList();
+        return handleResponse(categories).ok();
     }
 }

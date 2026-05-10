@@ -11,11 +11,13 @@ import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import es.dimecresalessis.scoutbase.domain.stat.exception.StatException;
 import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
+import es.dimecresalessis.scoutbase.domain.stat.model.StatEnum;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatDTO;
+import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatEnumDTO;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatUpdateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.mapper.StatMapper;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
@@ -27,6 +29,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,6 +54,21 @@ public class StatController {
     private final FindPlayerByIdUseCase findPlayerByIdUseCase;
     private final FindTeamByPlayerUseCase findTeamByPlayerUseCase;
 
+
+    /**
+     * Finds all available stats.
+     *
+     * @return {@link ApiResponse} containing a list of all {@link Stat}.
+     */
+    @GetMapping
+    @Operation(summary = "Find all available stats", description = "Finds all available Stats")
+    public ResponseEntity<ApiResponse<List<StatEnumDTO>>> getAllStats() {
+        List<StatEnumDTO> stats = Arrays.stream(StatEnum.values())
+                .map(statMapper::statEnumToStatEnumDto)
+                .toList();
+        return handleResponse(stats).ok();
+    }
+
     /**
      * Finds all stats of a player.
      *
@@ -68,7 +86,7 @@ public class StatController {
         userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
 
         List<Stat> stats = findAllStatsByPlayerIdUseCase.execute(playerId);
-        List<StatDTO> statsDto = stats.stream().map(statMapper::toDto).toList();
+        List<StatDTO> statsDto = stats.stream().map(statMapper::domainToDto).toList();
         return handleResponse(statsDto).ok();
     }
 
@@ -86,7 +104,7 @@ public class StatController {
         Team team = findTeamByPlayerUseCase.execute(player.getId());
         userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
 
-        StatDTO statDto = statMapper.toDto(stat);
+        StatDTO statDto = statMapper.domainToDto(stat);
         return handleResponse(statDto).ok();
     }
 
@@ -111,7 +129,7 @@ public class StatController {
 
         Stat newStat = statMapper.updateToDomain(updateRequest);
         Stat updatedStat = updateStatUseCase.execute(newStat, statId);
-        StatDTO updatedStatDTO = statMapper.toDto(updatedStat);
+        StatDTO updatedStatDTO = statMapper.domainToDto(updatedStat);
         return handleResponse(updatedStatDTO).ok();
     }
 

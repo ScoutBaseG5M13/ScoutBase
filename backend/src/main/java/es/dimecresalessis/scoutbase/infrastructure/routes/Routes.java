@@ -13,6 +13,7 @@ public class Routes {
     public static final String USER_CLUBS = "/user-clubs";
     public static final String CLUBS = "/clubs";
     public static final String HEALTH = "/health";
+    public static final String CATEGORIES = "/categories";
 
     public static final String AUTH_LOGIN = "/auth/login";
     public static final String ID_PATHVAR = "/{id}";
