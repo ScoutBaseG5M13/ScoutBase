@@ -147,7 +147,7 @@ public class UsersController {
                     """.formatted(username, password, role, name, surname, email);
 
             String response = apiClient.post(
-                    "https://scoutbase-dev-6r6d.onrender.com/api/v1/users",
+                    "https://scoutbase-pro-sjz0.onrender.com/api/v1/users",
                     body
             );
 
@@ -180,7 +180,7 @@ public class UsersController {
             }
 
             String response = apiClient.get(
-                    "https://scoutbase-dev-6r6d.onrender.com/api/v1/users/username/" + username
+                    "https://scoutbase-pro-sjz0.onrender.com/api/v1/users/username/" + username
             );
 
             System.out.println("SEARCH RESPONSE: " + response);
@@ -218,7 +218,7 @@ public class UsersController {
     private void onLoadMeClick() {
         try {
             String response = apiClient.get(
-                    "https://scoutbase-dev-6r6d.onrender.com/api/v1/users/me"
+                    "https://scoutbase-pro-sjz0.onrender.com/api/v1/users/me"
             );
 
             System.out.println("ME RESPONSE: " + response);

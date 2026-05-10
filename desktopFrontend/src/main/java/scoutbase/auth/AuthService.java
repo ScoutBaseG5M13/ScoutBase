@@ -26,7 +26,7 @@ public class AuthService {
      * URL base de la API backend para la gestión de usuarios.
      */
     private static final String BASE_URL =
-            "https://scoutbase-dev-6r6d.onrender.com/api/v1/users";
+            "https://scoutbase-pro-sjz0.onrender.com/api/v1/users";
 
     /**
      * URL del endpoint de autenticación para el inicio de sesión.

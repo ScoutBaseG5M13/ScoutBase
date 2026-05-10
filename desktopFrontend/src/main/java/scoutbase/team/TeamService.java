@@ -24,7 +24,7 @@ public class TeamService {
      * URL base del endpoint de equipos en el backend.
      */
     private static final String BASE_URL =
-            "https://scoutbase-dev-6r6d.onrender.com/api/v1/teams";
+            "https://scoutbase-pro-sjz0.onrender.com/api/v1/teams";
 
     /**
      * Cliente HTTP utilizado para comunicarse con la API.

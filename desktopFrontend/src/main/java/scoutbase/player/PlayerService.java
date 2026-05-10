@@ -21,7 +21,7 @@ public class PlayerService {
      * URL base del endpoint de jugadores en el backend.
      */
     private static final String BASE_URL =
-            "https://scoutbase-dev-6r6d.onrender.com/api/v1/players";
+            "https://scoutbase-pro-sjz0.onrender.com/api/v1/players";
 
     /**
      * Cliente HTTP utilizado para comunicarse con la API.

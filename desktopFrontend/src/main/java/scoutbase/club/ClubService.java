@@ -18,7 +18,7 @@ public class ClubService {
     /**
      * URL base del endpoint de clubes en el backend.
      */
-    private static final String BASE_URL = "https://scoutbase-dev-6r6d.onrender.com/api/v1/clubs";
+    private static final String BASE_URL = "https://scoutbase-pro-sjz0.onrender.com/api/v1/clubs";
 
     /**
      * Cliente HTTP encargado de realizar las peticiones a la API.
