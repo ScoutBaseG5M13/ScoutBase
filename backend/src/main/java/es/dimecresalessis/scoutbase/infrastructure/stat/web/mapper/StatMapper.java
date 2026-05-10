@@ -4,6 +4,7 @@ import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import es.dimecresalessis.scoutbase.domain.stat.model.StatEnum;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatDTO;
+import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatEnumDTO;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatUpdateRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -23,5 +24,9 @@ public interface StatMapper {
     Stat updateToDomain(StatUpdateRequest request);
 
     @Mapping(target = "name", expression = "java(StatEnum.fromStatCode(domain.getCode()).statName)")
-    StatDTO toDto(Stat domain);
+    StatDTO domainToDto(Stat domain);
+
+    @Mapping(target = "name", source = "statName")
+    @Mapping(target = "code", source = "statCode")
+    StatEnumDTO statEnumToStatEnumDto(StatEnum statEnum);
 }

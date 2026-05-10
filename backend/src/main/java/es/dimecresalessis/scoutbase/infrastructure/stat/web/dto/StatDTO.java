@@ -1,6 +1,7 @@
 package es.dimecresalessis.scoutbase.infrastructure.stat.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import es.dimecresalessis.scoutbase.domain.stat.model.StatEnum;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +21,8 @@ public class StatDTO {
 
     private String name;
 
+    private String type;
+
     @NotBlank
     @Size(min = 3, max = 3, message = "Code must be exactly 3 characters long [CON, RES...]")
     private String code;
@@ -28,4 +31,8 @@ public class StatDTO {
     @Min(value = 0)
     @Max(value = 10)
     private int value;
+
+    String getType() {
+        return StatEnum.fromStatCode(code).type;
+    }
 }

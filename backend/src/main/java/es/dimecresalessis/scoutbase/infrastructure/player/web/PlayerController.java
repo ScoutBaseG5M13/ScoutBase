@@ -161,7 +161,7 @@ public class PlayerController {
 
         Stat stat = statMapper.createToDomain(statRequest, playerId);
         Stat createdStat = createStatUseCase.execute(stat, playerId);
-        StatDTO createdStatDTO = statMapper.toDto(createdStat);
+        StatDTO createdStatDTO = statMapper.domainToDto(createdStat);
         return handleResponse(createdStatDTO).created();
     }
 }

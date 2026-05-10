@@ -8,7 +8,6 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum SubcategoryEnum {
-    SUB6("SUB-6"),
     SUB7("SUB-7"),
     SUB8("SUB-8"),
     SUB9("SUB-9"),
