@@ -2,6 +2,7 @@ package es.dimecresalessis.scoutbase.application.stat.create;
 
 import es.dimecresalessis.scoutbase.application.stat.CheckIfStatAlreadyExistsOnPlayer;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
+import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
 import es.dimecresalessis.scoutbase.domain.stat.exception.StatException;
 import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import es.dimecresalessis.scoutbase.domain.stat.repository.StatRepository;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -21,6 +23,7 @@ public class CreateStatUseCase {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateStatUseCase.class);
     private final StatRepository statRepository;
+    private final PlayerRepository playerRepository;
     private final CheckIfStatAlreadyExistsOnPlayer checkIfStatAlreadyExistsOnPlayer;
 
     /**
@@ -46,6 +49,16 @@ public class CreateStatUseCase {
         stat.setPlayerId(playerId);
         statRepository.save(stat);
         logger.info("[CREATE] Created Stat with id '{}'", stat.getId());
+
+        playerRepository.findById(stat.getPlayerId()).ifPresent(player -> {
+            if (player.getStats() == null) {
+                player.setStats(new ArrayList<>());
+            }
+            player.getStats().add(stat.getId());
+            playerRepository.save(player);
+            logger.info("[CREATE] Added Stat '{}' to Player '{}'", stat.getId(), player.getName());
+        });
+
         return stat;
     }
 }
