@@ -11,9 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.management.relation.Role;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Use case for finding the {@link Role} of a {@link User} in their {@link UserTeam}.
+ */
 @Service
 @AllArgsConstructor
 public class FindUserRoleInTeamUseCase {
@@ -49,7 +53,7 @@ public class FindUserRoleInTeamUseCase {
             if (team.get().getScouters() != null && team.get().getScouters().stream().anyMatch(s -> s.equals(user.getId()))) {
                 return RoleEnum.SCOUTER;
             }
-            logger.info("[AUTH] User '{}' has role {} in userteam {}, of userclub '{}'", user.getUsername(), teamRole, team.get().getName(), club.isPresent() ? club.get().getName() : null);
+            logger.info("[AUTH] User '{}' has role {} in User Team {}, of User Club '{}'", user.getUsername(), teamRole, team.get().getName(), club.isPresent() ? club.get().getName() : null);
         }
         return null;
     }

@@ -197,7 +197,7 @@ public class TeamController {
      * @throws PlayerException If an error occurs during category retrieval.
      */
     @GetMapping( Routes.ID_PATHVAR + Routes.STATS)
-    @Operation(summary = "Gets all player stats in team", description = "Get all Player Stats in the Team")
+    @Operation(summary = "Gets all player average stats in team", description = "Get all Player average Stats in the Team")
     public ResponseEntity<ApiResponse<List<PlayerAverageStatScoreDTO>>> getAllPlayerAverageStats(@PathVariable("id") UUID teamId) {
         List<Player> players = findAllPlayersByTeamIdUseCase.execute(teamId);
         List<PlayerAverageStatScoreDTO> averageScores = players.stream()

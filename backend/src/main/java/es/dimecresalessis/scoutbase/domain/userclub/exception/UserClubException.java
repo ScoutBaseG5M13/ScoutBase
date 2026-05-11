@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Exception for Club specific errors.
+ * Exception for User Club specific errors.
  * <p>
  * Extends {@link ScoutbaseException} to add custom error handling logic.
  * </p>
@@ -16,7 +16,7 @@ public class UserClubException extends ScoutbaseException {
     /**
      * Constructs a new {@link UserClubException}.
      *
-     * @param errorEnum The {@link ErrorEnum} representing a userclub specific error.
+     * @param errorEnum The {@link ErrorEnum} representing a user club specific error.
      * @param variables The variables to customize error message placeholders.
      */
     public UserClubException(ErrorEnum errorEnum, String... variables) {

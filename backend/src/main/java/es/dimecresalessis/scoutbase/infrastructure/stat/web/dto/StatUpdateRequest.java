@@ -1,12 +1,16 @@
 package es.dimecresalessis.scoutbase.infrastructure.stat.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.UUID;
 
+/**
+ * Request DTO for updating an existing {@link Stat} entity.
+ */
 @Data
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -1,10 +1,14 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * Request DTO for creating a new {@link Player} entity.
+ */
 @Data
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)

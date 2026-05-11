@@ -4,8 +4,6 @@ import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
 import es.dimecresalessis.scoutbase.domain.userclub.repository.UserClubRepository;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +18,12 @@ public class FindAllUserClubsByUserUseCase {
 
     private final UserClubRepository userClubRepository;
 
+    /**
+     * Executes the retrieval of all {@link UserClub} associations linked to a specific {@link User}.
+     *
+     * @param userId The {@link UUID} of the user whose club associations are to be retrieved.
+     * @return A {@link List} of {@link UserClub} objects related to the specified user.
+     */
     public List<UserClub> execute(UUID userId) {
         return userClubRepository.findAllUserClubsByUserId(userId);
     }
