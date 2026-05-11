@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.application.userclub.find;
 
+import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.userclub.exception.UserClubException;
 import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Use case for finding a {@link List < Club >} by {@link User} {@link UUID}.
+ * Use case for finding a {@link List<Club>} by {@link User} {@link UUID}.
  */
 @Service
 @AllArgsConstructor

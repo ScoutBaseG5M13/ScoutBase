@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Use case for finding all {@link List <UserClub>}.
+ * Use case for finding all {@link List<UserClub>}.
  */
 @Service
 @AllArgsConstructor
