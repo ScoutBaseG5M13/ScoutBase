@@ -8,6 +8,7 @@ import es.dimecresalessis.scoutbase.application.user.find.*;
 import es.dimecresalessis.scoutbase.application.user.update.UpdateUserUseCase;
 import es.dimecresalessis.scoutbase.application.userclub.find.FindAllUserClubsByUserUseCase;
 import es.dimecresalessis.scoutbase.application.userclub.find.FindUserClubByIdUseCase;
+import es.dimecresalessis.scoutbase.application.userclub.find.FindUserClubByUserTeamUseCase;
 import es.dimecresalessis.scoutbase.application.userteam.find.FindAllUserTeamsByUserClubUseCase;
 import es.dimecresalessis.scoutbase.application.userteam.find.FindUserTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
@@ -62,6 +63,7 @@ public class UserController {
     private final FindAllUsersByRoleUseCase findAllUsersByRoleUseCase;
     private final FindUserRoleInTeamUseCase findUserRoleInTeamUseCase;
     private final FindUserRoleInClubUseCase findUserRoleInClubUseCase;
+    private final FindUserClubByUserTeamUseCase findUserClubByUserTeamUseCase;
 
     /**
      * Finds all Users. For Superadmin pursposes. Or testing now.
@@ -219,7 +221,8 @@ public class UserController {
     @GetMapping(Routes.USER_TEAMS + Routes.ID_PATHVAR)
     @Operation(summary = "Finds all Users by Team ID [Auth ADMIN]", description = "Finds all Users by Team")
     public ResponseEntity<ApiResponse<List<UserDTO>>> findAllByTeam(@PathVariable("id") UUID teamId) {
-        userAuthService.isAuthorizedByTeam(teamId, RoleEnum.ADMIN);
+        UserClub userClub = findUserClubByUserTeamUseCase.execute(teamId);
+        userAuthService.isAuthorizedByClub(userClub.getId(), RoleEnum.ADMIN);
             List<UUID> userIds = new ArrayList<>();
             UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
                 if (userTeam.getTrainer() != null) {
@@ -354,20 +357,6 @@ public class UserController {
                 loginRequest.getPassword()
         );
         return handleResponse(Map.of("token", token)).ok();
-    }
-
-    /**
-     * Returns the role of the currently authenticated user inside the userteam.
-     *
-     * @param teamId the userteam from the consumer wants to check the role of the user.
-     * @return {@link ApiResponse} containing the user's role.
-     */
-    @GetMapping(value =  Routes.USER_TEAMS + Routes.ID_PATHVAR + Routes.ROLE_PATH)
-    @Operation(summary = "Get User role inside Team [Auth ADMIN]", description = "Find the role in the Team of the User currently logged in")
-    public ResponseEntity<ApiResponse<String>> getTeamRole(@PathVariable(value = "id") UUID teamId) {
-        userAuthService.hasMinimumTeamAuthorization(teamId,  RoleEnum.ADMIN);
-        RoleEnum role = findUserRoleInTeamUseCase.execute(Session.getSessionUser(), teamId);
-        return handleResponse(role != null ? role.getRoleName() : "No role found").ok();
     }
 
     /**

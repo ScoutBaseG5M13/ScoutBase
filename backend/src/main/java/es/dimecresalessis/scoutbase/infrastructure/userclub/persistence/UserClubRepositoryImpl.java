@@ -81,7 +81,11 @@ public class UserClubRepositoryImpl implements UserClubRepository {
             AtomicBoolean isAdded = new AtomicBoolean(false);
             for (UUID teamId : clubTeamIds) {
                 jpaUserTeamRepository.findById(teamId).ifPresent(teamEntity -> {
-                    if (teamEntity.getTrainer().equals(userId) || teamEntity.getSecondTrainer().equals(userId) || teamEntity.getScouters().contains(userId)) {
+                    if (teamEntity.getTrainer() != null && teamEntity.getTrainer().equals(userId)) {
+                        isAdded.set(true);
+                    } else if (teamEntity.getSecondTrainer() != null && teamEntity.getSecondTrainer().equals(userId)) {
+                        isAdded.set(true);
+                    } else if (teamEntity.getScouters() != null && teamEntity.getScouters().contains(userId)) {
                         isAdded.set(true);
                     }
                 });

@@ -1,5 +1,6 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web;
 
+import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.player.delete.DeletePlayerUseCase;
 import es.dimecresalessis.scoutbase.application.player.find.FindAllPlayersByTeamIdUseCase;
 import es.dimecresalessis.scoutbase.application.player.find.FindPlayerByIdUseCase;
@@ -8,6 +9,8 @@ import es.dimecresalessis.scoutbase.application.stat.create.CreateStatUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByPlayerUseCase;
 import es.dimecresalessis.scoutbase.application.team.update.UpdateTeamUseCase;
+import es.dimecresalessis.scoutbase.application.userclub.find.FindUserClubByUserTeamUseCase;
+import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
@@ -16,6 +19,7 @@ import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import es.dimecresalessis.scoutbase.domain.team.exception.TeamException;
 import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.domain.user.model.RoleEnum;
+import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerUpdateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.mapper.PlayerMapper;
@@ -59,6 +63,8 @@ public class PlayerController {
     private final FindTeamByPlayerUseCase findTeamByPlayerUseCase;
     private final FindTeamByIdUseCase findTeamByIdUseCase;
     private final CreateStatUseCase createStatUseCase;
+    private final FindClubByIdUseCase findClubByIdUseCase;
+    private final FindUserClubByUserTeamUseCase findUserClubByUserTeamUseCase;
 
     /**
      * Finds all players.
@@ -68,7 +74,8 @@ public class PlayerController {
     @GetMapping(Routes.TEAMS + Routes.ID_PATHVAR)
     @Operation(summary = "Find all players of team [Auth SCOUTER]", description = "Find all Players from Team")
     public ResponseEntity<ApiResponse<List<PlayerDTO>>> findAllByTeam(@PathVariable("id") UUID teamId) {
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.SCOUTER);
+        UserClub userClub = findUserClubByUserTeamUseCase.execute(teamId);
+        userAuthService.hasMinimumClubAuthorization(userClub.getId(), RoleEnum.SCOUTER);
         List<Player> players = findAllPlayersByTeamIdUseCase.execute(teamId);
         List<PlayerDTO> playersDto = players.stream().map(playerMapper::toDto).toList();
         return handleResponse(playersDto).ok();
@@ -93,8 +100,9 @@ public class PlayerController {
         if (team == null) {
             throw new TeamException(ErrorEnum.TEAM_NOT_FOUND, player.getTeamId().toString());
         }
+        Club club = findClubByIdUseCase.execute(team.getClubId());
 
-        userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
         PlayerDTO playerDto = playerMapper.toDto(player);
         return handleResponse(playerDto).ok();
     }
@@ -115,7 +123,8 @@ public class PlayerController {
         if (team == null) {
             throw new TeamException(ErrorEnum.TEAM_BY_PLAYER_NOT_FOUND, playerId.toString());
         }
-        userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
+        Club club = findClubByIdUseCase.execute(team.getClubId());
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
         Player updatedPlayer = updatePlayerUseCase.execute(player, playerId);
         PlayerDTO updatedPlayerDTO = playerMapper.toDto(updatedPlayer);
         return handleResponse(updatedPlayerDTO).ok();
@@ -131,14 +140,15 @@ public class PlayerController {
     @DeleteMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Delete player [Auth SCOUTER]", description = "Deletes a Player")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable("id") UUID playerId) {
-        Team userTeam = findTeamByPlayerUseCase.execute(playerId);
-        if (userTeam == null) {
+        Team team = findTeamByPlayerUseCase.execute(playerId);
+        if (team == null) {
             throw new TeamException(ErrorEnum.USER_TEAM_BY_PLAYER_NOT_FOUND, playerId.toString());
         }
-        userAuthService.hasMinimumTeamAuthorization(userTeam.getId(), RoleEnum.SCOUTER);
+        Club club = findClubByIdUseCase.execute(team.getClubId());
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
         boolean isDeleted = deletePlayerUseCase.execute(playerId);
-        userTeam.getPlayers().remove(playerId);
-        updateTeamUseCase.execute(userTeam, userTeam.getId());
+        team.getPlayers().remove(playerId);
+        updateTeamUseCase.execute(team, team.getId());
         return handleResponse(isDeleted).ok();
     }
 
@@ -157,7 +167,8 @@ public class PlayerController {
             throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, playerId.toString());
         }
         Team team = findTeamByPlayerUseCase.execute(player.getId());
-        userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
+        Club club = findClubByIdUseCase.execute(team.getClubId());
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
 
         Stat stat = statMapper.createToDomain(statRequest, playerId);
         Stat createdStat = createStatUseCase.execute(stat, playerId);

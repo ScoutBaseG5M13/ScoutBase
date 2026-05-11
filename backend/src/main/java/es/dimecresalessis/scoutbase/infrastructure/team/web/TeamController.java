@@ -97,7 +97,8 @@ public class TeamController {
     @Operation(summary = "Find Team by ID [Auth SCOUTER]", description = "Finds a Team")
     public ResponseEntity<ApiResponse<TeamDTO>> findById(@PathVariable(value = "id") UUID teamId) {
         Team team = findTeamById.execute(teamId);
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.SCOUTER);
+        Club club = findClubByTeamUseCase.execute(teamId);
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
         TeamDTO teamDto = teamMapper.domainToDTO(team);
         return handleResponse(teamDto).ok();
     }
@@ -112,7 +113,8 @@ public class TeamController {
     @Operation(summary = "Find Team by Player [Auth SCOUTER]", description = "Finds the Team by User")
     public ResponseEntity<ApiResponse<TeamDTO>> findByPlayerId(@PathVariable("id") UUID playerId) {
         Team team = findTeamByPlayerUseCase.execute(playerId);
-        userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
+        Club club = findClubByTeamUseCase.execute(team.getId());
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
         TeamDTO teamDto = teamMapper.domainToDTO(team);
         return handleResponse(teamDto).ok();
     }
@@ -128,7 +130,8 @@ public class TeamController {
     @Operation(summary = "Updates a team [Auth TRAINER]", description = "Updates a Team")
     public ResponseEntity<ApiResponse<TeamDTO>> update(@RequestBody TeamUpdateRequest updateRequest, @PathVariable("id") UUID teamId) {
         Team team = teamMapper.updateToDomain(updateRequest);
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.TRAINER);
+        Club club = findClubByTeamUseCase.execute(teamId);
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.TRAINER);
         Team updatedTeam = updateTeamUseCase.execute(team, teamId);
         TeamDTO updatedTeamDto = teamMapper.domainToDTO(updatedTeam);
         return handleResponse(updatedTeamDto).ok();
@@ -163,8 +166,9 @@ public class TeamController {
         if (team == null) {
             throw new TeamException(ErrorEnum.TEAM_NOT_FOUND, teamId.toString());
         }
+        Club club = findClubByTeamUseCase.execute(teamId);
 
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.SCOUTER);
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
         Player player = playerMapper.createToDomain(createPlayerRequest, teamId);
         Player createdPlayer = createPlayerUseCase.execute(player, teamId);
         team.getPlayers().add(createdPlayer.getId());
