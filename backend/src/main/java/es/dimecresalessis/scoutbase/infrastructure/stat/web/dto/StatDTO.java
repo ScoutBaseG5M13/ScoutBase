@@ -29,10 +29,10 @@ public class StatDTO {
 
     @NotNull
     @Min(value = 0)
-    @Max(value = 10)
+    @Max(value = 5)
     private int value;
 
     String getType() {
-        return StatEnum.fromStatCode(code).type;
+        return StatEnum.fromStatCode(code).type.name();
     }
 }
