@@ -20,6 +20,7 @@ import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatDTO;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatEnumDTO;
+import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatListUpdateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatUpdateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.mapper.StatMapper;
 import es.dimecresalessis.scoutbase.infrastructure.web.annotation.ApiCommonResponses;
@@ -31,6 +32,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -137,6 +139,37 @@ public class StatController {
         Stat updatedStat = updateStatUseCase.execute(newStat, statId);
         StatDTO updatedStatDTO = statMapper.domainToDto(updatedStat);
         return handleResponse(updatedStatDTO).ok();
+    }
+
+    /**
+     * Updates an existing stat.
+     *
+     * @param updateRequest The updated stat list.
+     * @return {@link ApiResponse} containing the updated stat's details.
+     * @throws StatException If the stat is not found.
+     */
+    @PutMapping
+    @Operation(summary = "Updates a list of stats [Auth SCOUTER]", description = "Update a List of Stat")
+    public ResponseEntity<ApiResponse<List<StatDTO>>> updateAll(@Valid @RequestBody StatListUpdateRequest updateRequest) {
+        List<Stat> stats = new ArrayList<>();
+        for (StatUpdateRequest individualUpdateStat : updateRequest.getStats()) {
+            Stat stat = findStatByIdUseCase.execute(individualUpdateStat.getId());
+            if (stat == null) {
+                throw new StatException(ErrorEnum.STAT_NOT_FOUND, individualUpdateStat.getId().toString());
+            }
+            Player player = findPlayerByIdUseCase.execute(stat.getPlayerId());
+            Team team = findTeamByPlayerUseCase.execute(player.getId());
+            Club club = findClubByIdUseCase.execute(team.getClubId());
+            userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
+
+            stats.add(statMapper.updateToDomain(individualUpdateStat));
+        }
+        List<StatDTO> statsDto = new ArrayList<>();
+        for (Stat stat : stats) {
+            Stat updatedStatDTO = updateStatUseCase.execute(stat, stat.getId());
+            statsDto.add(statMapper.domainToDto(updatedStatDTO));
+        }
+        return handleResponse(statsDto).ok();
     }
 
     /**

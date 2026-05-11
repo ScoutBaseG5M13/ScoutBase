@@ -44,7 +44,7 @@ public class CreateStatUseCase {
             throw new StatException(ErrorEnum.USER_ID_DOES_NOT_MATCH, stat.getPlayerId().toString(), playerId.toString());
         }
         if (checkIfStatAlreadyExistsOnPlayer.execute(stat)) {
-            throw new StatException(ErrorEnum.STAT_CODE_ALREADY_EXISTS, stat.getId().toString(), stat.getPlayerId().toString());
+            throw new StatException(ErrorEnum.STAT_CODE_ALREADY_EXISTS, stat.getCode(), stat.getPlayerId().toString());
         }
         stat.setPlayerId(playerId);
         statRepository.save(stat);
