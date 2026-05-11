@@ -1,11 +1,13 @@
 package es.dimecresalessis.scoutbase.infrastructure.stat.web;
 
+import es.dimecresalessis.scoutbase.application.club.find.FindClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.player.find.FindPlayerByIdUseCase;
 import es.dimecresalessis.scoutbase.application.stat.delete.DeleteStatUseCase;
 import es.dimecresalessis.scoutbase.application.stat.find.FindAllStatsByPlayerIdUseCase;
 import es.dimecresalessis.scoutbase.application.stat.find.FindStatByIdUseCase;
 import es.dimecresalessis.scoutbase.application.stat.update.UpdateStatUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByPlayerUseCase;
+import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
 import es.dimecresalessis.scoutbase.domain.player.model.Player;
@@ -53,6 +55,7 @@ public class StatController {
     private final UserAuthService userAuthService;
     private final FindPlayerByIdUseCase findPlayerByIdUseCase;
     private final FindTeamByPlayerUseCase findTeamByPlayerUseCase;
+    private final FindClubByIdUseCase findClubByIdUseCase;
 
 
     /**
@@ -83,7 +86,8 @@ public class StatController {
             throw new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, playerId.toString());
         }
         Team team = findTeamByPlayerUseCase.execute(player.getId());
-        userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
+        Club club = findClubByIdUseCase.execute(team.getClubId());
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
 
         List<Stat> stats = findAllStatsByPlayerIdUseCase.execute(playerId);
         List<StatDTO> statsDto = stats.stream().map(statMapper::domainToDto).toList();
@@ -102,7 +106,8 @@ public class StatController {
         Stat stat = findStatByIdUseCase.execute(statId);
         Player player = findPlayerByIdUseCase.execute(stat.getPlayerId());
         Team team = findTeamByPlayerUseCase.execute(player.getId());
-        userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
+        Club club = findClubByIdUseCase.execute(team.getClubId());
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
 
         StatDTO statDto = statMapper.domainToDto(stat);
         return handleResponse(statDto).ok();
@@ -125,7 +130,8 @@ public class StatController {
         }
         Player player = findPlayerByIdUseCase.execute(stat.getPlayerId());
         Team team = findTeamByPlayerUseCase.execute(player.getId());
-        userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
+        Club club = findClubByIdUseCase.execute(team.getClubId());
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
 
         Stat newStat = statMapper.updateToDomain(updateRequest);
         Stat updatedStat = updateStatUseCase.execute(newStat, statId);
@@ -149,7 +155,8 @@ public class StatController {
         }
         Player player = findPlayerByIdUseCase.execute(stat.getPlayerId());
         Team team = findTeamByPlayerUseCase.execute(player.getId());
-        userAuthService.hasMinimumTeamAuthorization(team.getId(), RoleEnum.SCOUTER);
+        Club club = findClubByIdUseCase.execute(team.getClubId());
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
         boolean isDeleted = deleteStatUseCase.execute(statId);
         return handleResponse(isDeleted).ok();
     }

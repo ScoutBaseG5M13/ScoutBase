@@ -18,6 +18,7 @@ public class FindUserRoleInClubUseCase {
 
     private static final Logger logger = LoggerFactory.getLogger(FindUserRoleInClubUseCase.class);
     private final UserClubRepository userClubRepository;
+    private final FindUserRoleInTeamUseCase findUserRoleInTeamUseCase;
 
     /**
      * Resolves the role of a user within a specific userclub.
@@ -28,14 +29,28 @@ public class FindUserRoleInClubUseCase {
      * or {@code null} otherwise.
      */
     public RoleEnum execute(User user, UUID clubId) {
-        Optional<UserClub> club = userClubRepository.findUserClubById(clubId);
-        if (club.isPresent()) {
-            boolean clubHasUser = club.get().getAdminUserIds()
+        Optional<UserClub> userClub = userClubRepository.findUserClubById(clubId);
+        if (userClub.isPresent()) {
+            boolean clubHasUser = userClub.get().getAdminUserIds()
                     .stream()
                     .anyMatch(t -> t.equals(user.getId()));
             if (clubHasUser) {
-                logger.info("[AUTH] User '{}' has ROLE '{}' in CLUB '{}'", user.getUsername(), RoleEnum.ADMIN, club.get().getName());
+                logger.info("[AUTH] User '{}' has ROLE '{}' in CLUB '{}'", user.getUsername(), RoleEnum.ADMIN, userClub.get().getName());
                 return RoleEnum.ADMIN;
+            } else {
+                RoleEnum maxRole = null;
+                for (UUID userTeamId : userClub.get().getUserTeams()) {
+                    RoleEnum role = findUserRoleInTeamUseCase.execute(user, userTeamId);
+                    if (maxRole == null) {
+                        maxRole = role;
+                    } else if (role != null && maxRole.getRoleAuthLevel() < role.getRoleAuthLevel()) {
+                        maxRole = role;
+                    }
+                }
+                if (maxRole != null) {
+                    logger.info("[AUTH] User '{}' has ROLE '{}' in CLUB '{}'", user.getUsername(), maxRole, userClub.get().getName());
+                    return maxRole;
+                }
             }
         }
         return null;

@@ -21,7 +21,6 @@ public class FindUserRoleInTeamUseCase {
     private static final Logger logger = LoggerFactory.getLogger(FindUserRoleInTeamUseCase.class);
     private final UserClubRepository userClubRepository;
     private final UserTeamRepository userTeamRepository;
-    private final FindUserRoleInClubUseCase findUserRoleInClubUseCase;
 
     /**
      * Resolves the specific role of a user within a userteam context.
@@ -38,12 +37,6 @@ public class FindUserRoleInTeamUseCase {
         Optional<UserTeam> team = userTeamRepository.findById(teamId);
         if (team.isPresent()) {
             Optional<UserClub> club = userClubRepository.findUserClubByTeam(teamId);
-            if (club.isPresent()) {
-                RoleEnum clubRole = findUserRoleInClubUseCase.execute(user, club.get().getId());
-                if (clubRole != null) {
-                    return clubRole;
-                }
-            }
 
             if (team.get().getTrainer() != null && team.get().getTrainer().equals(user.getId())) {
                 return RoleEnum.TRAINER;

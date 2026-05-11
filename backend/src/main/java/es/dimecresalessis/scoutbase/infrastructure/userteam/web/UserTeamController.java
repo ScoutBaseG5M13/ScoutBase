@@ -107,7 +107,7 @@ public class UserTeamController {
     @Operation(summary = "Find UserTeam by ID [Auth SCOUTER]", description = "Finds a UserTeam")
     public ResponseEntity<ApiResponse<UserTeamDTO>> findById(@PathVariable(value = "id") UUID teamId) {
         UserTeam userTeam = findTeamById.execute(teamId);
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.SCOUTER);
+        userAuthService.hasMinimumClubAuthorization(userTeam.getUserClub(), RoleEnum.SCOUTER);
         UserTeamDTO userTeamDto = userTeamMapper.toDto(userTeam);
         return handleResponse(userTeamDto).ok();
     }
@@ -144,9 +144,10 @@ public class UserTeamController {
     @PutMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Updates a user team [Auth TRAINER]", description = "Updates a UserTeam")
     public ResponseEntity<ApiResponse<UserTeamDTO>> update(@RequestBody UserTeamUpdateRequest updateRequest, @PathVariable("id") UUID teamId) {
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.TRAINER);
-        UserTeam userTeam = userTeamMapper.updateToDomain(updateRequest);
-        UserTeam updatedUserTeam = updateUserTeamUseCase.execute(userTeam, teamId);
+        UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
+        userAuthService.hasMinimumClubAuthorization(userTeam.getUserClub(), RoleEnum.TRAINER);
+        UserTeam userTeamUpdateReq = userTeamMapper.updateToDomain(updateRequest);
+        UserTeam updatedUserTeam = updateUserTeamUseCase.execute(userTeamUpdateReq, teamId);
         UserTeamDTO updatedUserTeamDto = userTeamMapper.toDto(updatedUserTeam);
         return handleResponse(updatedUserTeamDto).ok();
     }
@@ -191,7 +192,7 @@ public class UserTeamController {
         if (userTeam == null) {
             throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(userTeam.getUserClub(), RoleEnum.ADMIN);
         if (findUserTeamByIdUseCase.execute(teamId) == null) {
             throw new UserException(ErrorEnum.USER_NOT_FOUND, userId.toString());
         }
@@ -216,7 +217,7 @@ public class UserTeamController {
         if (userTeam == null) {
             throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(userTeam.getUserClub(), RoleEnum.ADMIN);
         if (findUserTeamByIdUseCase.execute(teamId) == null) {
             throw new UserException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
@@ -241,7 +242,7 @@ public class UserTeamController {
         if (userTeam == null) {
             throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(userTeam.getUserClub(), RoleEnum.ADMIN);
         if (findUserTeamByIdUseCase.execute(teamId) == null) {
             throw new UserException(ErrorEnum.USER_NOT_FOUND, userId.toString());
         }
@@ -266,7 +267,7 @@ public class UserTeamController {
         if (userTeam == null) {
             throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(userTeam.getUserClub(), RoleEnum.ADMIN);
         if (findUserTeamByIdUseCase.execute(teamId) == null) {
             throw new UserException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
@@ -291,7 +292,7 @@ public class UserTeamController {
         if (userTeam == null) {
             throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(userTeam.getUserClub(), RoleEnum.ADMIN);
         if (findUserTeamByIdUseCase.execute(teamId) == null) {
             throw new UserException(ErrorEnum.USER_NOT_FOUND, userId.toString());
         }
@@ -315,7 +316,7 @@ public class UserTeamController {
         if (userTeam == null) {
             throw new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString());
         }
-        userAuthService.hasMinimumTeamAuthorization(teamId, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(userTeam.getUserClub(), RoleEnum.ADMIN);
         if (findUserTeamByIdUseCase.execute(teamId) == null) {
             throw new UserException(ErrorEnum.USER_NOT_FOUND, userId.toString());
         }

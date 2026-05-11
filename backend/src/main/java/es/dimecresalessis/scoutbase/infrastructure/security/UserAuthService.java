@@ -28,11 +28,11 @@ public class UserAuthService {
     private final FindUserRoleInTeamUseCase findUserRoleInTeamUseCase;
     private final FindUserRoleInClubUseCase  findUserRoleInClubUseCase;
 
-    public void hasMinimumTeamAuthorization(UUID teamId, RoleEnum minRole) {
-        if (!isAuthorizedByTeam(teamId, minRole)) {
-            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, minRole.name());
-        }
-    }
+//    public void hasMinimumTeamAuthorization(UUID teamId, RoleEnum minRole) {
+//        if (!isAuthorizedByTeam(teamId, minRole)) {
+//            throw new UserException(ErrorEnum.USER_HAS_NOT_AUTHORIZATION, minRole.name());
+//        }
+//    }
 
     public void hasMinimumClubAuthorization(UUID clubId, RoleEnum minRole) {
         if (!isAuthorizedByClub(clubId, minRole)) {
@@ -51,33 +51,33 @@ public class UserAuthService {
         return Session.getSessionUser().getId().equals(userId);
     }
 
-    /**
-     * Checks if a user is authorized for a specific userteam given a minimum required role.
-     * Authorization is granted if the user holds the required role either at the
-     * owning userclub level or directly within the userteam.
-     *
-     * @param teamId The unique identifier of the userteam.
-     * @param minRole The minimum role level required to perform the action.
-     * @return {@code true} if the user meets the role requirements; {@code false} otherwise.
-     */
-    public boolean isAuthorizedByTeam(UUID teamId, RoleEnum minRole) {
-        User user = Session.getSessionUser();
-        if (isSuperadmin()) {
-            return true;
-        }
-        Optional<UserClub> club = userClubRepository.findUserClubByTeam(teamId);
-        if (club.isPresent()) {
-            RoleEnum clubRole = findUserRoleInClubUseCase.execute(user, club.get().getId());
-            if (clubRole != null && RoleEnum.isEqualsOrHigher(clubRole, minRole)) {
-                return true;
-            }
-        }
-        RoleEnum teamRole = findUserRoleInTeamUseCase.execute(user, teamId);
-        if (teamRole != null && RoleEnum.isEqualsOrHigher(teamRole, minRole)) {
-            return true;
-        }
-        return false;
-    }
+//    /**
+//     * Checks if a user is authorized for a specific userteam given a minimum required role.
+//     * Authorization is granted if the user holds the required role either at the
+//     * owning userclub level or directly within the userteam.
+//     *
+//     * @param teamId The unique identifier of the userteam.
+//     * @param minRole The minimum role level required to perform the action.
+//     * @return {@code true} if the user meets the role requirements; {@code false} otherwise.
+//     */
+//    public boolean isAuthorizedByTeam(UUID teamId, RoleEnum minRole) {
+//        User user = Session.getSessionUser();
+//        if (isSuperadmin()) {
+//            return true;
+//        }
+//        Optional<UserClub> userClub = userClubRepository.findUserClubByTeam(teamId);
+//        if (userClub.isPresent()) {
+//            RoleEnum clubRole = findUserRoleInClubUseCase.execute(user, userClub.get().getId());
+//            if (clubRole != null && RoleEnum.isEqualsOrHigher(clubRole, minRole)) {
+//                return true;
+//            }
+//        }
+//        RoleEnum teamRole = findUserRoleInTeamUseCase.execute(user, teamId);
+//        if (teamRole != null && RoleEnum.isEqualsOrHigher(teamRole, minRole)) {
+//            return true;
+//        }
+//        return false;
+//    }
 
     /**
      * Checks if a user is authorized for actions at the userclub level.
@@ -91,9 +91,9 @@ public class UserAuthService {
         if (isSuperadmin()) {
             return true;
         }
-        Optional<UserClub> club = userClubRepository.findUserClubById(clubId);
-        if (club.isPresent()) {
-            RoleEnum userRole = findUserRoleInClubUseCase.execute(user, club.get().getId());
+        Optional<UserClub> userClub = userClubRepository.findUserClubById(clubId);
+        if (userClub.isPresent()) {
+            RoleEnum userRole = findUserRoleInClubUseCase.execute(user, userClub.get().getId());
             if (userRole != null && RoleEnum.isEqualsOrHigher(minRole, userRole)) {
                 return true;
             }
