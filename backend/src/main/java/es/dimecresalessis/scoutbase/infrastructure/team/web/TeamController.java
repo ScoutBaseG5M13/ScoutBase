@@ -2,6 +2,8 @@ package es.dimecresalessis.scoutbase.infrastructure.team.web;
 
 import es.dimecresalessis.scoutbase.application.club.find.FindClubByTeamUseCase;
 import es.dimecresalessis.scoutbase.application.player.create.CreatePlayerUseCase;
+import es.dimecresalessis.scoutbase.application.player.find.FindAllPlayersByTeamIdUseCase;
+import es.dimecresalessis.scoutbase.application.stat.service.CalculateAverageScore;
 import es.dimecresalessis.scoutbase.application.team.delete.DeleteTeamUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindAllTeamsByClubUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
@@ -21,6 +23,7 @@ import es.dimecresalessis.scoutbase.infrastructure.player.web.dto.PlayerDTO;
 import es.dimecresalessis.scoutbase.infrastructure.player.web.mapper.PlayerMapper;
 import es.dimecresalessis.scoutbase.infrastructure.routes.Routes;
 import es.dimecresalessis.scoutbase.infrastructure.security.UserAuthService;
+import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.PlayerAverageStatScoreDTO;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.CategoryEnumDTO;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamDTO;
 import es.dimecresalessis.scoutbase.infrastructure.team.web.dto.TeamUpdateRequest;
@@ -62,6 +65,8 @@ public class TeamController {
     private final FindAllTeamsByClubUseCase findAllTeamsByClubUseCase;
     private final FindClubByTeamUseCase findClubByTeamUseCase;
     private final CreatePlayerUseCase createPlayerUseCase;
+    private final FindAllPlayersByTeamIdUseCase findAllPlayersByTeamIdUseCase;
+    private final CalculateAverageScore calculateAverageScore;
 
     /**
      * Retrieves all teams belonging to a specific club, filtered by user access.
@@ -179,5 +184,21 @@ public class TeamController {
     public ResponseEntity<ApiResponse<List<CategoryEnumDTO>>> getCategories() {
         List<CategoryEnumDTO> categories = Arrays.stream(CategoryEnum.values()).map(categoryMapper::domainToDTO).toList();
         return handleResponse(categories).ok();
+    }
+
+    /**
+     * Returns the available Categories and its Subcategories
+     *
+     * @return {@link ApiResponse} containing all categories.
+     * @throws PlayerException If an error occurs during category retrieval.
+     */
+    @GetMapping( Routes.ID_PATHVAR + Routes.STATS)
+    @Operation(summary = "Gets all player stats in team", description = "Get all Player Stats in the Team")
+    public ResponseEntity<ApiResponse<List<PlayerAverageStatScoreDTO>>> getAllPlayerAverageStats(@PathVariable("id") UUID teamId) {
+        List<Player> players = findAllPlayersByTeamIdUseCase.execute(teamId);
+        List<PlayerAverageStatScoreDTO> averageScores = players.stream()
+                .map(player -> calculateAverageScore.execute(player.getId()))
+                .toList();
+        return handleResponse(averageScores).ok();
     }
 }

@@ -32,7 +32,7 @@ public class Stat {
         this.id = this.id != null ? this.id : incoming.id;
         this.playerId = this.playerId != null ? this.playerId : incoming.playerId;
         this.code = this.code != null ? this.code : incoming.code;
-        this.value = this.value >= 0 || this.value < 10 ? this.value : incoming.value;
+        this.value = this.value >= 0 || this.value <= 5 ? this.value : incoming.value;
     }
 
     public void setCode(final String code) {
