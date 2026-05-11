@@ -99,20 +99,6 @@ public class UserClubRepositoryImpl implements UserClubRepository {
     }
 
     @Override
-    public Optional<UserClub> findUserClubByClubId(UUID clubId) {
-        UserClubEntity userClubEntity = jpaUserClubRepository.findAll()
-                .stream()
-                .filter(uc -> uc.getManagedClubs().contains(clubId))
-                .findFirst()
-                .orElse(null);
-
-        if (userClubEntity != null) {
-            return Optional.of(clubMapper.toDomain(userClubEntity));
-        }
-        return Optional.empty();
-    }
-
-    @Override
     @Transactional
     public UserClub save(UserClub userClub) {
         UserClubEntity userClubEntity = jpaUserClubRepository.findById(userClub.getId())

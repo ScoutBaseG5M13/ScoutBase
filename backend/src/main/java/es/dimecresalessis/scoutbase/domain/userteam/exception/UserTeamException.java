@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Exception for Team specific errors.
+ * Exception for User Team specific errors.
  * <p>
  * Extends {@link ScoutbaseException} to add custom error handling logic.
  * </p>

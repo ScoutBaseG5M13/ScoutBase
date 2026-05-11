@@ -19,6 +19,11 @@ public class FindAllUsersUseCase {
     private static final Logger logger = LoggerFactory.getLogger(FindAllUsersUseCase.class);
     private final UserRepository userRepository;
 
+    /**
+     * Executes the retrieval of all {@link User} entities registered in the system.
+     *
+     * @return A {@link List} of all {@link User} objects found in the repository.
+     */
     public List<User> execute() {
         List<User> users = userRepository.findAll();
         logger.info("[FIND] Found {} users", users.size());

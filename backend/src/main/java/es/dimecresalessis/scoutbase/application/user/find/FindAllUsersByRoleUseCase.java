@@ -26,6 +26,12 @@ public class FindAllUsersByRoleUseCase {
     private final UserClubRepository userClubRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Executes the retrieval of all {@link User} entities that match a specific {@link RoleEnum}.
+     *
+     * @param role The {@link RoleEnum} to filter the users by.
+     * @return A {@link List} of {@link User} objects assigned to the specified role.
+     */
     public List<User> execute(RoleEnum role) {
         List<UserClub> userClubs = userClubRepository.findAll();
         List<UserTeam> userTeams = userTeamRepository.findAll();

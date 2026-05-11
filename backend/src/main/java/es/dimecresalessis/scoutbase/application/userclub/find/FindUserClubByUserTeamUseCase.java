@@ -20,6 +20,13 @@ public class FindUserClubByUserTeamUseCase {
 
     private final UserClubRepository userClubRepository;
 
+    /**
+     * Executes the search for a specific {@link UserClub} that contains a given team ID.
+     *
+     * @param teamId The {@link UUID} of the team used to find the associated club.
+     * @return The {@link UserClub} that contains the specified team in its associations.
+     * @throws UserClubException If no club is found that matches the provided team ID.
+     */
     public UserClub execute(UUID teamId) {
         List<UserClub> userClubs = userClubRepository.findAll();
         return userClubs.stream()

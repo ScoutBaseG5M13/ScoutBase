@@ -43,8 +43,6 @@ public interface UserClubRepository {
      */
     List<UserClub> findAllUserClubsByUserId(UUID userId);
 
-    Optional<UserClub> findUserClubByClubId(UUID clubId);
-
     /**
      * Persists a player's userclub into the system.
      * <p>

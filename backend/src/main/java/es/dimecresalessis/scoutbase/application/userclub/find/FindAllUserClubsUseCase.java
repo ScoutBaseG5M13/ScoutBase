@@ -16,6 +16,11 @@ public class FindAllUserClubsUseCase {
 
     private final UserClubRepository userClubRepository;
 
+    /**
+     * Executes the retrieval of all {@link UserClub} entities stored in the system.
+     *
+     * @return A {@link List} of all {@link UserClub} objects found in the repository.
+     */
     public List<UserClub> execute() {
         return userClubRepository.findAll();
     }

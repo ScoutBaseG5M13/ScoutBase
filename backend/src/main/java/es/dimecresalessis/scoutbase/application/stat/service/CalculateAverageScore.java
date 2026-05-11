@@ -7,6 +7,7 @@ import es.dimecresalessis.scoutbase.domain.player.repository.PlayerRepository;
 import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import es.dimecresalessis.scoutbase.domain.stat.model.StatEnum;
 import es.dimecresalessis.scoutbase.domain.stat.repository.StatRepository;
+import es.dimecresalessis.scoutbase.domain.team.model.Team;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.PlayerAverageStatScoreDTO;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -18,6 +19,9 @@ import java.util.UUID;
 
 import static es.dimecresalessis.scoutbase.domain.stat.model.StatTypeEnum.*;
 
+/**
+ * Service to calculate the average score of the {@link Stat} of the players of a {@link Team}.
+ */
 @Service
 @RequiredArgsConstructor
 public class CalculateAverageScore {
@@ -26,6 +30,13 @@ public class CalculateAverageScore {
     private final StatRepository statRepository;
     private final PlayerRepository playerRepository;
 
+    /**
+     * Executes the calculation of average scores for a specific {@link Player} based on their recorded {@link Stat}.
+     *
+     * @param playerId The {@link UUID} of the player whose stats will be calculated.
+     * @return A {@link PlayerAverageStatScoreDTO} containing the player's information and calculated averages.
+     * @throws PlayerException If no player is found with the provided ID.
+     */
     public PlayerAverageStatScoreDTO execute(UUID playerId) {
         Player player = playerRepository.findById(playerId).orElseThrow(
                 () -> new PlayerException(ErrorEnum.PLAYER_NOT_FOUND, playerId.toString())
@@ -33,7 +44,6 @@ public class CalculateAverageScore {
         List<Stat> stats = statRepository.findAllByPlayerId(playerId);
 
         // SUM
-
         float offensiveTotalScore = 0f;
         float defensiveTotalScore = 0f;
         float mentalTotalScore = 0f;

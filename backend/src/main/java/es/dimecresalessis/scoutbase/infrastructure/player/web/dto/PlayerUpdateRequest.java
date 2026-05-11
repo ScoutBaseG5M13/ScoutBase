@@ -1,6 +1,7 @@
 package es.dimecresalessis.scoutbase.infrastructure.player.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,9 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+/**
+ * Request DTO for updating an existing {@link Player} entity.
+ */
 @Data
 @Setter
 @AllArgsConstructor

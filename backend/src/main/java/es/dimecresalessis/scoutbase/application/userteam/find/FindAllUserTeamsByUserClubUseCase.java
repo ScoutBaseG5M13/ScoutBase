@@ -5,8 +5,6 @@ import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
 import es.dimecresalessis.scoutbase.domain.userteam.model.UserTeam;
 import es.dimecresalessis.scoutbase.domain.userteam.repository.UserTeamRepository;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +21,12 @@ public class FindAllUserTeamsByUserClubUseCase {
     private final UserTeamRepository userTeamRepository;
     private final FindUserClubByIdUseCase findUserClubByIdUseCase;
 
+    /**
+     * Executes the retrieval of all {@link UserTeam} entities associated with a specific {@link UserClub}.
+     *
+     * @param clubId The {@link UUID} of the user club whose teams are to be retrieved.
+     * @return A {@link List} of {@link UserTeam} objects belonging to the specified club.
+     */
     public List<UserTeam> execute(UUID clubId) {
         List<UserTeam> userTeams = new ArrayList<>();
         UserClub userClub = findUserClubByIdUseCase.execute(clubId);

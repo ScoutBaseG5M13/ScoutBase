@@ -1,6 +1,7 @@
 package es.dimecresalessis.scoutbase.application.userteam.delete;
 
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
+import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
 import es.dimecresalessis.scoutbase.domain.userteam.exception.UserTeamException;
 import es.dimecresalessis.scoutbase.domain.userteam.model.UserTeam;
 import es.dimecresalessis.scoutbase.domain.userteam.repository.UserTeamRepository;
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+/**
+ * Use case for removing a trainer from the {@link UserClub}.
+ */
 @Component
 @RequiredArgsConstructor
 public class RemoveTrainerUseCase {

@@ -20,6 +20,14 @@ public class RemoveClubUseCase {
     private static final Logger logger = LoggerFactory.getLogger(RemoveClubUseCase.class);
     private final UserClubRepository userClubRepository;
 
+    /**
+     * Executes the removal of a specific club association from a {@link UserClub} record.
+     *
+     * @param userClubId The {@link UUID} of the user-club aggregate to be modified.
+     * @param clubId The {@link UUID} of the club to be removed from the managed list.
+     * @return {@code true} if the operation completes successfully.
+     * @throws java.util.NoSuchElementException If the {@link UserClub} with the given ID does not exist.
+     */
     public boolean execute(UUID userClubId, UUID clubId) {
         UserClub userClub = userClubRepository.findUserClubById(userClubId).orElseThrow();
         userClub.getManagedClubs().remove(clubId);

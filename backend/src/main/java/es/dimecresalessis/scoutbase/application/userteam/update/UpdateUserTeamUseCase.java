@@ -38,15 +38,6 @@ public class UpdateUserTeamUseCase {
         return matchedUserTeam;
     }
 
-    /**
-     * Validates that both the ID from the request body and the ID from the
-     * path exist in the database and match each other.
-     *
-     * @param userTeam The userteam object from the request.
-     * @param id The ID provided in the application context/path.
-     * @throws UserTeamException if either ID does not correspond to an existing userteam.
-     * @throws IllegalArgumentException if there is a mismatch between the IDs.
-     */
     private void validateAndRetrieveTeam(UserTeam userTeam, UUID id) {
         if (!userTeam.getId().equals(id)) {
             throw new IllegalArgumentException("User Team id '" + userTeam.getId() + "' does not match the path variable '" + id + "'");
