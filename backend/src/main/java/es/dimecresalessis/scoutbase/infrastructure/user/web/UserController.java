@@ -71,7 +71,7 @@ public class UserController {
      * @return {@link ApiResponse} with the current user's {@link UserDTO}.
      */
     @GetMapping
-    @Operation(summary = "Find all Users User [Auth SUPERADMIN]", description = "Finds all Users")
+    @Operation(summary = "Find all Users [Auth SUPERADMIN]", description = "Finds all Users")
     public ResponseEntity<ApiResponse<List<UserDTO>>> findAll() {
         userAuthService.hasSuperadminAuthorization();
         List<User> users = findAllUsersUseCase.execute();
@@ -85,7 +85,7 @@ public class UserController {
      * @return {@link ApiResponse} with the current user's {@link User}.
      */
     @GetMapping(Routes.ROLE_PATH + Routes.ID_PATHVAR)
-    @Operation(summary = "Find all Scouter User [Auth SUPERADMIN]", description = "Finds all Scouter Users")
+    @Operation(summary = "Find all users filtering by role [Auth SUPERADMIN]", description = "Finds all users by role")
     public ResponseEntity<ApiResponse<List<UserDTO>>> findAllByRole(@PathVariable("id") String role) {
         RoleEnum roleEnum = RoleEnum.fromName(role);
         if (roleEnum == null) {
@@ -141,7 +141,7 @@ public class UserController {
      * @return {@link ApiResponse} containing the user's information.
      */
     @GetMapping(Routes.ID_PATHVAR + Routes.USER_CLUBS + Routes.ID_TWO_PATHVAR)
-    @Operation(summary = "Find User by ID [Auth ADMIN]", description = "Finds a User")
+    @Operation(summary = "Find user and role by ID [Auth ADMIN]", description = "Finds a User with the assigned Role")
     public ResponseEntity<ApiResponse<UserInfoDTO>> findWithRoleById(@PathVariable("id") UUID userId, @PathVariable("id2") UUID clubId) {
         // ¿En qué Clubs están ambos Users?
         List<UserClub> clubsOfLookedUpUser = findAllUserClubsByUserUseCase.execute(userId);

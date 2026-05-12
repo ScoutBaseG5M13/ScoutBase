@@ -33,6 +33,9 @@ public class FindUserRoleInClubUseCase {
      * or {@code null} otherwise.
      */
     public RoleEnum execute(User user, UUID clubId) {
+        if (user.isSuperAdmin()) {
+            return RoleEnum.SUPERADMIN;
+        }
         Optional<UserClub> userClub = userClubRepository.findUserClubById(clubId);
         if (userClub.isPresent()) {
             boolean clubHasUser = userClub.get().getAdminUserIds()

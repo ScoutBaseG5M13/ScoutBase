@@ -9,6 +9,7 @@ import es.dimecresalessis.scoutbase.application.stat.create.CreateStatUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByPlayerUseCase;
 import es.dimecresalessis.scoutbase.application.team.update.UpdateTeamUseCase;
+import es.dimecresalessis.scoutbase.application.userclub.find.FindUserClubByIdUseCase;
 import es.dimecresalessis.scoutbase.application.userclub.find.FindUserClubByUserTeamUseCase;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
@@ -65,6 +66,7 @@ public class PlayerController {
     private final CreateStatUseCase createStatUseCase;
     private final FindClubByIdUseCase findClubByIdUseCase;
     private final FindUserClubByUserTeamUseCase findUserClubByUserTeamUseCase;
+    private final FindUserClubByIdUseCase findUserClubByIdUseCase;
 
     /**
      * Finds all players.
@@ -74,7 +76,9 @@ public class PlayerController {
     @GetMapping(Routes.TEAMS + Routes.ID_PATHVAR)
     @Operation(summary = "Find all players of team [Auth SCOUTER]", description = "Find all Players from Team")
     public ResponseEntity<ApiResponse<List<PlayerDTO>>> findAllByTeam(@PathVariable("id") UUID teamId) {
-        UserClub userClub = findUserClubByUserTeamUseCase.execute(teamId);
+        Team team = findTeamByIdUseCase.execute(teamId);
+        Club club = findClubByIdUseCase.execute(team.getClubId());
+        UserClub userClub = findUserClubByIdUseCase.execute(club.getUserClub());
         userAuthService.hasMinimumClubAuthorization(userClub.getId(), RoleEnum.SCOUTER);
         List<Player> players = findAllPlayersByTeamIdUseCase.execute(teamId);
         List<PlayerDTO> playersDto = players.stream().map(playerMapper::toDto).toList();
