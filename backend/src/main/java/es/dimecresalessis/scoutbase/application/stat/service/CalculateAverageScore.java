@@ -97,8 +97,8 @@ public class CalculateAverageScore {
                 player.getSurname(),
                 player.getPosition(),
                 globalAverageScore,
-                defensiveAverageScore,
                 offensiveAverageScore,
+                defensiveAverageScore,
                 mentalAverageScore,
                 physicalAverageScore
         );

@@ -37,15 +37,15 @@ public class CreateTeamUseCase {
      */
     public Team execute(Team team, UUID clubId) {
         if (team == null) {
-            throw new TeamException(ErrorEnum.USER_TEAM_IS_NULL);
+            throw new TeamException(ErrorEnum.TEAM_IS_NULL);
         }
 
         if (team.getId() == null) {
-            throw new TeamException(ErrorEnum.USER_TEAM_ID_IS_NULL);
+            throw new TeamException(ErrorEnum.TEAM_ID_IS_NULL);
         }
 
         if (teamRepository.findById(team.getId()).isPresent()) {
-            throw new TeamException(ErrorEnum.USER_TEAM_ALREADY_EXISTS, team.getId().toString());
+            throw new TeamException(ErrorEnum.TEAM_ALREADY_EXISTS, team.getId().toString());
         }
 
         Optional<Club> club = clubRepository.findById(clubId);

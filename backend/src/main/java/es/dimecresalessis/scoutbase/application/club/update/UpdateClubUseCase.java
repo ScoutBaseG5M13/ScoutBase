@@ -42,11 +42,11 @@ public class UpdateClubUseCase {
         }
 
         Club bodyClub = clubRepository.findById(club.getId()).orElseThrow(
-                () -> new ClubException(ErrorEnum.USER_CLUB_NOT_FOUND, club.getId().toString())
+                () -> new ClubException(ErrorEnum.CLUB_NOT_FOUND, club.getId().toString())
         );
 
         Club idClub = clubRepository.findById(id).orElseThrow(
-                () -> new ClubException(ErrorEnum.USER_CLUB_NOT_FOUND, id.toString())
+                () -> new ClubException(ErrorEnum.CLUB_NOT_FOUND, id.toString())
         );
 
         if (!bodyClub.getId().toString().equals(idClub.getId().toString())) {
