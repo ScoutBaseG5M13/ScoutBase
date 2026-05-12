@@ -64,7 +64,7 @@ public class ClubController {
     @GetMapping(Routes.USER_CLUBS + Routes.ID_PATHVAR)
     @Operation(summary = "Find all clubs from a user club [Auth SCOUTER]", description = "Finds all Clubs created by a User Club")
     public ResponseEntity<ApiResponse<List<ClubDTO>>> findAll(@PathVariable(value = "id") UUID clubId) {
-        userAuthService.isAuthorizedByClub(clubId, RoleEnum.SCOUTER);
+        userAuthService.hasMinimumClubAuthorization(clubId, RoleEnum.SCOUTER);
         List<Club> clubs = findAllClubsByUserClubIdUseCase.execute(clubId);
         List<ClubDTO> clubDtos = clubs.stream().map(clubMapper::domainToDTO).toList();
         return handleResponse(clubDtos).ok();
@@ -80,7 +80,7 @@ public class ClubController {
     @GetMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Find Club by ID [Auth SCOUTER]", description = "Finds and returns a Club by ID")
     public ResponseEntity<ApiResponse<ClubDTO>> findById(@PathVariable("id") UUID clubId) throws ClubException {
-        userAuthService.isAuthorizedByClub(clubId, RoleEnum.SCOUTER);
+        userAuthService.hasMinimumClubAuthorization(clubId, RoleEnum.SCOUTER);
         try {
             Club club = findClubByIdUseCase.execute(clubId);
             ClubDTO clubDto = clubMapper.domainToDTO(club);
@@ -101,7 +101,7 @@ public class ClubController {
     @PutMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Update club by ID [Auth ADMIN]", description = "Updates a Club")
     public ResponseEntity<ApiResponse<ClubDTO>> update(@Valid @RequestBody ClubUpdateRequest updateRequest, @PathVariable(value = "id") UUID id) {
-        userAuthService.isAuthorizedByClub(id, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(id, RoleEnum.ADMIN);
         try {
             Club updatedClub = updateClubUseCase.execute(clubMapper.updateToDomain(updateRequest), id);
             ClubDTO updatedClubDto = clubMapper.domainToDTO(updatedClub);
@@ -121,7 +121,7 @@ public class ClubController {
     @DeleteMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Delete club by ID [Auth ADMIN]", description = "Deletes a Club")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
-        userAuthService.isAuthorizedByClub(id, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(id, RoleEnum.ADMIN);
         try {
             boolean isDeleted = deleteClubUseCase.execute(id);
             return handleResponse(isDeleted).ok();
@@ -146,7 +146,7 @@ public class ClubController {
             throw new UserClubException(ErrorEnum.CLUB_NOT_FOUND, clubId.toString());
         }
         UserClub userClub = findUserClubByIdUseCase.execute(club.getUserClub());
-        userAuthService.isAuthorizedByClub(userClub.getId(), RoleEnum.SCOUTER);
+        userAuthService.hasMinimumClubAuthorization(userClub.getId(), RoleEnum.SCOUTER);
         Team team = teamMapper.createToDomain(request);
         Team createdTeam = createTeamUseCase.execute(team, club.getId());
         return handleResponse(teamMapper.domainToDTO(createdTeam)).ok();
