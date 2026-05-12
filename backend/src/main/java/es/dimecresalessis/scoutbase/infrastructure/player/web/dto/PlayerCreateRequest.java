@@ -5,12 +5,14 @@ import es.dimecresalessis.scoutbase.domain.player.model.Player;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Request DTO for creating a new {@link Player} entity.
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlayerCreateRequest {
 

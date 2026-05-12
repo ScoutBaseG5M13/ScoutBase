@@ -4,71 +4,115 @@ import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import es.dimecresalessis.scoutbase.domain.stat.model.StatEnum;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatCreateRequest;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatDTO;
+import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatEnumDTO;
 import es.dimecresalessis.scoutbase.infrastructure.stat.web.dto.StatUpdateRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mapstruct.factory.Mappers;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = StatMapperImpl.class)
 class StatMapperTest {
 
-    @Autowired
-    private StatMapper statMapper;
+    private StatMapper mapper;
+
+    @BeforeEach
+    void setUp() {
+        mapper = Mappers.getMapper(StatMapper.class);
+    }
 
     @Test
-    void shouldMapDtoToDomain() {
+    void dtoToDomain_ShouldMapCorrectly() {
         UUID id = UUID.randomUUID();
+        StatDTO dto = new StatDTO();
+        dto.setId(id);
+        dto.setCode(StatEnum.REM.statCode);
+        dto.setValue(1);
+
+        Stat domain = mapper.dtoToDomain(dto);
+
+        assertNotNull(domain);
+        assertEquals(dto.getId(), domain.getId());
+        assertEquals(dto.getCode(), domain.getCode());
+        assertEquals(dto.getValue(), domain.getValue());
+    }
+
+    @Test
+    void createToDomain_ShouldMapCorrectly_WithPlayerId() {
         UUID playerId = UUID.randomUUID();
-        StatDTO dto = new StatDTO(id, playerId, StatEnum.UPA.statName, StatEnum.UPA.type.name(), StatEnum.UPA.statCode, 8);
+        StatCreateRequest request = new StatCreateRequest();
+        request.setCode(StatEnum.VJU.statCode);
+        request.setValue(3);
 
-        Stat domain = statMapper.dtoToDomain(dto);
+        Stat domain = mapper.createToDomain(request, playerId);
 
-        assertThat(domain.getId()).isEqualTo(id);
-        assertThat(domain.getPlayerId()).isEqualTo(playerId);
-        assertThat(domain.getCode()).isEqualTo(StatEnum.UPA.statCode);
-        assertThat(domain.getValue()).isEqualTo(8);
+        assertNotNull(domain);
+        assertEquals(StatEnum.VJU.statCode, domain.getCode());
+        assertEquals(3, domain.getValue());
+        assertEquals(playerId, domain.getPlayerId());
     }
 
     @Test
-    void shouldMapCreateRequestToDomain() {
-        UUID playerId = UUID.randomUUID();
-        StatCreateRequest request = new StatCreateRequest(StatEnum.CLI.statCode, 9);
-
-        Stat domain = statMapper.createToDomain(request, playerId);
-
-        assertThat(domain.getPlayerId()).isEqualTo(playerId);
-        assertThat(domain.getCode()).isEqualTo(StatEnum.CLI.statCode);
-        assertThat(domain.getValue()).isEqualTo(9);
-    }
-
-    @Test
-    void shouldMapModifyRequestToDomain() {
-        UUID statId = UUID.randomUUID();
-        StatUpdateRequest request = new StatUpdateRequest(statId, StatEnum.CBA.statCode, 7);
-
-        Stat domain = statMapper.updateToDomain(request);
-
-        assertThat(domain.getId()).isEqualTo(statId);
-        assertThat(domain.getCode()).isEqualTo(StatEnum.CBA.statCode);
-        assertThat(domain.getValue()).isEqualTo(7);
-    }
-
-    @Test
-    void shouldMapDomainToDto() {
+    void updateToDomain_ShouldMapCorrectly() {
         UUID id = UUID.randomUUID();
-        UUID playerId = UUID.randomUUID();
-        Stat domain = new Stat(id, playerId, StatEnum.AGR.statCode, 6);
+        StatUpdateRequest request = new StatUpdateRequest();
+        request.setId(id);
+        request.setCode(StatEnum.FUE.statCode);
+        request.setValue(3);
 
-        StatDTO dto = statMapper.domainToDto(domain);
+        Stat domain = mapper.updateToDomain(request);
 
-        assertThat(dto.getId()).isEqualTo(id);
-        assertThat(dto.getPlayerId()).isEqualTo(playerId);
-        assertThat(dto.getCode()).isEqualTo(StatEnum.AGR.statCode);
-        assertThat(dto.getName()).isEqualTo(StatEnum.AGR.statName);
-        assertThat(dto.getValue()).isEqualTo(6);
+        assertNotNull(domain);
+        assertEquals(id, domain.getId());
+        assertEquals(StatEnum.FUE.statCode, domain.getCode());
+        assertEquals(3, domain.getValue());
+    }
+
+    @Test
+    void domainToDto_ShouldMapCorrectly_AndResolveNameFromEnum() {
+        UUID id = UUID.randomUUID();
+        Stat domain = Stat.builder()
+                .id(id)
+                .code(StatEnum.REM.statCode)
+                .value(0)
+                .build();
+
+        StatDTO dto = mapper.domainToDto(domain);
+
+        assertNotNull(dto);
+        assertEquals(domain.getId(), dto.getId());
+        assertEquals(domain.getCode(), dto.getCode());
+        assertEquals(StatEnum.REM.statName, dto.getName());
+        assertEquals(domain.getValue(), dto.getValue());
+    }
+
+    @Test
+    void statEnumToStatEnumDto_ShouldMapFieldsCorrectly() {
+        StatEnum statEnum = StatEnum.REM;
+
+        StatEnumDTO dto = mapper.statEnumToStatEnumDto(statEnum);
+
+        assertNotNull(dto);
+        assertEquals(statEnum.statName, dto.getName());
+        assertEquals(statEnum.statCode, dto.getCode());
+        assertEquals(statEnum.type.name(), dto.getType());
+    }
+
+    @Test
+    void domainToDto_ShouldThrowException_WhenCodeIsInvalid() {
+        assertThrows(IllegalArgumentException.class, () -> Stat.builder()
+                .code("INVALID_CODE")
+                .build());
+    }
+
+    @Test
+    void mappers_ShouldReturnNull_WhenInputsAreNull() {
+        assertNull(mapper.dtoToDomain(null));
+        assertNull(mapper.createToDomain(null, null));
+        assertNull(mapper.updateToDomain(null));
+        assertNull(mapper.domainToDto(null));
+        assertNull(mapper.statEnumToStatEnumDto(null));
     }
 }

@@ -5,12 +5,14 @@ import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Request DTO for creating a new {@link Club} entity.
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClubCreateRequest {
 

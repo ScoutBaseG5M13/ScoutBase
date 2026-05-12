@@ -22,6 +22,10 @@ public class FindAllClubsByUserClubIdUseCase {
     private final UserClubRepository userClubRepository;
     private final ClubRepository clubRepository;
 
+    /**
+     * Service class that implements the use case for retrieving all {@link Club} entities
+     * associated with a specific {@link UserClub} id.
+     */
     public List<Club> execute(UUID userClubId) {
         Optional<UserClub> userClub = userClubRepository.findUserClubById(userClubId);
         List<Club> clubs = new ArrayList<>();

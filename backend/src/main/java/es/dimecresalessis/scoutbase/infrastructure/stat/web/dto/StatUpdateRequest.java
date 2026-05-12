@@ -5,6 +5,7 @@ import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StatUpdateRequest {
 

@@ -3,60 +3,89 @@ package es.dimecresalessis.scoutbase.infrastructure.stat.persistence.mapper;
 import es.dimecresalessis.scoutbase.domain.stat.model.Stat;
 import es.dimecresalessis.scoutbase.domain.stat.model.StatEnum;
 import es.dimecresalessis.scoutbase.infrastructure.stat.persistence.StatEntity;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class StatEntityMapperTest {
 
-    private final StatEntityMapper mapper = Mappers.getMapper(StatEntityMapper.class);
+    private StatEntityMapper mapper;
+
+    @BeforeEach
+    void setUp() {
+        mapper = Mappers.getMapper(StatEntityMapper.class);
+    }
 
     @Test
-    void shouldMapDomainToEntity() {
-        Stat domain = new Stat(UUID.randomUUID(), UUID.randomUUID(), StatEnum.OPR.statCode, 8);
+    void toEntity_ShouldMapDomainToEntityWithStatNameFromEnum() {
+        UUID id = UUID.randomUUID();
+        Stat domain = Stat.builder()
+                .id(id)
+                .code(StatEnum.REM.statCode)
+                .value(5)
+                .build();
 
         StatEntity entity = mapper.toEntity(domain);
 
-        assertThat(entity.getId()).isEqualTo(domain.getId());
-        assertThat(entity.getPlayerId()).isEqualTo(domain.getPlayerId());
-        assertThat(entity.getCode()).isEqualTo(StatEnum.OPR.statCode);
-        assertThat(entity.getValue()).isEqualTo(8);
-        assertThat(entity.getName()).isEqualTo(StatEnum.OPR.statName);
+        assertNotNull(entity);
+        assertEquals(domain.getId(), entity.getId());
+        assertEquals(StatEnum.REM.statCode, entity.getCode());
+        assertEquals(StatEnum.REM.statName, entity.getName());
+        assertEquals(5, entity.getValue());
     }
 
     @Test
-    void shouldMapEntityToDomain() {
+    void toDomain_ShouldMapEntityToDomain() {
+        UUID id = UUID.randomUUID();
         StatEntity entity = new StatEntity();
-        entity.setId(UUID.randomUUID());
-        entity.setPlayerId(UUID.randomUUID());
-        entity.setCode("VEL");
-        entity.setValue(9);
-        entity.setName("Velocidad");
+        entity.setId(id);
+        entity.setCode(StatEnum.VJU.statCode);
+        entity.setName(StatEnum.VJU.statName);
+        entity.setValue(4);
 
         Stat domain = mapper.toDomain(entity);
 
-        assertThat(domain.getId()).isEqualTo(entity.getId());
-        assertThat(domain.getPlayerId()).isEqualTo(entity.getPlayerId());
-        assertThat(domain.getCode()).isEqualTo("VEL");
-        assertThat(domain.getValue()).isEqualTo(9);
+        assertNotNull(domain);
+        assertEquals(entity.getId(), domain.getId());
+        assertEquals(StatEnum.VJU.statCode, domain.getCode());
+        assertEquals(4, domain.getValue());
     }
 
     @Test
-    void shouldUpdateEntityFromDomain() {
-        StatEntity entity = new StatEntity();
-        entity.setId(UUID.randomUUID());
-        entity.setCode(StatEnum.AGR.statCode);
-        entity.setName(StatEnum.AGR.statName);
+    void updateEntityFromDomain_ShouldUpdateExistingEntityAndResolveName() {
+        UUID id = UUID.randomUUID();
+        Stat domain = Stat.builder()
+                .id(id)
+                .code(StatEnum.FUE.statCode)
+                .value(2)
+                .build();
 
-        Stat domain = new Stat(entity.getId(), UUID.randomUUID(), StatEnum.COR.statCode, 7);
+        StatEntity entity = new StatEntity();
+        entity.setId(id);
+        entity.setCode(StatEnum.REM.statCode);
+        entity.setName(StatEnum.REM.statName);
 
         mapper.updateEntityFromDomain(domain, entity);
 
-        assertThat(entity.getCode()).isEqualTo(StatEnum.COR.statCode);
-        assertThat(entity.getValue()).isEqualTo(7);
-        assertThat(entity.getName()).isEqualTo(StatEnum.COR.statName);
+        assertEquals(StatEnum.FUE.statCode, entity.getCode());
+        assertEquals(StatEnum.FUE.statName, entity.getName());
+        assertEquals(2, entity.getValue());
+    }
+
+    @Test
+    void toEntity_ShouldThrowException_WhenStatCodeIsInvalid() {
+        assertThrows(IllegalArgumentException.class, () ->  Stat.builder()
+                .code("INVALID_CODE")
+                .build());
+    }
+
+    @Test
+    void mappers_ShouldReturnNull_WhenInputsAreNull() {
+        assertNull(mapper.toEntity(null));
+        assertNull(mapper.toDomain(null));
     }
 }
