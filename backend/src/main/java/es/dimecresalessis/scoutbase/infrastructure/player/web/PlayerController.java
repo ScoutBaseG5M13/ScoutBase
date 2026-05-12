@@ -10,7 +10,6 @@ import es.dimecresalessis.scoutbase.application.team.find.FindTeamByIdUseCase;
 import es.dimecresalessis.scoutbase.application.team.find.FindTeamByPlayerUseCase;
 import es.dimecresalessis.scoutbase.application.team.update.UpdateTeamUseCase;
 import es.dimecresalessis.scoutbase.application.userclub.find.FindUserClubByIdUseCase;
-import es.dimecresalessis.scoutbase.application.userclub.find.FindUserClubByUserTeamUseCase;
 import es.dimecresalessis.scoutbase.domain.club.model.Club;
 import es.dimecresalessis.scoutbase.domain.exception.ErrorEnum;
 import es.dimecresalessis.scoutbase.domain.player.exception.PlayerException;
@@ -65,7 +64,6 @@ public class PlayerController {
     private final FindTeamByIdUseCase findTeamByIdUseCase;
     private final CreateStatUseCase createStatUseCase;
     private final FindClubByIdUseCase findClubByIdUseCase;
-    private final FindUserClubByUserTeamUseCase findUserClubByUserTeamUseCase;
     private final FindUserClubByIdUseCase findUserClubByIdUseCase;
 
     /**

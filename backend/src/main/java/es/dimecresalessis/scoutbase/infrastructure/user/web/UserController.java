@@ -180,17 +180,17 @@ public class UserController {
     }
 
     /**
-     * Finds all users in the Club.
+     * Finds all users in the User Club.
      *
-     * @param clubId The ID of the userclub.
+     * @param userClubId The ID of the user club.
      * @return {@link ApiResponse} containing the user's information.
      */
     @GetMapping(Routes.USER_CLUBS + Routes.ID_PATHVAR)
-    @Operation(summary = "Finds all Users by Club ID [Auth ADMIN]", description = "Finds all Users by Club")
-    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllByClub(@PathVariable("id") UUID clubId) {
-        userAuthService.hasMinimumClubAuthorization(clubId, RoleEnum.ADMIN);
+    @Operation(summary = "Finds all Users by Club ID [Auth ADMIN]", description = "Finds all Users by User Club")
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllByClub(@PathVariable("id") UUID userClubId) {
+        userAuthService.hasMinimumClubAuthorization(userClubId, RoleEnum.ADMIN);
         List<UUID> userIds = new ArrayList<>();
-        UserClub clubs = findUserClubByIdUseCase.execute(clubId);
+        UserClub clubs = findUserClubByIdUseCase.execute(userClubId);
         userIds.addAll(clubs.getAdminUserIds());
         List<UserTeam> userTeams = findAllUserTeamsByUserClubUseCase.execute(clubs.getId());
         for (UserTeam userTeam : userTeams) {
@@ -213,18 +213,18 @@ public class UserController {
     }
 
     /**
-     * Finds all users in the Team.
+     * Finds all users in the User Team.
      *
-     * @param teamId The ID of the userclub.
+     * @param userTeamId The ID of the user team.
      * @return {@link ApiResponse} containing the user's information.
      */
     @GetMapping(Routes.USER_TEAMS + Routes.ID_PATHVAR)
-    @Operation(summary = "Finds all Users by Team ID [Auth ADMIN]", description = "Finds all Users by Team")
-    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllByTeam(@PathVariable("id") UUID teamId) {
-        UserClub userClub = findUserClubByUserTeamUseCase.execute(teamId);
+    @Operation(summary = "Finds all Users by Team ID [Auth ADMIN]", description = "Finds all Users by User Team")
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findAllByUserTeam(@PathVariable("id") UUID userTeamId) {
+        UserClub userClub = findUserClubByUserTeamUseCase.execute(userTeamId);
         userAuthService.hasMinimumClubAuthorization(userClub.getId(), RoleEnum.ADMIN);
             List<UUID> userIds = new ArrayList<>();
-            UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
+            UserTeam userTeam = findUserTeamByIdUseCase.execute(userTeamId);
                 if (userTeam.getTrainer() != null) {
                     userIds.add(userTeam.getTrainer());
                 }
