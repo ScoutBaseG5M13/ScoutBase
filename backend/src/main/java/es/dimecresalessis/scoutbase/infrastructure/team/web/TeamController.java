@@ -160,7 +160,7 @@ public class TeamController {
      * @throws PlayerException If an error occurs during player creation.
      */
     @PostMapping(Routes.ID_PATHVAR + Routes.PLAYERS)
-    @Operation(summary = "Creates a player [Auth SCOUTER]", description = "Create Player")
+    @Operation(summary = "Creates a player in the Team [Auth SCOUTER]", description = "Create Player in Team")
     public ResponseEntity<ApiResponse<PlayerDTO>> createPlayer(@Valid @RequestBody PlayerCreateRequest createPlayerRequest, @PathVariable("id") UUID teamId) {
         Team team = findTeamById.execute(teamId);
         if (team == null) {
@@ -197,8 +197,11 @@ public class TeamController {
      * @throws PlayerException If an error occurs during category retrieval.
      */
     @GetMapping( Routes.ID_PATHVAR + Routes.STATS)
-    @Operation(summary = "Gets all player average stats in team", description = "Get all Player average Stats in the Team")
+    @Operation(summary = "Gets all player average stats in team [Auth SCOUTER]", description = "Get all Player average Stats in the Team")
     public ResponseEntity<ApiResponse<List<PlayerAverageStatScoreDTO>>> getAllPlayerAverageStats(@PathVariable("id") UUID teamId) {
+        Team team = findTeamById.execute(teamId);
+        Club club = findClubByTeamUseCase.execute(team.getClubId());
+        userAuthService.hasMinimumClubAuthorization(club.getUserClub(), RoleEnum.SCOUTER);
         List<Player> players = findAllPlayersByTeamIdUseCase.execute(teamId);
         List<PlayerAverageStatScoreDTO> averageScores = players.stream()
                 .map(player -> calculateAverageScore.execute(player.getId()))

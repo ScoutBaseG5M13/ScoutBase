@@ -180,7 +180,7 @@ public class StatController {
      * @throws StatException If the stat is not found.
      */
     @DeleteMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Deletes stat [Auth SCOUTER]", description = "Delete Stat")
+    @Operation(summary = "Deletes a stat [Auth SCOUTER]", description = "Delete Stat")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable(value = "id") UUID statId) {
         Stat stat = findStatByIdUseCase.execute(statId);
         if (stat == null) {
