@@ -159,7 +159,7 @@ public class UserTeamController {
      * @return {@link ApiResponse} indicating success.
      */
     @DeleteMapping(Routes.ID_PATHVAR)
-    @Operation(summary = "Delete Team [Auth ADMIN]", description = "Deletes a Team")
+    @Operation(summary = "Delete user team [Auth ADMIN]", description = "Deletes a User Team")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable("id") UUID teamId) {
         UserClub userClub = findUserClubByUserTeamUseCase.execute(teamId);
         if (userClub == null) {

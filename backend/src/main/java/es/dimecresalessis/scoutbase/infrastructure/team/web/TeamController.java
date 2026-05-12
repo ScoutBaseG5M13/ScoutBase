@@ -161,7 +161,7 @@ public class TeamController {
      */
     @PostMapping(Routes.ID_PATHVAR + Routes.PLAYERS)
     @Operation(summary = "Creates a player [Auth SCOUTER]", description = "Create Player")
-    public ResponseEntity<ApiResponse<PlayerDTO>> create(@Valid @RequestBody PlayerCreateRequest createPlayerRequest, @PathVariable("id") UUID teamId) {
+    public ResponseEntity<ApiResponse<PlayerDTO>> createPlayer(@Valid @RequestBody PlayerCreateRequest createPlayerRequest, @PathVariable("id") UUID teamId) {
         Team team = findTeamById.execute(teamId);
         if (team == null) {
             throw new TeamException(ErrorEnum.TEAM_NOT_FOUND, teamId.toString());
