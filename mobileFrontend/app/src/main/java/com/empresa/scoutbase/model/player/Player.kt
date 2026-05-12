@@ -2,12 +2,14 @@ package com.empresa.scoutbase.model.player
 
 data class Player(
     val id: String,
+    val teamId: String,
     val name: String,
     val surname: String,
-    val age: Int,
+    val birthYear: Int,
     val email: String,
     val number: Int,
-    val teamId: String,
     val position: String,
-    val priority: Int
+    val priority: Int,
+    val stats: Any?
 )
+

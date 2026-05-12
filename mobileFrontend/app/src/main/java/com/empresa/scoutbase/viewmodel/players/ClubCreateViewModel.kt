@@ -1,0 +1,43 @@
+// com/empresa/scoutbase/viewmodel/players/ClubCreateViewModel.kt
+package com.empresa.scoutbase.viewmodel.players
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.empresa.scoutbase.data.remote.ApiService
+import com.empresa.scoutbase.model.player.ClubCreateRequest
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+
+class ClubCreateViewModel : ViewModel() {
+
+    private val api = ApiService.playerApi
+
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    private val _success = MutableStateFlow(false)
+    val success: StateFlow<Boolean> = _success
+
+    fun createClub(token: String, userClubId: String, req: ClubCreateRequest) {
+        _loading.value = true
+        _error.value = null
+        _success.value = false
+
+        viewModelScope.launch {
+            try {
+                api.createClubInUserClub("Bearer $token", userClubId, req)
+                _success.value = true
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
+}
+
+

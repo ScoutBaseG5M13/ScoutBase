@@ -1,44 +1,80 @@
 package com.empresa.scoutbase.data.remote.player
 
+import com.empresa.scoutbase.model.club.ClubSingleResponse
+import com.empresa.scoutbase.model.player.ClubCreateRequest
 import com.empresa.scoutbase.model.player.PlayerCreateRequest
 import com.empresa.scoutbase.model.player.PlayerDeleteResponse
 import com.empresa.scoutbase.model.player.PlayerResponse
 import com.empresa.scoutbase.model.player.PlayerSingleResponse
 import com.empresa.scoutbase.model.player.PlayerUpdateRequest
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
+import com.empresa.scoutbase.model.player.TeamResponse
+import com.empresa.scoutbase.model.player.ClubResponse
+import com.empresa.scoutbase.model.player.TeamCreateRequest
+import com.empresa.scoutbase.model.team.TeamSingleResponse
+import retrofit2.http.*
 
 interface PlayerApi {
 
-    @GET("players/teams/{teamId}")
-    suspend fun getPlayersByTeam(
+    // 1) Obtener Clubs desde un UserClub
+    @GET("clubs/user-clubs/{id}")
+    suspend fun getClubsFromUserClub(
         @Header("Authorization") token: String,
-        @Path("teamId") teamId: String
+        @Path("id") userClubId: String
+    ): ClubResponse
+
+    // 2) Obtener Teams desde un Club
+    @GET("teams/clubs/{id}")
+    suspend fun getTeamsFromClub(
+        @Header("Authorization") token: String,
+        @Path("id") clubId: String
+    ): TeamResponse
+
+    // 3) Obtener Players desde un Team
+    @GET("players/teams/{id}")
+    suspend fun getPlayersFromTeam(
+        @Header("Authorization") token: String,
+        @Path("id") teamId: String
     ): PlayerResponse
 
-    @POST("players/teams/{teamId}")
+    // 4) Crear Player dentro de un Team
+    @POST("teams/{id}/players")
     suspend fun createPlayer(
         @Header("Authorization") token: String,
-        @Path("teamId") teamId: String,
+        @Path("id") teamId: String,
         @Body request: PlayerCreateRequest
     ): PlayerSingleResponse
 
-    @PUT("players/{playerId}")
+    // 5) Editar Player
+    @PUT("players/{id}")
     suspend fun updatePlayer(
         @Header("Authorization") token: String,
-        @Path("playerId") playerId: String,
+        @Path("id") playerId: String,
         @Body request: PlayerUpdateRequest
     ): PlayerSingleResponse
 
-    @DELETE("players/{playerId}")
+    // 6) Eliminar Player
+    @DELETE("players/{id}")
     suspend fun deletePlayer(
         @Header("Authorization") token: String,
-        @Path("playerId") playerId: String
+        @Path("id") playerId: String
     ): PlayerDeleteResponse
+
+    @POST("user-clubs/{id}/clubs")
+    suspend fun createClubInUserClub(
+        @Header("Authorization") token: String,
+        @Path("id") userClubId: String,
+        @Body req: ClubCreateRequest
+    ): ClubSingleResponse
+
+    @POST("clubs/{id}/teams")
+    suspend fun createTeamInClub(
+        @Header("Authorization") token: String,
+        @Path("id") clubId: String,
+        @Body req: TeamCreateRequest
+    ): TeamSingleResponse
+
+
 }
+
+
 

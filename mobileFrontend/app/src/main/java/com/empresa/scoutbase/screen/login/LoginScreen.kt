@@ -12,39 +12,29 @@ import com.empresa.scoutbase.ui.theme.AzulPetroleo
 import com.empresa.scoutbase.ui.theme.FondoClaro
 import com.empresa.scoutbase.viewmodel.login.LoginViewModel
 
-/**
- * Pantalla de inicio de sesión.
- * Navega a Home cuando el token y el rol han sido obtenidos correctamente.
- */
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (String, String, String) -> Unit   // ← AHORA ACEPTA TOKEN
+    onLoginSuccess: (String, String, String, String) -> Unit   // username, role, token, userClubId
 ) {
-    // Estados locales para usuario y contraseña
     var usuario by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
 
-    // ViewModel
     val loginViewModel: LoginViewModel = viewModel()
 
-    // Estados expuestos por el ViewModel
     val loading by loginViewModel.loading.collectAsState()
     val errorServidor by loginViewModel.error.collectAsState()
     val token by loginViewModel.token.collectAsState()
     val role by loginViewModel.role.collectAsState()
+    val userClubId by loginViewModel.userClubId.collectAsState()
 
-    /**
-     * Cuando token y role no son nulos, significa que:
-     * 1. El login ha sido correcto
-     * 2. Se ha obtenido el rol real del backend
-     * Entonces se navega a Home.
-     */
-    LaunchedEffect(token, role) {
+    // Cuando ya tenemos token + role + userClubId → navegar
+    LaunchedEffect(token, role, userClubId) {
         val currentToken = token
         val currentRole = role
+        val currentClub = userClubId
 
-        if (currentToken != null && currentRole != null) {
-            onLoginSuccess(usuario, currentRole, currentToken)   // ← AHORA ENVÍA TOKEN
+        if (currentToken != null && currentRole != null && currentClub != null) {
+            onLoginSuccess(usuario, currentRole, currentToken, currentClub)
         }
     }
 
@@ -52,7 +42,6 @@ fun LoginScreen(
         modifier = Modifier.fillMaxSize(),
         color = FondoClaro
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -123,6 +112,9 @@ fun LoginScreen(
         }
     }
 }
+
+
+
 
 
 

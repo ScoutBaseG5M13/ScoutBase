@@ -2,15 +2,14 @@ package com.empresa.scoutbase.viewmodel.players
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.empresa.scoutbase.data.remote.repository.PlayerRepository
-import com.empresa.scoutbase.data.remote.repository.PlayerRepositoryImpl
 import com.empresa.scoutbase.model.player.Player
+import com.empresa.scoutbase.repository.PlayerRepositoryImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class PlayerListViewModel(
-    private val repository: PlayerRepository = PlayerRepositoryImpl()
+    private val repository: PlayerRepositoryImpl = PlayerRepositoryImpl()
 ) : ViewModel() {
 
     private val _players = MutableStateFlow<List<Player>>(emptyList())
@@ -28,8 +27,7 @@ class PlayerListViewModel(
 
         viewModelScope.launch {
             try {
-                val result = repository.getPlayersByTeam(token, teamId)
-                _players.value = result
+                _players.value = repository.getPlayersFromTeam(token, teamId)
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {
@@ -38,3 +36,5 @@ class PlayerListViewModel(
         }
     }
 }
+
+

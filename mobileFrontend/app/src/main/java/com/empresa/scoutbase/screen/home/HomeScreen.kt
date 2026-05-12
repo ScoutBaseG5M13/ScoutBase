@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.empresa.scoutbase.model.team.Team
+import com.empresa.scoutbase.model.UserTeam.UserTeam
 import com.empresa.scoutbase.ui.theme.*
 import com.empresa.scoutbase.viewmodel.home.HomeViewModel
 
@@ -22,6 +22,7 @@ fun HomeScreen(
     username: String,
     role: String,
     token: String,
+    userClubId: String,   // ← NECESARIO
     onLogout: () -> Unit = {},
     onEnterTeam: (String) -> Unit
 ) {
@@ -35,7 +36,7 @@ fun HomeScreen(
     val homeViewModel: HomeViewModel = viewModel()
 
     LaunchedEffect(Unit) {
-        homeViewModel.loadTeams(token)
+        homeViewModel.loadTeams(token, userClubId)
     }
 
     val teams by homeViewModel.teams.collectAsState()
@@ -55,7 +56,7 @@ fun HomeScreen(
         ) {
 
             // -------------------------
-            // HEADER ORDENADO
+            // HEADER
             // -------------------------
             Row(
                 modifier = Modifier
@@ -149,7 +150,7 @@ fun HomeScreen(
 
 @Composable
 fun TeamCard(
-    team: Team,
+    team: UserTeam,
     onEnterScouting: (String) -> Unit
 ) {
     Column(
@@ -170,7 +171,7 @@ fun TeamCard(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text("Categoría: ${team.category}", fontSize = 18.sp, color = TextoPrincipal)
-        Text("Subcategoría: ${team.subCategory}", fontSize = 18.sp, color = TextoPrincipal)
+        Text("Subcategoría: ${team.subcategory}", fontSize = 18.sp, color = TextoPrincipal)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -192,6 +193,8 @@ fun TeamCard(
         }
     }
 }
+
+
 
 
 

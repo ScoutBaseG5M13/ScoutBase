@@ -7,3 +7,4 @@ data class ApiResponse<T>(
     val sessionId: String,
     val timestamp: String
 )
+
