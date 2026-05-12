@@ -188,7 +188,7 @@ public class UserController {
     @GetMapping(Routes.USER_CLUBS + Routes.ID_PATHVAR)
     @Operation(summary = "Finds all Users by Club ID [Auth ADMIN]", description = "Finds all Users by Club")
     public ResponseEntity<ApiResponse<List<UserDTO>>> findAllByClub(@PathVariable("id") UUID clubId) {
-        userAuthService.isAuthorizedByClub(clubId, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(clubId, RoleEnum.ADMIN);
         List<UUID> userIds = new ArrayList<>();
         UserClub clubs = findUserClubByIdUseCase.execute(clubId);
         userIds.addAll(clubs.getAdminUserIds());
@@ -222,7 +222,7 @@ public class UserController {
     @Operation(summary = "Finds all Users by Team ID [Auth ADMIN]", description = "Finds all Users by Team")
     public ResponseEntity<ApiResponse<List<UserDTO>>> findAllByTeam(@PathVariable("id") UUID teamId) {
         UserClub userClub = findUserClubByUserTeamUseCase.execute(teamId);
-        userAuthService.isAuthorizedByClub(userClub.getId(), RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(userClub.getId(), RoleEnum.ADMIN);
             List<UUID> userIds = new ArrayList<>();
             UserTeam userTeam = findUserTeamByIdUseCase.execute(teamId);
                 if (userTeam.getTrainer() != null) {

@@ -86,7 +86,7 @@ public class UserClubController {
     @GetMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Find user clubs by ID [Auth SCOUTER]", description = "Finds and returns a UserClub by ID")
     public ResponseEntity<ApiResponse<UserClubDTO>> findById(@PathVariable("id") UUID clubId) {
-        userAuthService.isAuthorizedByClub(clubId, RoleEnum.SCOUTER);
+        userAuthService.hasMinimumClubAuthorization(clubId, RoleEnum.SCOUTER);
         try {
             UserClub userClub = findUserClubByIdUseCase.execute(clubId);
             UserClubDTO userClubDto = userClubMapper.domainToDTO(userClub);
@@ -123,7 +123,7 @@ public class UserClubController {
     @PutMapping(value = Routes.ID_PATHVAR)
     @Operation(summary = "Update a user club by ID [Auth ADMIN]", description = "Updates a UserClub")
     public ResponseEntity<ApiResponse<UserClubDTO>> update(@Valid @RequestBody UserClubUpdateRequest updateRequest, @PathVariable UUID id) {
-        userAuthService.isAuthorizedByClub(id, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(id, RoleEnum.ADMIN);
         try {
             UserClub userClub = userClubMapper.updateToDomain(updateRequest);
             UserClub updatedUserClub = updateUserClubUseCase.execute(userClub, id);
@@ -144,7 +144,7 @@ public class UserClubController {
     @DeleteMapping(Routes.ID_PATHVAR)
     @Operation(summary = "Deletes a user club by ID [Auth ADMIN]", description = "Deletes a UserClub")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
-        userAuthService.isAuthorizedByClub(id, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(id, RoleEnum.ADMIN);
         UserClub userClub = findUserClubByIdUseCase.execute(id);
         if (userClub == null) {
             throw new UserClubException(ErrorEnum.USER_CLUB_NOT_FOUND, id.toString());
@@ -164,7 +164,7 @@ public class UserClubController {
     @PostMapping(Routes.ID_PATHVAR + Routes.USERS + Routes.ID_TWO_PATHVAR + Routes.ADMIN_PATH)
     @Operation(summary = "Adds a user as admin in a user club [Auth ADMIN]", description = "Adds a new User admin to a UserClub")
     public ResponseEntity<ApiResponse<UserClubDTO>> addAdmin(@PathVariable(value = "id") UUID clubId, @PathVariable(value = "id2") UUID userId) {
-        userAuthService.isAuthorizedByClub(clubId, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(clubId, RoleEnum.ADMIN);
         try {
             UserClub userClub = findUserClubByIdUseCase.execute(clubId);
             userClub.getAdminUserIds().add(userId);
@@ -186,7 +186,7 @@ public class UserClubController {
     @DeleteMapping(Routes.ID_PATHVAR + Routes.USERS + Routes.ID_TWO_PATHVAR + Routes.ADMIN_PATH)
     @Operation(summary = "Removes a user as admin from a user club [Auth ADMIN]", description = "Removes a User as admin from a UserClub")
     public ResponseEntity<ApiResponse<UserClubDTO>> removeAdmin(@PathVariable(value = "id") UUID clubId, @PathVariable(value = "id2") UUID userId) {
-        userAuthService.isAuthorizedByClub(clubId, RoleEnum.ADMIN);
+        userAuthService.hasMinimumClubAuthorization(clubId, RoleEnum.ADMIN);
         try {
             UserClub userClub = findUserClubByIdUseCase.execute(clubId);
             userClub.getAdminUserIds().remove(userId);
@@ -208,7 +208,7 @@ public class UserClubController {
     @PostMapping(Routes.ID_PATHVAR + Routes.CLUBS)
     @Operation(summary = "Creates a new managed Club [Auth SCOUTER]", description = "Creates a new managed Club")
     public ResponseEntity<ApiResponse<ClubDTO>> createManagedClub(@PathVariable(value = "id") UUID userClubId, @RequestBody ClubCreateRequest request) {
-        userAuthService.isAuthorizedByClub(userClubId, RoleEnum.SCOUTER);
+        userAuthService.hasMinimumClubAuthorization(userClubId, RoleEnum.SCOUTER);
         try {
             Club club = clubMapper.createToDomain(request);
             Club createdClub = createClubUseCase.execute(club, userClubId);
