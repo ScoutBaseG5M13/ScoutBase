@@ -31,14 +31,14 @@ public class UserClubEntity extends CommonEntity {
     private String name;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = false, columnDefinition = "uuid[]")
+    @Column(nullable = false, columnDefinition = "uuid ARRAY")
     private List<UUID> adminUserIds;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = true, columnDefinition = "uuid[]")
+    @Column(nullable = true, columnDefinition = "uuid ARRAY")
     private List<UUID> userTeams;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = true, columnDefinition = "uuid[]")
+    @Column(nullable = true, columnDefinition = "uuid ARRAY")
     private List<UUID> managedClubs;
 }

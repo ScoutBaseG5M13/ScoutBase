@@ -35,6 +35,6 @@ public class TeamEntity extends CommonEntity {
     private String subcategory;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = true, columnDefinition = "uuid[]")
+    @Column(nullable = true, columnDefinition = "uuid ARRAY")
     private List<UUID> players;
 }

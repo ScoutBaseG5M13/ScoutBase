@@ -43,6 +43,6 @@ public class PlayerEntity extends CommonEntity {
     private int priority;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = true, columnDefinition = "uuid[]")
+    @Column(nullable = true, columnDefinition = "uuid ARRAY")
     private List<UUID> stats;
 }
