@@ -18,6 +18,12 @@ public class FindClubByTeamUseCase {
 
     private final ClubRepository clubRepository;
 
+    /**
+     * Executes the search logic to find the parent Club of a team.
+     *
+     * @param teamId The unique identifier of the team whose parent club is being looked for.
+     * @return The {@link Club} entity that owns the team; {@code null} if no matching club is found.
+     */
     public Club execute(UUID teamId) {
         List<Club> clubs = clubRepository.findAll();
         return clubs.stream()

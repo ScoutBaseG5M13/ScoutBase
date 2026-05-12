@@ -41,6 +41,6 @@ public class UserTeamEntity extends CommonEntity {
     private UUID secondTrainer;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = true, columnDefinition = "uuid[]")
+    @Column(nullable = true, columnDefinition = "uuid ARRAY")
     private List<UUID> scouters;
 }

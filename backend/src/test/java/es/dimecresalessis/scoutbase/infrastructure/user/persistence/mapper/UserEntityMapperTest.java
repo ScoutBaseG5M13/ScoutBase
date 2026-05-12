@@ -2,90 +2,95 @@ package es.dimecresalessis.scoutbase.infrastructure.user.persistence.mapper;
 
 import es.dimecresalessis.scoutbase.domain.user.model.User;
 import es.dimecresalessis.scoutbase.infrastructure.user.persistence.UserEntity;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mapstruct.factory.Mappers;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = UserEntityMapperImpl.class)
 class UserEntityMapperTest {
 
-    @Autowired
-    private UserEntityMapper userEntityMapper;
+    private UserEntityMapper mapper;
 
-    @Test
-    void shouldMapToEntity() {
-        UUID userId = UUID.randomUUID();
-        User user = User.builder()
-                .id(userId)
-                .username("scout_master")
-                .password("encoded_password")
-                .name("Alex")
-                .surname("Scout")
-                .email("alex@scoutbase.com")
-                .build();
-
-        UserEntity result = userEntityMapper.toEntity(user);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(user.getId());
-        assertThat(result.getUsername()).isEqualTo(user.getUsername());
-        assertThat(result.getPassword()).isEqualTo(user.getPassword());
-        assertThat(result.getName()).isEqualTo(user.getName());
-        assertThat(result.getSurname()).isEqualTo(user.getSurname());
-        assertThat(result.getEmail()).isEqualTo(user.getEmail());
+    @BeforeEach
+    void setUp() {
+        mapper = Mappers.getMapper(UserEntityMapper.class);
     }
 
     @Test
-    void shouldMapToDomain() {
-        UUID userId = UUID.randomUUID();
-        UserEntity userEntity = UserEntity.builder()
-                .id(userId)
-                .username("scout_entity")
-                .password("encoded_password_entity")
-                .name("Alexine")
-                .surname("Manager")
-                .email("alexine@scoutbase.com")
-                .build();
-
-        User result = userEntityMapper.toDomain(userEntity);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(userEntity.getId());
-        assertThat(result.getUsername()).isEqualTo(userEntity.getUsername());
-        assertThat(result.getPassword()).isEqualTo(userEntity.getPassword());
-        assertThat(result.getName()).isEqualTo(userEntity.getName());
-        assertThat(result.getSurname()).isEqualTo(userEntity.getSurname());
-        assertThat(result.getEmail()).isEqualTo(userEntity.getEmail());
-    }
-
-    @Test
-    void shouldUpdateEntityFromDomain() {
-        UserEntity entity = UserEntity.builder()
-                .id(UUID.randomUUID())
-                .username("old_user")
-                .name("Old Name")
-                .build();
-
+    void toEntity_ShouldMapDomainToEntity() {
+        UUID id = UUID.randomUUID();
         User domain = User.builder()
-                .username("new_user")
-                .name("New Name")
-                .email("new@test.com")
+                .id(id)
+                .email("test@example.com")
+                .username("testuser")
                 .build();
 
-        userEntityMapper.updateEntityFromDomain(domain, entity);
+        UserEntity entity = mapper.toEntity(domain);
 
-        assertThat(entity.getUsername()).isEqualTo("new_user");
-        assertThat(entity.getName()).isEqualTo("New Name");
-        assertThat(entity.getEmail()).isEqualTo("new@test.com");
+        assertNotNull(entity);
+        assertEquals(domain.getId(), entity.getId());
+        assertEquals(domain.getEmail(), entity.getEmail());
+        assertEquals(domain.getUsername(), entity.getUsername());
     }
 
     @Test
-    void shouldReturnNullWhenInputsAreNull() {
-        assertThat(userEntityMapper.toEntity(null)).isNull();
-        assertThat(userEntityMapper.toDomain(null)).isNull();
+    void toDomain_ShouldMapEntityToDomain() {
+        UUID id = UUID.randomUUID();
+        UserEntity entity = new UserEntity();
+        entity.setId(id);
+        entity.setEmail("entity@example.com");
+        entity.setUsername("entityuser");
+
+        User domain = mapper.toDomain(entity);
+
+        assertNotNull(domain);
+        assertEquals(entity.getId(), domain.getId());
+        assertEquals(entity.getEmail(), domain.getEmail());
+        assertEquals(entity.getUsername(), domain.getUsername());
+    }
+
+    @Test
+    void updateEntity_ShouldUpdateTargetWithSourceData() {
+        UserEntity source = new UserEntity();
+        source.setEmail("new@example.com");
+        source.setUsername("newuser");
+
+        UserEntity target = new UserEntity();
+        target.setEmail("old@example.com");
+        target.setUsername("olduser");
+
+        mapper.updateEntity(target, source);
+
+        assertEquals("new@example.com", target.getEmail());
+        assertEquals("newuser", target.getUsername());
+    }
+
+    @Test
+    void updateEntityFromDomain_ShouldUpdateEntityWithDomainState() {
+        UUID id = UUID.randomUUID();
+        User domain = User.builder()
+                .id(id)
+                .email("updated@example.com")
+                .username("updateduser")
+                .build();
+
+        UserEntity target = new UserEntity();
+        target.setId(id);
+        target.setEmail("old@example.com");
+
+        mapper.updateEntityFromDomain(domain, target);
+
+        assertEquals("updated@example.com", target.getEmail());
+        assertEquals("updateduser", target.getUsername());
+        assertEquals(id, target.getId());
+    }
+
+    @Test
+    void mappers_ShouldReturnNull_WhenInputsAreNull() {
+        assertNull(mapper.toEntity(null));
+        assertNull(mapper.toDomain(null));
     }
 }

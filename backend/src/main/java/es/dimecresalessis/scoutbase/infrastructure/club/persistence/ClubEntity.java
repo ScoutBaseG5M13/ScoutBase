@@ -31,7 +31,7 @@ public class ClubEntity extends CommonEntity {
     private String name;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = true, columnDefinition = "uuid[]")
+    @Column(nullable = true, columnDefinition = "uuid ARRAY")
     private List<UUID> teams;
 
     @Column(nullable = false)

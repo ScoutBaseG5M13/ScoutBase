@@ -2,10 +2,7 @@ package es.dimecresalessis.scoutbase.infrastructure.player.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +13,7 @@ import java.util.UUID;
 @Data
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlayerDTO {
