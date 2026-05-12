@@ -23,7 +23,9 @@ import com.empresa.scoutbase.viewmodel.players.PlayerEditViewModel
 fun EditPlayerScreen(
     player: Player,
     token: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onCreateReport: (String) -> Unit,
+    onViewReport: (String) -> Unit
 ) {
     val viewModel: PlayerEditViewModel = viewModel()
 
@@ -42,7 +44,7 @@ fun EditPlayerScreen(
 
     var name by remember { mutableStateOf(player.name) }
     var surname by remember { mutableStateOf(player.surname) }
-    var age by remember { mutableStateOf(player.age.toString()) }
+    var birthYear by remember { mutableStateOf(player.birthYear.toString()) }
     var email by remember { mutableStateOf(player.email) }
     var number by remember { mutableStateOf(player.number.toString()) }
     var priority by remember { mutableStateOf(player.priority.toString()) }
@@ -88,12 +90,47 @@ fun EditPlayerScreen(
 
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
-            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = surname, onValueChange = { surname = it }, label = { Text("Apellido") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = age, onValueChange = { age = it }, label = { Text("Edad") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = number, onValueChange = { number = it }, label = { Text("Número") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = priority, onValueChange = { priority = it }, label = { Text("Prioridad") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Nombre") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = surname,
+                onValueChange = { surname = it },
+                label = { Text("Apellido") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = birthYear,
+                onValueChange = { birthYear = it },
+                label = { Text("Año de nacimiento") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = number,
+                onValueChange = { number = it },
+                label = { Text("Número") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = priority,
+                onValueChange = { priority = it },
+                label = { Text("Prioridad") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             ExposedDropdownMenuBox(
                 expanded = expanded,
@@ -105,7 +142,9 @@ fun EditPlayerScreen(
                     readOnly = true,
                     label = { Text("Posición") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
                 )
 
                 ExposedDropdownMenu(
@@ -131,23 +170,28 @@ fun EditPlayerScreen(
             Button(
                 onClick = {
                     val request = PlayerUpdateRequest(
-                        id = player.id,   // ← AÑADIDO
+                        id = player.id,
                         name = name,
                         surname = surname,
-                        age = age.toIntOrNull() ?: 0,
+                        birthYear = birthYear.toIntOrNull() ?: 0,
                         email = email,
                         number = number.toIntOrNull() ?: 0,
                         position = position,
                         priority = priority.toIntOrNull() ?: 0
                     )
-                    viewModel.updatePlayer(token, player.id, request)
+                    viewModel.updatePlayer(token, request)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo)
             ) {
-                Text("Guardar cambios", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    if (loading) "Guardando..." else "Guardar cambios",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
             Button(
@@ -157,11 +201,50 @@ fun EditPlayerScreen(
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
             ) {
-                Text("Eliminar jugador", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "Eliminar jugador",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // 🔵 BOTONES JUNTOS Y VISIBLES
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = { onCreateReport(player.id) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo)
+                ) {
+                    Text("Crear informe", color = Color.White, fontSize = 16.sp)
+                }
+
+                Button(
+                    onClick = { onViewReport(player.id) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo)
+                ) {
+                    Text("Visualitzar", color = Color.White, fontSize = 16.sp)
+                }
             }
         }
     }
 }
+
+
+
+
+
+
 
 
 

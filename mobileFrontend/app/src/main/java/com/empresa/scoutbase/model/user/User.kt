@@ -8,3 +8,4 @@ data class User(
     val surname: String,
     val email: String
 )
+

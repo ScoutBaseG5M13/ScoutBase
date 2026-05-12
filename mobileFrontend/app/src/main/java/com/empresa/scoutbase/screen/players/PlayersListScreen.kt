@@ -128,11 +128,13 @@ fun PlayerCard(player: Player, onClick: (Player) -> Unit) {
         Spacer(modifier = Modifier.height(6.dp))
 
         Text("Posición: ${player.position}", fontSize = 16.sp, color = TextoPrincipal)
-        Text("Edad: ${player.age}", fontSize = 16.sp, color = TextoPrincipal)
+        Text("Año: ${player.birthYear}", fontSize = 16.sp, color = TextoPrincipal)
         Text("Número: ${player.number}", fontSize = 16.sp, color = TextoPrincipal)
         Text("Prioridad: ${player.priority}", fontSize = 16.sp, color = TextoPrincipal)
     }
 }
+
+
 
 
 
