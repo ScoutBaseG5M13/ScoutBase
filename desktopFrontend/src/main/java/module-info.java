@@ -26,7 +26,11 @@ module scoutbase {
     exports scoutbase.player;
     exports scoutbase.scout;
     exports scoutbase.user;
+    exports scoutbase.userClub;
+    exports scoutbase.stat;
+    exports scoutbase.userTeam;
 
+    opens scoutbase.userTeam to javafx.fxml, com.fasterxml.jackson.databind;
     opens scoutbase.app to javafx.fxml, com.fasterxml.jackson.databind;
     opens scoutbase.auth to javafx.fxml, com.fasterxml.jackson.databind;
     opens scoutbase.common to javafx.fxml, com.fasterxml.jackson.databind;
@@ -36,4 +40,6 @@ module scoutbase {
     opens scoutbase.player to javafx.fxml, com.fasterxml.jackson.databind;
     opens scoutbase.scout to javafx.fxml, com.fasterxml.jackson.databind;
     opens scoutbase.user to javafx.fxml, com.fasterxml.jackson.databind;
+    opens scoutbase.userClub to javafx.fxml, com.fasterxml.jackson.databind;
+    opens scoutbase.stat to javafx.fxml, com.fasterxml.jackson.databind;
 }

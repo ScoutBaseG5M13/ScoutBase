@@ -3,52 +3,59 @@ package scoutbase.club;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * Objeto de transferencia de datos (DTO) que representa un club.
+ * Objeto de transferencia de datos (DTO) que representa un club dentro del sistema ScoutBase.
  *
- * <p>Se utiliza para mapear la información de un club recibida desde el backend,
- * permitiendo trabajar con sus datos dentro de la aplicación.</p>
+ * <p>Esta clase se utiliza para mapear la información recibida desde la API REST
+ * relacionada con clubes deportivos y transferirla entre las distintas capas
+ * de la aplicación desktop.</p>
  *
- * <p>Incluye únicamente los campos necesarios para la capa cliente.</p>
+ * <p>Actualmente el DTO contiene únicamente los datos básicos necesarios
+ * para la representación de clubes en la interfaz gráfica, aunque puede
+ * ampliarse fácilmente en futuras versiones del backend.</p>
+ *
+ * <p>La anotación {@link JsonIgnoreProperties} permite ignorar automáticamente
+ * propiedades JSON desconocidas durante la deserialización, facilitando la
+ * compatibilidad con cambios futuros en la API.</p>
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClubDTO {
 
     /**
-     * Identificador único del club.
+     * Identificador único del club en formato UUID.
      */
     private String id;
 
     /**
-     * Nombre del club.
+     * Nombre oficial del club.
      */
     private String name;
 
     /**
-     * Constructor vacío necesario para la deserialización desde JSON.
+     * Constructor vacío requerido por Jackson para la deserialización JSON.
      */
     public ClubDTO() {
     }
 
     /**
-     * Devuelve el identificador del club.
+     * Devuelve el identificador único del club.
      *
-     * @return identificador del club
+     * @return identificador UUID del club
      */
     public String getId() {
         return id;
     }
 
     /**
-     * Establece el identificador del club.
+     * Establece el identificador único del club.
      *
-     * @param id identificador a establecer
+     * @param id identificador UUID a establecer
      */
     public void setId(String id) {
         this.id = id;
     }
 
     /**
-     * Devuelve el nombre del club.
+     * Devuelve el nombre oficial del club.
      *
      * @return nombre del club
      */
@@ -57,11 +64,24 @@ public class ClubDTO {
     }
 
     /**
-     * Establece el nombre del club.
+     * Establece el nombre oficial del club.
      *
-     * @param name nombre a establecer
+     * @param name nombre del club a establecer
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Devuelve una representación textual legible del club.
+     *
+     * <p>Este método resulta útil para componentes JavaFX como
+     * ComboBox, ListView o logs de depuración.</p>
+     *
+     * @return nombre del club
+     */
+    @Override
+    public String toString() {
+        return name != null ? name : "Club";
     }
 }

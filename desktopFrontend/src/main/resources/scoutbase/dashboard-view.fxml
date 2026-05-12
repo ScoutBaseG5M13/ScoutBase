@@ -59,13 +59,6 @@
                         prefHeight="34.0"
                         styleClass="menu-button" />
 
-                <Button fx:id="informesButton"
-                        text="Informes"
-                        onAction="#onInformesClick"
-                        prefWidth="120.0"
-                        prefHeight="34.0"
-                        styleClass="menu-button" />
-
                 <Button fx:id="estadisticasButton"
                         text="Estadísticas"
                         onAction="#onEstadisticasClick"

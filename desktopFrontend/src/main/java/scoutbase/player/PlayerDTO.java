@@ -3,19 +3,29 @@ package scoutbase.player;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * Objeto de transferencia de datos (DTO) que representa a un jugador.
+ * Objeto de transferencia de datos (DTO) que representa a un jugador dentro de ScoutBase.
  *
- * <p>Se utiliza para mapear la información de jugadores recibida desde el backend
- * y para enviar datos relacionados con jugadores en las peticiones HTTP.</p>
+ * <p>Esta clase se utiliza para mapear la información de jugadores recibida
+ * desde la API REST del backend y transferirla entre la capa de servicios
+ * y los controladores JavaFX.</p>
  *
- * <p>Incluye los atributos básicos de un jugador como identificación, datos personales,
- * posición en el campo y relación con su equipo.</p>
+ * <p>El DTO contiene información básica relacionada con:</p>
+ * <ul>
+ *     <li>Identificación del jugador.</li>
+ *     <li>Datos personales y de contacto.</li>
+ *     <li>Información deportiva.</li>
+ *     <li>Relación con el equipo al que pertenece.</li>
+ * </ul>
+ *
+ * <p>La anotación {@link JsonIgnoreProperties} permite ignorar automáticamente
+ * propiedades JSON desconocidas durante la deserialización, manteniendo
+ * compatibilidad con futuras versiones del backend.</p>
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlayerDTO {
 
     /**
-     * Identificador único del jugador.
+     * Identificador único del jugador en formato UUID.
      */
     private String id;
 
@@ -35,7 +45,7 @@ public class PlayerDTO {
     private int age;
 
     /**
-     * Correo electrónico del jugador.
+     * Correo electrónico asociado al jugador.
      */
     private String email;
 
@@ -45,39 +55,45 @@ public class PlayerDTO {
     private int number;
 
     /**
-     * Posición en el campo (por ejemplo: delantero, defensa, etc.).
+     * Posición principal del jugador en el terreno de juego.
+     *
+     * <p>Ejemplos posibles: portero, defensa, centrocampista,
+     * delantero u otras posiciones definidas por el sistema.</p>
      */
     private String position;
 
     /**
-     * Prioridad o nivel asignado al jugador dentro del sistema.
+     * Prioridad o valoración asignada al jugador dentro del sistema.
+     *
+     * <p>Este valor puede utilizarse para clasificaciones internas,
+     * seguimiento de talento o sistemas de scouting.</p>
      */
     private int priority;
 
     /**
-     * Identificador del equipo al que pertenece el jugador.
+     * Identificador UUID del equipo al que pertenece el jugador.
      */
     private String teamId;
 
     /**
-     * Constructor vacío necesario para la deserialización desde JSON.
+     * Constructor vacío requerido por Jackson para la deserialización JSON.
      */
     public PlayerDTO() {
     }
 
     /**
-     * Devuelve el identificador del jugador.
+     * Devuelve el identificador único del jugador.
      *
-     * @return identificador del jugador
+     * @return identificador UUID del jugador
      */
     public String getId() {
         return id;
     }
 
     /**
-     * Establece el identificador del jugador.
+     * Establece el identificador único del jugador.
      *
-     * @param id identificador a establecer
+     * @param id identificador UUID a establecer
      */
     public void setId(String id) {
         this.id = id;
@@ -138,9 +154,9 @@ public class PlayerDTO {
     }
 
     /**
-     * Devuelve el correo electrónico del jugador.
+     * Devuelve el correo electrónico asociado al jugador.
      *
-     * @return correo electrónico
+     * @return dirección de correo electrónico
      */
     public String getEmail() {
         return email;
@@ -158,7 +174,7 @@ public class PlayerDTO {
     /**
      * Devuelve el número dorsal del jugador.
      *
-     * @return número del jugador
+     * @return número dorsal
      */
     public int getNumber() {
         return number;
@@ -167,14 +183,14 @@ public class PlayerDTO {
     /**
      * Establece el número dorsal del jugador.
      *
-     * @param number número a establecer
+     * @param number dorsal a establecer
      */
     public void setNumber(int number) {
         this.number = number;
     }
 
     /**
-     * Devuelve la posición del jugador en el campo.
+     * Devuelve la posición principal del jugador.
      *
      * @return posición del jugador
      */
@@ -183,7 +199,7 @@ public class PlayerDTO {
     }
 
     /**
-     * Establece la posición del jugador en el campo.
+     * Establece la posición principal del jugador.
      *
      * @param position posición a establecer
      */
@@ -192,7 +208,7 @@ public class PlayerDTO {
     }
 
     /**
-     * Devuelve la prioridad asignada al jugador.
+     * Devuelve la prioridad o valoración asignada al jugador.
      *
      * @return prioridad del jugador
      */
@@ -201,7 +217,7 @@ public class PlayerDTO {
     }
 
     /**
-     * Establece la prioridad del jugador.
+     * Establece la prioridad o valoración del jugador.
      *
      * @param priority prioridad a establecer
      */
@@ -212,7 +228,7 @@ public class PlayerDTO {
     /**
      * Devuelve el identificador del equipo asociado al jugador.
      *
-     * @return identificador del equipo
+     * @return identificador UUID del equipo
      */
     public String getTeamId() {
         return teamId;
@@ -221,9 +237,42 @@ public class PlayerDTO {
     /**
      * Establece el identificador del equipo asociado al jugador.
      *
-     * @param teamId identificador del equipo
+     * @param teamId identificador UUID del equipo
      */
     public void setTeamId(String teamId) {
         this.teamId = teamId;
+    }
+
+    /**
+     * Devuelve el nombre completo del jugador concatenando nombre y apellidos.
+     *
+     * <p>Este método resulta útil para tablas, listados y componentes
+     * visuales de JavaFX.</p>
+     *
+     * @return nombre completo formateado
+     */
+    public String getFullName() {
+        String fullName = "";
+
+        if (name != null) {
+            fullName += name;
+        }
+
+        if (surname != null && !surname.isBlank()) {
+            fullName += " " + surname;
+        }
+
+        return fullName.trim();
+    }
+
+    /**
+     * Devuelve una representación textual legible del jugador.
+     *
+     * @return nombre completo del jugador o un texto genérico si no existe
+     */
+    @Override
+    public String toString() {
+        String fullName = getFullName();
+        return !fullName.isBlank() ? fullName : "Jugador";
     }
 }

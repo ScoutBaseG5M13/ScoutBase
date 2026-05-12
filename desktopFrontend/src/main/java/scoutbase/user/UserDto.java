@@ -3,20 +3,21 @@ package scoutbase.user;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * Objeto de transferencia de datos (DTO) que representa un usuario.
+ * Objeto de transferencia de datos (DTO) que representa un usuario del sistema ScoutBase.
  *
- * <p>Se utiliza para mapear la información de usuarios obtenida desde el backend,
- * incluyendo datos de identificación, credenciales, rol y datos personales.</p>
+ * <p>Esta clase se utiliza para mapear la información de usuarios recibida
+ * desde la API REST del backend y transferirla entre las diferentes capas
+ * de la aplicación desktop.</p>
  *
- * <p>La anotación {@code @JsonIgnoreProperties(ignoreUnknown = true)} permite
- * ignorar campos adicionales presentes en la respuesta de la API, evitando
- * errores durante la deserialización.</p>
+ * <p>En la estructura actual del backend, el usuario puede tener un indicador
+ * global de superadministrador mediante {@code superAdmin}. El resto de roles
+ * funcionales pueden depender del contexto de un UserClub o UserTeam concreto.</p>
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDto {
 
     /**
-     * Identificador único del usuario.
+     * Identificador único del usuario en formato UUID.
      */
     private String id;
 
@@ -26,12 +27,17 @@ public class UserDto {
     private String username;
 
     /**
-     * Contraseña del usuario (normalmente en formato cifrado).
+     * Contraseña del usuario.
+     *
+     * <p>Normalmente este campo no debería utilizarse desde el frontend.</p>
      */
     private String password;
 
     /**
-     * Rol del usuario dentro del sistema.
+     * Rol directo del usuario si el backend lo informa.
+     *
+     * <p>Puede venir vacío o nulo si el rol se calcula según el UserClub
+     * o UserTeam seleccionado.</p>
      */
     private String role;
 
@@ -46,36 +52,41 @@ public class UserDto {
     private String surname;
 
     /**
-     * Correo electrónico del usuario.
+     * Dirección de correo electrónico asociada al usuario.
      */
     private String email;
 
     /**
-     * Constructor vacío necesario para la deserialización desde JSON.
+     * Indica si el usuario tiene permisos globales de superadministrador.
+     */
+    private boolean superAdmin;
+
+    /**
+     * Constructor vacío requerido por Jackson para la deserialización JSON.
      */
     public UserDto() {
     }
 
     /**
-     * Devuelve el identificador del usuario.
+     * Devuelve el identificador único del usuario.
      *
-     * @return identificador del usuario
+     * @return identificador UUID del usuario
      */
     public String getId() {
         return id;
     }
 
     /**
-     * Establece el identificador del usuario.
+     * Establece el identificador único del usuario.
      *
-     * @param id identificador a establecer
+     * @param id identificador UUID a establecer
      */
     public void setId(String id) {
         this.id = id;
     }
 
     /**
-     * Devuelve el nombre de usuario.
+     * Devuelve el nombre de usuario utilizado para autenticación.
      *
      * @return nombre de usuario
      */
@@ -111,16 +122,16 @@ public class UserDto {
     }
 
     /**
-     * Devuelve el rol del usuario.
+     * Devuelve el rol directo del usuario si el backend lo informa.
      *
-     * @return rol del usuario
+     * @return rol directo del usuario
      */
     public String getRole() {
         return role;
     }
 
     /**
-     * Establece el rol del usuario.
+     * Establece el rol directo del usuario.
      *
      * @param role rol a establecer
      */
@@ -131,7 +142,7 @@ public class UserDto {
     /**
      * Devuelve el nombre real del usuario.
      *
-     * @return nombre real
+     * @return nombre real del usuario
      */
     public String getName() {
         return name;
@@ -149,7 +160,7 @@ public class UserDto {
     /**
      * Devuelve los apellidos del usuario.
      *
-     * @return apellidos
+     * @return apellidos del usuario
      */
     public String getSurname() {
         return surname;
@@ -165,9 +176,9 @@ public class UserDto {
     }
 
     /**
-     * Devuelve el correo electrónico del usuario.
+     * Devuelve el correo electrónico asociado al usuario.
      *
-     * @return correo electrónico
+     * @return dirección de correo electrónico
      */
     public String getEmail() {
         return email;
@@ -176,9 +187,79 @@ public class UserDto {
     /**
      * Establece el correo electrónico del usuario.
      *
-     * @param email correo a establecer
+     * @param email correo electrónico a establecer
      */
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    /**
+     * Indica si el usuario es superadministrador global.
+     *
+     * @return {@code true} si el usuario es SUPERADMIN; {@code false} en caso contrario
+     */
+    public boolean isSuperAdmin() {
+        return superAdmin;
+    }
+
+    /**
+     * Establece si el usuario es superadministrador global.
+     *
+     * @param superAdmin valor de superadministrador
+     */
+    public void setSuperAdmin(boolean superAdmin) {
+        this.superAdmin = superAdmin;
+    }
+
+    /**
+     * Devuelve el rol global legible del usuario.
+     *
+     * <p>Si el usuario es superadministrador, devuelve {@code SUPERADMIN}.
+     * Si el backend informa un rol directo, devuelve ese rol. En caso contrario,
+     * indica que no existe un rol global asignado.</p>
+     *
+     * @return rol global formateado para mostrar en interfaz
+     */
+    public String getDisplayRole() {
+        if (superAdmin) {
+            return "SUPERADMIN";
+        }
+
+        if (role != null && !role.isBlank()) {
+            return role.replace("ROLE_", "");
+        }
+
+        return "SIN ROL GLOBAL";
+    }
+
+    /**
+     * Indica si el usuario tiene algún rol global conocido.
+     *
+     * <p>Esto no contempla roles contextuales de UserClub o UserTeam,
+     * únicamente permisos globales presentes directamente en el usuario.</p>
+     *
+     * @return {@code true} si tiene rol global; {@code false} en caso contrario
+     */
+    public boolean hasGlobalRole() {
+        return superAdmin || (role != null && !role.isBlank());
+    }
+
+    /**
+     * Devuelve el nombre completo del usuario concatenando nombre y apellidos.
+     *
+     * @return nombre completo formateado
+     */
+    public String getFullName() {
+        String fullName = "";
+
+        if (name != null) {
+            fullName += name;
+        }
+
+        if (surname != null && !surname.isBlank()) {
+            fullName += " " + surname;
+        }
+
+        return fullName.trim();
     }
 }

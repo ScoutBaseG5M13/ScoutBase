@@ -20,7 +20,7 @@
 
             <Label text="Gestión de jugadores" styleClass="dashboard-title" />
 
-            <Label text="Listado global de jugadores y gestión por equipo"
+            <Label text="Listado de jugadores visibles y gestión por equipo"
                    styleClass="section-subtitle" />
 
             <HBox spacing="10.0">

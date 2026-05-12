@@ -1,6 +1,7 @@
 package scoutbase;
 
 import org.junit.jupiter.api.Test;
+import scoutbase.app.SessionManager;
 import scoutbase.auth.AuthService;
 import scoutbase.common.ApiResponse;
 import scoutbase.user.UserDto;
@@ -16,12 +17,17 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class UserEndpointsIntegrationTest {
 
+    /**
+     * Verifica que el endpoint de usuario autenticado
+     * devuelve correctamente el usuario logueado.
+     */
     @Test
     void shouldGetCurrentUserSuccessfully() throws Exception {
 
         AuthService authService = new AuthService();
 
-        ApiResponse loginResponse = authService.login("john_doe", "password123");
+        ApiResponse loginResponse =
+                authService.login("john_doe", "password123");
 
         assertTrue(loginResponse.isSuccess());
 
@@ -30,9 +36,20 @@ public class UserEndpointsIntegrationTest {
         assertNotNull(token, "El token no debería ser null");
         assertFalse(token.isBlank(), "El token no debería estar vacío");
 
-        UserDto user = authService.getCurrentUser(token);
+        SessionManager.saveSession(
+                token,
+                loginResponse.getSessionId(),
+                "john_doe",
+                null
+        );
+
+        UserDto user = authService.getCurrentUser();
 
         assertNotNull(user, "El usuario no debería ser null");
-        assertEquals("john_doe", user.getUsername(), "El username debería coincidir");
+        assertEquals(
+                "john_doe",
+                user.getUsername(),
+                "El username debería coincidir"
+        );
     }
 }

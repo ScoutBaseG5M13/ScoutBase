@@ -7,23 +7,18 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.TextInputDialog;
 import scoutbase.team.TeamsController;
-import scoutbase.app.SessionManager;
-import scoutbase.auth.AuthService;
-import scoutbase.user.UserDto;
+import scoutbase.userClub.UserClubDTO;
+import scoutbase.userClub.UserClubService;
 
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Controlador de la vista de gestión de clubes.
- *
- * <p>Se encarga de inicializar la tabla de clubes, cargar los datos
- * desde el backend, recargar la información mostrada, abrir la vista
- * de equipos del club seleccionado y permitir la creación de nuevos clubes.</p>
  */
 public class ClubsController {
 
@@ -39,57 +34,100 @@ public class ClubsController {
     @FXML
     private Label statusLabel;
 
-    /**
-     * Servicio encargado de gestionar las operaciones relacionadas con clubes.
-     */
     private final ClubService clubService = new ClubService();
+    private final UserClubService userClubService = new UserClubService();
 
-    /**
-     * Método de inicialización del controlador.
-     *
-     * <p>Configura las columnas de la tabla y carga la lista inicial
-     * de clubes al abrir la vista.</p>
-     */
+    private String selectedUserClubId;
+
     @FXML
     public void initialize() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        resolveDefaultUserClubAndLoadClubs();
+    }
+
+    public void setSelectedUserClubId(String userClubId) {
+        this.selectedUserClubId = userClubId;
         loadClubs();
     }
 
-    /**
-     * Carga la lista de clubes desde el backend y la muestra en la tabla.
-     *
-     * <p>Si la operación se completa correctamente, actualiza la tabla
-     * y muestra un mensaje informativo en la interfaz. En caso de error,
-     * informa del problema mediante la etiqueta de estado.</p>
-     */
-    private void loadClubs() {
+    private void resolveDefaultUserClubAndLoadClubs() {
         try {
-            List<ClubDTO> clubs = clubService.getAllClubs();
-            clubsTable.setItems(FXCollections.observableArrayList(clubs));
-            statusLabel.setText("Clubs cargados correctamente");
+            UserClubDTO defaultUserClub = userClubService.getDefaultUserClub();
+
+            if (defaultUserClub != null
+                    && defaultUserClub.getId() != null
+                    && !defaultUserClub.getId().isBlank()) {
+                selectedUserClubId = defaultUserClub.getId();
+            }
+
+            loadClubs();
+
         } catch (Exception e) {
             e.printStackTrace();
-            statusLabel.setText("Error al cargar clubs");
+            loadAllClubsFallback("Error al resolver UserClub. Clubes cargados en modo global.");
         }
     }
 
-    /**
-     * Recarga manualmente la lista de clubes mostrada en la tabla.
-     */
+    private void loadClubs() {
+        try {
+            List<ClubDTO> clubs = null;
+
+            if (selectedUserClubId != null && !selectedUserClubId.isBlank()) {
+                try {
+                    clubs = clubService.getClubsByUserClub(selectedUserClubId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (clubs == null || clubs.isEmpty()) {
+                clubs = clubService.getAllClubs();
+
+                clubsTable.setItems(FXCollections.observableArrayList(
+                        clubs != null ? clubs : List.of()
+                ));
+
+                if (clubs == null || clubs.isEmpty()) {
+                    statusLabel.setText("No hay clubes disponibles");
+                } else {
+                    statusLabel.setText("Clubes cargados correctamente en modo global");
+                }
+
+                return;
+            }
+
+            clubsTable.setItems(FXCollections.observableArrayList(clubs));
+            statusLabel.setText("Clubes cargados correctamente");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Error al cargar clubes");
+        }
+    }
+
+    private void loadAllClubsFallback(String message) {
+        try {
+            List<ClubDTO> clubs = clubService.getAllClubs();
+
+            clubsTable.setItems(FXCollections.observableArrayList(
+                    clubs != null ? clubs : List.of()
+            ));
+
+            statusLabel.setText(message);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Error al cargar clubes globales");
+        }
+    }
+
     @FXML
     private void onReloadClick() {
         loadClubs();
     }
 
-    /**
-     * Abre la vista de equipos del club seleccionado.
-     *
-     * <p>Obtiene el club seleccionado en la tabla, carga la vista de equipos
-     * y la inserta en el contenedor principal de contenido. Si no hay ningún
-     * club seleccionado o se produce un error, se muestra un mensaje en la interfaz.</p>
-     */
     @FXML
     private void onViewTeamsClick() {
         ClubDTO selectedClub = clubsTable.getSelectionModel().getSelectedItem();
@@ -121,16 +159,28 @@ public class ClubsController {
         }
     }
 
-    /**
-     * Muestra un cuadro de diálogo para crear un nuevo club.
-     *
-     * <p>Solicita el nombre del club al usuario, valida que no esté vacío,
-     * obtiene el usuario autenticado actual y envía la petición de creación
-     * al backend. Tras ello, recarga la tabla de clubes y actualiza el mensaje
-     * de estado según el resultado.</p>
-     */
     @FXML
     private void onAddClubClick() {
+        if (selectedUserClubId == null || selectedUserClubId.isBlank()) {
+            try {
+                UserClubDTO defaultUserClub = userClubService.getDefaultUserClub();
+
+                if (defaultUserClub != null
+                        && defaultUserClub.getId() != null
+                        && !defaultUserClub.getId().isBlank()) {
+                    selectedUserClubId = defaultUserClub.getId();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (selectedUserClubId == null || selectedUserClubId.isBlank()) {
+            statusLabel.setText("No hay UserClub disponible para crear clubes");
+            return;
+        }
+
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Nuevo club");
         dialog.setHeaderText("Crear club");
@@ -138,29 +188,25 @@ public class ClubsController {
 
         Optional<String> result = dialog.showAndWait();
 
-        if (result.isPresent()) {
-            String name = result.get().trim();
+        if (result.isEmpty()) {
+            return;
+        }
 
-            if (name.isBlank()) {
-                statusLabel.setText("El nombre del club no puede estar vacío");
-                return;
-            }
+        String name = result.get().trim();
 
-            try {
-                AuthService authService = new AuthService();
-                UserDto currentUser = authService.getUserByUsername(
-                        SessionManager.getUsername(),
-                        SessionManager.getAuthToken()
-                );
+        if (name.isBlank()) {
+            statusLabel.setText("El nombre del club no puede estar vacío");
+            return;
+        }
 
-                clubService.createClub(name, currentUser.getId());
-                loadClubs();
-                statusLabel.setText("Club creado correctamente");
+        try {
+            clubService.createClub(selectedUserClubId, name);
+            loadClubs();
+            statusLabel.setText("Club creado correctamente");
 
-            } catch (Exception e) {
-                e.printStackTrace();
-                statusLabel.setText("Error al crear club");
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Error al crear club");
         }
     }
 }

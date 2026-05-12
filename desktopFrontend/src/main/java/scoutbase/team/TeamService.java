@@ -1,182 +1,190 @@
 package scoutbase.team;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import scoutbase.common.ApiClient;
 import scoutbase.common.ApiResponse;
 
-import java.util.ArrayList;
+import java.text.Normalizer;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 /**
  * Servicio encargado de gestionar las operaciones relacionadas con equipos.
- *
- * <p>Permite obtener equipos desde el backend, filtrarlos por club
- * y crear nuevos equipos. Mientras el backend no tenga estable
- * la creación y el listado de equipos, incorpora un fallback local
- * en memoria mediante {@link TeamCache}.</p>
  */
 public class TeamService {
 
-    /**
-     * URL base del endpoint de equipos en el backend.
-     */
-    private static final String BASE_URL =
-            "https://scoutbase-pro-sjz0.onrender.com/api/v1/teams";
+    private static final String TEAMS_ENDPOINT = "/teams";
+    private static final String CLUBS_ENDPOINT = "/clubs";
 
-    /**
-     * Cliente HTTP utilizado para comunicarse con la API.
-     */
     private final ApiClient apiClient = new ApiClient();
-
-    /**
-     * Objeto encargado de la serialización y deserialización de JSON.
-     */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    /**
-     * Obtiene todos los equipos disponibles.
-     *
-     * <p>Intenta recuperar los equipos desde el backend y fusionarlos
-     * con los equipos creados localmente en caché. Si el backend falla,
-     * devuelve únicamente los equipos del caché sin propagar la excepción.</p>
-     *
-     * @return lista de equipos visibles
-     */
-    public List<TeamDTO> getAllTeams() {
-        try {
-            String responseJson = apiClient.get(BASE_URL);
-            System.out.println("GET TEAMS RAW: " + responseJson);
-
-            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
-
-            if (!response.isSuccess()) {
-                System.out.println("GET TEAMS API ERROR: " + response.getMessage());
-                return TeamCache.getTeams();
-            }
-
-            JsonNode data = response.getData();
-
-            List<TeamDTO> backendTeams = objectMapper
-                    .readerForListOf(TeamDTO.class)
-                    .readValue(data);
-
-            List<TeamDTO> mergedTeams = new ArrayList<>(backendTeams);
-
-            for (TeamDTO localTeam : TeamCache.getTeams()) {
-                boolean exists = mergedTeams.stream()
-                        .anyMatch(team -> team.getId() != null
-                                && localTeam.getId() != null
-                                && team.getId().equals(localTeam.getId()));
-
-                if (!exists) {
-                    mergedTeams.add(localTeam);
-                }
-            }
-
-            for (TeamDTO team : mergedTeams) {
-                System.out.println("TEAM -> id=" + team.getId()
-                        + ", name=" + team.getName()
-                        + ", clubId=" + team.getResolvedClubId());
-            }
-
-            return mergedTeams;
-
-        } catch (Exception e) {
-            System.out.println("GET TEAMS FALLBACK TO CACHE: " + e.getMessage());
-            return TeamCache.getTeams();
-        }
-    }
-
-    /**
-     * Obtiene los equipos filtrados por el identificador de un club.
-     *
-     * @param clubId identificador del club seleccionado
-     * @return lista de equipos pertenecientes al club indicado
-     */
     public List<TeamDTO> getTeamsByClubId(String clubId) {
-        return getAllTeams().stream()
-                .filter(team -> clubId.equals(team.getResolvedClubId()))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Crea un nuevo equipo.
-     *
-     * <p>Intenta crear el equipo en backend. Si el endpoint de creación
-     * no está soportado o falla por el problema actual conocido,
-     * genera un equipo local y lo almacena en {@link TeamCache} para
-     * mantener operativa la demo.</p>
-     *
-     * @param name nombre del equipo
-     * @param category categoría del equipo
-     * @param subcategory subcategoría del equipo
-     * @param clubId identificador del club al que pertenece el equipo
-     * @param userId identificador del usuario autenticado
-     */
-    public void createTeam(String name, String category, String subcategory, String clubId, String userId) {
         try {
-            String jsonBody = """
-                {
-                  "name": "%s",
-                  "category": "%s",
-                  "subcategory": "%s",
-                  "players": [],
-                  "trainers": [],
-                  "scouters": ["%s"],
-                  "clubId": "%s"
-                }
-                """.formatted(name, category, subcategory, userId, clubId);
-
-            System.out.println("CREATE TEAM BODY: " + jsonBody);
-
-            String responseJson = apiClient.post(BASE_URL, jsonBody);
-            System.out.println("CREATE TEAM RESPONSE: " + responseJson);
-
+            String responseJson = apiClient.get(TEAMS_ENDPOINT + "/clubs/" + clubId);
             ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
 
-            if (!response.isSuccess()) {
-                throw new RuntimeException(response.getMessage());
-            }
+            validateResponse(response, "Error obteniendo equipos del club");
+
+            return response.dataAs(new TypeReference<List<TeamDTO>>() {});
 
         } catch (Exception e) {
             String message = e.getMessage() != null ? e.getMessage() : "";
 
-            if (message.contains("Request method 'POST' is not supported")
-                    || message.contains("HTTP Error: 400")
-                    || message.contains("HTTP Error: 500")) {
-                TeamDTO localTeam = createLocalTeam(name, category, subcategory, clubId, userId);
-                TeamCache.addTeam(localTeam);
-                System.out.println("TEAM CREADO EN CACHE LOCAL: " + localTeam.getName());
-                return;
+            if (message.contains("Club.getTeams()")
+                    || message.contains("getTeams()\" is null")
+                    || message.contains("NullPointerException")) {
+                return List.of();
             }
 
+            throw new RuntimeException("Error obteniendo equipos del club", e);
+        }
+    }
+
+    public TeamDTO getTeamById(String teamId) {
+        try {
+            String responseJson = apiClient.get(TEAMS_ENDPOINT + "/" + teamId);
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+
+            validateResponse(response, "Error obteniendo equipo por ID");
+
+            return response.dataAs(TeamDTO.class);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo equipo por ID", e);
+        }
+    }
+
+    public List<TeamCategoryDTO> getCategories() {
+        try {
+            String responseJson = apiClient.get(TEAMS_ENDPOINT + "/categories");
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+
+            validateResponse(response, "Error obteniendo categorías de equipos");
+
+            return response.dataAs(new TypeReference<List<TeamCategoryDTO>>() {});
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo categorías de equipos", e);
+        }
+    }
+
+    public TeamDTO createTeam(String clubId, String name, String category, String subcategory) {
+        try {
+            String normalizedCategory = normalizeCategory(category);
+            String normalizedSubcategory = normalizeSubcategory(subcategory);
+
+            Map<String, String> body = Map.of(
+                    "name", name,
+                    "category", normalizedCategory,
+                    "subcategory", normalizedSubcategory
+            );
+
+            String jsonBody = objectMapper.writeValueAsString(body);
+
+            String responseJson = apiClient.post(
+                    CLUBS_ENDPOINT + "/" + clubId + "/teams",
+                    jsonBody
+            );
+
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+
+            validateResponse(response, "Error creando equipo");
+
+            return response.dataAs(TeamDTO.class);
+
+        } catch (Exception e) {
             throw new RuntimeException("Error creando equipo", e);
         }
     }
 
-    /**
-     * Crea un equipo únicamente en memoria como fallback temporal.
-     *
-     * @param name nombre del equipo
-     * @param category categoría del equipo
-     * @param subcategory subcategoría del equipo
-     * @param clubId identificador del club
-     * @param userId identificador del usuario autenticado que queda asignado como scouter
-     * @return equipo creado localmente
-     */
-    public TeamDTO createLocalTeam(String name, String category, String subcategory, String clubId, String userId) {
-        TeamDTO team = new TeamDTO();
-        team.setId(UUID.randomUUID().toString());
-        team.setName(name);
-        team.setCategory(category);
-        team.setSubcategory(subcategory);
-        team.setClubId(clubId);
-        team.setPlayers(new ArrayList<>());
-        team.setTrainers(new ArrayList<>());
-        team.setScouters(new ArrayList<>(List.of(userId)));
-        return team;
+    public void deleteTeam(String teamId) {
+        try {
+            String responseJson = apiClient.delete(TEAMS_ENDPOINT + "/" + teamId);
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+
+            validateResponseWithoutData(response, "Error eliminando equipo");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error eliminando equipo", e);
+        }
+    }
+
+    private String normalizeCategory(String category) {
+        if (category == null) {
+            return null;
+        }
+
+        String normalized = Normalizer.normalize(category, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .trim()
+                .toUpperCase();
+
+        return normalized;
+    }
+
+    private String normalizeSubcategory(String subcategory) {
+        if (subcategory == null) {
+            return null;
+        }
+
+        return subcategory
+                .trim()
+                .toUpperCase()
+                .replace("-", "")
+                .replace("_", "");
+    }
+
+    private void validateResponse(ApiResponse response, String defaultMessage) {
+        validateResponseWithoutData(response, defaultMessage);
+
+        if (response.getData() == null || response.getData().isNull()) {
+            throw new RuntimeException(defaultMessage + ": respuesta sin datos");
+        }
+    }
+
+    private void validateResponseWithoutData(ApiResponse response, String defaultMessage) {
+        if (response == null) {
+            throw new RuntimeException(defaultMessage);
+        }
+
+        if (!response.isSuccess()) {
+            throw new RuntimeException(response.getMessage() != null
+                    ? response.getMessage()
+                    : defaultMessage);
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class TeamCategoryDTO {
+
+        private String name;
+        private List<String> subcategories;
+
+        public TeamCategoryDTO() {
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public List<String> getSubcategories() {
+            return subcategories;
+        }
+
+        public void setSubcategories(List<String> subcategories) {
+            this.subcategories = subcategories;
+        }
+
+        @Override
+        public String toString() {
+            return name != null ? name : "";
+        }
     }
 }

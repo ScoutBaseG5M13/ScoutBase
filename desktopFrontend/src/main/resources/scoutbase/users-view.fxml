@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TableColumn?>
@@ -23,7 +24,7 @@
     <HBox spacing="10">
         <TextField fx:id="usernameField" promptText="Username"/>
         <PasswordField fx:id="passwordField" promptText="Password"/>
-        <TextField fx:id="roleField" promptText="Rol"/>
+        <ComboBox fx:id="roleComboBox" promptText="Rol" prefWidth="190"/>
     </HBox>
 
     <HBox spacing="10">
@@ -34,9 +35,12 @@
 
     <HBox spacing="10">
         <Button text="Añadir usuario" onAction="#onAddUserClick"/>
+        <Button text="Modificar usuario" onAction="#onUpdateUserClick"/>
+        <Button text="Eliminar usuario" onAction="#onDeleteUserClick"/>
         <Button text="Buscar" onAction="#onSearchUserClick"/>
         <Button text="Mi usuario" onAction="#onLoadMeClick"/>
         <Button text="Recargar" onAction="#onReloadClick"/>
+        <Button text="Limpiar" onAction="#onClearFieldsClick"/>
     </HBox>
 
     <TableView fx:id="usersTable" prefHeight="300">

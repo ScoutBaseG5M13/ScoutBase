@@ -1,136 +1,124 @@
 package scoutbase.scout;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import scoutbase.common.ApiClient;
 import scoutbase.common.ApiResponse;
 import scoutbase.user.UserDto;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Servicio encargado de gestionar las operaciones relacionadas con scouts.
- *
- * <p>Dado que un scout es un tipo de usuario dentro del sistema,
- * este servicio utiliza el endpoint específico de scouters del backend
- * para obtener su listado y el endpoint general de usuarios para crearlos.</p>
- */
 public class ScoutService {
 
-    /**
-     * URL base del endpoint de usuarios en el backend.
-     */
-    private static final String BASE_URL =
-            "https://scoutbase-pro-sjz0.onrender.com/api/v1/users";
+    private static final String USERS_ENDPOINT = "/users";
+    private static final String USER_TEAMS_ENDPOINT = "/user-teams";
+    private static final String SCOUTER_ROLE_ID = "SCOUTER";
 
-    /**
-     * Cliente HTTP utilizado para comunicarse con la API.
-     */
     private final ApiClient apiClient = new ApiClient();
-
-    /**
-     * Objeto encargado de la serialización y deserialización de JSON.
-     */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    /**
-     * Obtiene todos los scouters disponibles desde el backend.
-     *
-     * <p>Utiliza el endpoint específico {@code /users/scouters},
-     * por lo que no es necesario filtrar usuarios en frontend.</p>
-     *
-     * @return lista de scouts adaptados al DTO de la vista
-     * @throws RuntimeException si ocurre un error al obtener o mapear los datos
-     */
     public List<ScoutDTO> getAllScouts() {
         try {
-            String responseJson = apiClient.get(BASE_URL + "/scouters");
-            System.out.println("GET SCOUTERS RAW: " + responseJson);
-
+            String responseJson = apiClient.get(USERS_ENDPOINT + "/role/" + SCOUTER_ROLE_ID);
             ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
 
-            if (!response.isSuccess()) {
-                throw new RuntimeException(response.getMessage());
-            }
+            validateResponse(response, "Error obteniendo scouts");
 
-            JsonNode data = response.getData();
-
-            List<UserDto> users = objectMapper
-                    .readerForListOf(UserDto.class)
-                    .readValue(data);
+            List<UserDto> users = response.dataAs(new TypeReference<List<UserDto>>() {});
 
             return users.stream()
                     .map(this::toScoutDTO)
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Error obteniendo scouts", e);
         }
     }
 
-    /**
-     * Crea un nuevo scout utilizando el endpoint de creación de usuarios.
-     *
-     * @param username nombre de usuario
-     * @param password contraseña
-     * @param name nombre real
-     * @param surname apellidos
-     * @param email correo electrónico
-     * @return scout creado adaptado al DTO de la vista
-     * @throws RuntimeException si ocurre un error durante la creación
-     */
     public ScoutDTO createScout(String username,
                                 String password,
                                 String name,
                                 String surname,
                                 String email) {
         try {
-            String body = """
-                    {
-                      "username": "%s",
-                      "password": "%s",
-                      "role": "SCOUTER",
-                      "name": "%s",
-                      "surname": "%s",
-                      "email": "%s"
-                    }
-                    """.formatted(username, password, name, surname, email);
+            Map<String, String> body = Map.of(
+                    "username", username,
+                    "password", password,
+                    "name", name,
+                    "surname", surname,
+                    "email", email
+            );
 
-            String responseJson = apiClient.post(BASE_URL, body);
-            System.out.println("CREATE SCOUT RESPONSE: " + responseJson);
+            String jsonBody = objectMapper.writeValueAsString(body);
+            String responseJson = apiClient.post(USERS_ENDPOINT, jsonBody);
 
             ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+            validateResponseWithoutData(response, "Error creando scout");
 
-            if (!response.isSuccess()) {
-                throw new RuntimeException(response.getMessage());
+            UserDto createdUser = findCreatedUserFromAllUsers(username);
+
+            if (createdUser == null || createdUser.getId() == null || createdUser.getId().isBlank()) {
+                throw new RuntimeException("Scout creado, pero no se pudo recuperar su ID");
             }
 
-            ScoutDTO scout = new ScoutDTO();
-            scout.setUsername(username);
-            scout.setName(name);
-            scout.setSurname(surname);
-            scout.setEmail(email);
-            scout.setRole("SCOUTER");
-
-            return scout;
+            return toScoutDTO(createdUser);
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Error creando scout", e);
         }
     }
 
-    /**
-     * Convierte un {@link UserDto} en un {@link ScoutDTO}.
-     *
-     * <p>Como el endpoint de scouters ya devuelve únicamente usuarios
-     * con ese rol, se asigna {@code SCOUTER} directamente.</p>
-     *
-     * @param user usuario de origen
-     * @return scout adaptado para la vista
-     */
+    public void addScoutToUserTeam(String userTeamId, String userId) {
+        try {
+            String responseJson = apiClient.post(
+                    USER_TEAMS_ENDPOINT + "/" + userTeamId + "/scouter/" + userId,
+                    "{}"
+            );
+
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+            validateResponseWithoutData(response, "Error asignando scout al equipo");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error asignando scout al equipo", e);
+        }
+    }
+
+    public void removeScoutFromUserTeam(String userTeamId, String userId) {
+        try {
+            String responseJson = apiClient.delete(
+                    USER_TEAMS_ENDPOINT + "/" + userTeamId + "/scouter/" + userId
+            );
+
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+            validateResponseWithoutData(response, "Error eliminando scout del equipo");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error eliminando scout del equipo", e);
+        }
+    }
+
+    private UserDto findCreatedUserFromAllUsers(String username) {
+        try {
+            String responseJson = apiClient.get(USERS_ENDPOINT);
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+
+            validateResponse(response, "Error buscando usuario creado");
+
+            List<UserDto> users = response.dataAs(new TypeReference<List<UserDto>>() {});
+
+            return users.stream()
+                    .filter(user -> user.getUsername() != null
+                            && user.getUsername().equalsIgnoreCase(username))
+                    .findFirst()
+                    .orElse(null);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error buscando usuario creado", e);
+        }
+    }
+
     private ScoutDTO toScoutDTO(UserDto user) {
         ScoutDTO scout = new ScoutDTO();
         scout.setId(user.getId());
@@ -140,5 +128,25 @@ public class ScoutService {
         scout.setEmail(user.getEmail());
         scout.setRole("SCOUTER");
         return scout;
+    }
+
+    private void validateResponse(ApiResponse response, String defaultMessage) {
+        validateResponseWithoutData(response, defaultMessage);
+
+        if (response.getData() == null || response.getData().isNull()) {
+            throw new RuntimeException(defaultMessage + ": respuesta sin datos");
+        }
+    }
+
+    private void validateResponseWithoutData(ApiResponse response, String defaultMessage) {
+        if (response == null) {
+            throw new RuntimeException(defaultMessage);
+        }
+
+        if (!response.isSuccess()) {
+            throw new RuntimeException(response.getMessage() != null
+                    ? response.getMessage()
+                    : defaultMessage);
+        }
     }
 }

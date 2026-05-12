@@ -3,245 +3,177 @@ package scoutbase.auth;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import scoutbase.common.ApiResponse;
+import scoutbase.common.ApiClient;
 import scoutbase.user.UserDto;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
 
 /**
- * Servicio encargado de gestionar la autenticación y la obtención
- * de datos del usuario contra el backend de ScoutBase.
+ * Servicio encargado de gestionar la autenticación de usuarios en ScoutBase.
  *
- * <p>Esta clase encapsula las llamadas HTTP relacionadas con el inicio
- * de sesión y la recuperación de información del usuario autenticado,
- * así como la extracción del token devuelto por la API.</p>
+ * <p>Esta clase centraliza las operaciones relacionadas con el inicio de sesión
+ * y la recuperación de información del usuario autenticado contra la API REST
+ * del backend.</p>
+ *
+ * <p>Sus responsabilidades principales son:</p>
+ * <ul>
+ *     <li>Enviar las credenciales del usuario al endpoint de login.</li>
+ *     <li>Procesar la respuesta estándar {@link ApiResponse} devuelta por la API.</li>
+ *     <li>Extraer el token JWT utilizado posteriormente por el cliente HTTP.</li>
+ *     <li>Obtener los datos del usuario autenticado mediante el endpoint {@code /users/me}.</li>
+ *     <li>Consultar usuarios concretos por nombre de usuario cuando sea necesario.</li>
+ * </ul>
+ *
+ * <p>El servicio utiliza {@link ApiClient} para reutilizar la configuración común
+ * de comunicación HTTP, incluyendo la URL base del backend y la gestión de
+ * cabeceras de autenticación.</p>
  */
 public class AuthService {
 
     /**
-     * URL base de la API backend para la gestión de usuarios.
+     * Endpoint relativo utilizado para autenticar un usuario.
+     *
+     * <p>Este endpoint no requiere token previo, ya que se utiliza precisamente
+     * para obtener el JWT inicial.</p>
      */
-    private static final String BASE_URL =
-            "https://scoutbase-pro-sjz0.onrender.com/api/v1/users";
+    private static final String LOGIN_ENDPOINT = "/users/auth/login";
 
     /**
-     * URL del endpoint de autenticación para el inicio de sesión.
+     * Endpoint relativo utilizado para recuperar el usuario autenticado.
      */
-    private static final String LOGIN_URL =
-            BASE_URL + "/auth/login";
+    private static final String CURRENT_USER_ENDPOINT = "/users/me";
 
     /**
-     * Cliente HTTP utilizado para comunicarse con la API.
+     * Endpoint base relativo para buscar usuarios por nombre de usuario.
      */
-    private final HttpClient httpClient;
+    private static final String USERNAME_ENDPOINT = "/users/username/";
 
     /**
-     * Objeto encargado de convertir JSON a objetos Java y viceversa.
+     * Cliente común encargado de realizar las peticiones HTTP al backend.
+     */
+    private final ApiClient apiClient;
+
+    /**
+     * Objeto encargado de serializar y deserializar datos JSON.
      */
     private final ObjectMapper objectMapper;
 
     /**
      * Crea una nueva instancia del servicio de autenticación.
      *
-     * <p>Inicializa el cliente HTTP con un tiempo de espera para la conexión
-     * y el objeto necesario para serializar y deserializar respuestas JSON.</p>
+     * <p>Inicializa el cliente HTTP común y el conversor JSON utilizado
+     * para transformar las peticiones y respuestas entre objetos Java
+     * y estructuras JSON.</p>
      */
     public AuthService() {
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(10))
-                .build();
+        this.apiClient = new ApiClient();
         this.objectMapper = new ObjectMapper();
     }
 
     /**
-     * Obtiene los datos de un usuario a partir de su nombre de usuario.
+     * Realiza el inicio de sesión de un usuario contra el backend.
      *
-     * <p>Este método realiza una petición autenticada al backend para recuperar
-     * la información asociada a un usuario concreto. Puede requerir permisos
-     * específicos según la configuración del servidor.</p>
+     * <p>Construye un {@link LoginRequest} con las credenciales recibidas,
+     * lo serializa a JSON y lo envía al endpoint de autenticación. Si la
+     * petición se completa correctamente, devuelve la respuesta estándar
+     * de la API.</p>
      *
-     * @param username nombre de usuario a consultar
-     * @param token token de autenticación necesario para acceder al endpoint
-     * @return objeto {@link UserDto} con los datos del usuario solicitado
-     * @throws IOException si ocurre un error durante la comunicación con la API
+     * <p>Este método no adjunta cabecera Authorization, ya que el usuario
+     * todavía no dispone de token JWT en el momento de autenticarse.</p>
+     *
+     * @param username nombre de usuario introducido en el formulario de login
+     * @param password contraseña introducida en el formulario de login
+     * @return respuesta estándar de la API con el resultado del login
+     * @throws IOException si ocurre un error de entrada/salida durante la petición
      * @throws InterruptedException si la petición HTTP es interrumpida
-     * @throws RuntimeException si la respuesta no contiene datos válidos
-     *                          o si se produce un error HTTP
-     */
-    public UserDto getUserByUsername(String username, String token) throws IOException, InterruptedException {
-        String url = BASE_URL + "/username/" + username;
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Accept", "application/json")
-                .header("Authorization", "Bearer " + token)
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println("GET USER URL: " + url);
-        System.out.println("GET USER STATUS: " + response.statusCode());
-        System.out.println("GET USER BODY: " + response.body());
-
-        if (response.statusCode() >= 200 && response.statusCode() < 300) {
-            ApiResponse apiResponse = objectMapper.readValue(response.body(), ApiResponse.class);
-
-            if (apiResponse.getData() != null && !apiResponse.getData().isNull()) {
-                return objectMapper.treeToValue(apiResponse.getData(), UserDto.class);
-            }
-
-            throw new RuntimeException("La respuesta no contiene datos de usuario");
-        }
-
-        throw new RuntimeException("Error obteniendo usuario: HTTP " + response.statusCode() + " -> " + response.body());
-    }
-
-    /**
-     * Obtiene los datos del usuario autenticado a partir del token actual.
-     *
-     * <p>Este método consulta el endpoint {@code /me} para recuperar
-     * la información del usuario en sesión, incluyendo datos que pueden
-     * ser necesarios en otras operaciones de la aplicación.</p>
-     *
-     * @param token token de autenticación del usuario actual
-     * @return objeto {@link UserDto} con los datos del usuario autenticado
-     * @throws IOException si ocurre un error durante la comunicación con la API
-     * @throws InterruptedException si la petición HTTP es interrumpida
-     * @throws RuntimeException si la respuesta no contiene datos válidos
-     *                          o si se produce un error HTTP
-     */
-    public UserDto getCurrentUser(String token) throws IOException, InterruptedException {
-        String url = BASE_URL + "/me";
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Accept", "application/json")
-                .header("Authorization", "Bearer " + token)
-                .GET()
-                .build();
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println("GET ME URL: " + url);
-        System.out.println("GET ME STATUS: " + response.statusCode());
-        System.out.println("GET ME BODY: " + response.body());
-
-        if (response.statusCode() >= 200 && response.statusCode() < 300) {
-            ApiResponse apiResponse = objectMapper.readValue(response.body(), ApiResponse.class);
-
-            if (apiResponse.getData() != null && !apiResponse.getData().isNull()) {
-                return objectMapper.treeToValue(apiResponse.getData(), UserDto.class);
-            }
-
-            throw new RuntimeException("La respuesta no contiene datos del usuario actual");
-        }
-
-        throw new RuntimeException("Error obteniendo usuario actual: HTTP "
-                + response.statusCode() + " -> " + response.body());
-    }
-
-    /**
-     * Realiza el inicio de sesión del usuario contra el backend.
-     *
-     * <p>Envía las credenciales al endpoint de autenticación y devuelve
-     * la respuesta procesada como un objeto {@link ApiResponse} si la
-     * operación se completa correctamente.</p>
-     *
-     * @param username nombre de usuario introducido
-     * @param password contraseña introducida
-     * @return respuesta de la API convertida a {@link ApiResponse}
-     * @throws IOException si ocurre un error durante la comunicación con la API
-     * @throws InterruptedException si la petición HTTP es interrumpida
-     * @throws RuntimeException si las credenciales son incorrectas
-     *                          o si se produce un error HTTP
+     * @throws RuntimeException si las credenciales no son válidas o el backend devuelve error
      */
     public ApiResponse login(String username, String password) throws IOException, InterruptedException {
         LoginRequest loginRequest = new LoginRequest(username, password);
         String requestBody = objectMapper.writeValueAsString(loginRequest);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(LOGIN_URL))
-                .timeout(Duration.ofSeconds(15))
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
-
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        int statusCode = response.statusCode();
-        String responseBody = response.body();
-
-        System.out.println("LOGIN URL: " + LOGIN_URL);
-        System.out.println("REQUEST BODY: " + requestBody);
-        System.out.println("STATUS: " + statusCode);
-        System.out.println("BODY: " + responseBody);
-
-        if (statusCode >= 200 && statusCode < 300) {
-            return objectMapper.readValue(responseBody, ApiResponse.class);
-        }
-
-        if (statusCode == 401) {
-            throw buildApiException(responseBody, "Credenciales incorrectas");
-        }
-
-        if (statusCode == 404) {
-            throw new RuntimeException("Ruta de login no encontrada en backend: " + LOGIN_URL);
-        }
-
-        if (statusCode == 500) {
-            throw new RuntimeException("Error interno del servidor");
-        }
-
-        throw new RuntimeException("Error HTTP " + statusCode + ": " + responseBody);
-    }
-
-    /**
-     * Construye una excepción a partir del mensaje de error devuelto por la API.
-     *
-     * <p>Si la respuesta contiene un mensaje válido, se utiliza dicho texto
-     * como descripción de la excepción. En caso contrario, se emplea
-     * el mensaje por defecto proporcionado.</p>
-     *
-     * @param responseBody cuerpo de la respuesta HTTP
-     * @param defaultMessage mensaje por defecto si no puede extraerse uno válido
-     * @return excepción con el mensaje más adecuado según la respuesta recibida
-     */
-    private RuntimeException buildApiException(String responseBody, String defaultMessage) {
         try {
-            ApiResponse errorResponse = objectMapper.readValue(responseBody, ApiResponse.class);
-            String message = errorResponse.getMessage();
-
-            if (message != null && !message.isBlank()) {
-                return new RuntimeException(message);
-            }
-        } catch (Exception ignored) {
+            String responseBody = apiClient.postWithoutAuth(LOGIN_ENDPOINT, requestBody);
+            return objectMapper.readValue(responseBody, ApiResponse.class);
+        } catch (RuntimeException e) {
+            throw buildApiException(e.getMessage(), "Credenciales incorrectas");
         }
-
-        return new RuntimeException(defaultMessage);
     }
 
     /**
-     * Extrae el token de autenticación contenido en la respuesta de login.
+     * Obtiene los datos del usuario autenticado actualmente.
      *
-     * <p>Este método contempla distintos nombres posibles del campo que
-     * almacena el token, para adaptarse a posibles variaciones en la
-     * estructura de respuesta del backend.</p>
+     * <p>Consulta el endpoint {@code /users/me}, que devuelve la información
+     * del usuario asociado al token JWT incluido en la sesión activa.</p>
      *
-     * @param response respuesta devuelta por la API tras el login
-     * @return token de autenticación extraído, o {@code null} si no se encuentra
+     * <p>Este método debe utilizarse después de un login correcto y una vez
+     * guardado el token en sesión.</p>
+     *
+     * @return objeto {@link UserDto} con los datos del usuario autenticado
+     * @throws IOException si ocurre un error de comunicación con el backend
+     * @throws InterruptedException si la petición HTTP es interrumpida
+     * @throws RuntimeException si la respuesta no contiene datos válidos
+     */
+    public UserDto getCurrentUser() throws IOException, InterruptedException {
+        String responseBody = apiClient.get(CURRENT_USER_ENDPOINT);
+        ApiResponse apiResponse = objectMapper.readValue(responseBody, ApiResponse.class);
+
+        if (apiResponse.getData() == null || apiResponse.getData().isNull()) {
+            throw new RuntimeException("La respuesta no contiene datos del usuario autenticado");
+        }
+
+        return apiResponse.dataAs(UserDto.class);
+    }
+
+    /**
+     * Obtiene los datos de un usuario a partir de su nombre de usuario.
+     *
+     * <p>Realiza una petición autenticada al endpoint
+     * {@code /users/username/{username}}. Según la documentación del backend,
+     * este endpoint puede estar restringido a usuarios con permisos de administrador.</p>
+     *
+     * @param username nombre de usuario que se desea consultar
+     * @return objeto {@link UserDto} con los datos del usuario encontrado
+     * @throws IOException si ocurre un error de comunicación con el backend
+     * @throws InterruptedException si la petición HTTP es interrumpida
+     * @throws RuntimeException si la respuesta no contiene datos válidos
+     */
+    public UserDto getUserByUsername(String username) throws IOException, InterruptedException {
+        String responseBody = apiClient.get(USERNAME_ENDPOINT + username);
+        ApiResponse apiResponse = objectMapper.readValue(responseBody, ApiResponse.class);
+
+        if (apiResponse.getData() == null || apiResponse.getData().isNull()) {
+            throw new RuntimeException("La respuesta no contiene datos del usuario solicitado");
+        }
+
+        return apiResponse.dataAs(UserDto.class);
+    }
+
+    /**
+     * Extrae el token JWT incluido en la respuesta de login.
+     *
+     * <p>El backend documenta que el endpoint de login devuelve un token JWT
+     * dentro de una respuesta estándar {@link ApiResponse}. Este método contempla
+     * diferentes nombres habituales para el campo del token con el objetivo de
+     * hacer la integración más tolerante ante pequeños cambios de estructura.</p>
+     *
+     * <p>Formatos contemplados:</p>
+     * <ul>
+     *     <li>{@code data} como texto plano.</li>
+     *     <li>{@code data.token}</li>
+     *     <li>{@code data.accessToken}</li>
+     *     <li>{@code data.jwt}</li>
+     * </ul>
+     *
+     * @param response respuesta devuelta por el endpoint de login
+     * @return token JWT extraído; {@code null} si no se encuentra ningún token válido
      */
     public String extractToken(ApiResponse response) {
-        JsonNode data = response.getData();
-
-        if (data == null || data.isNull()) {
+        if (response == null || response.getData() == null || response.getData().isNull()) {
             return null;
         }
+
+        JsonNode data = response.getData();
 
         if (data.isTextual()) {
             return data.asText();
@@ -260,5 +192,33 @@ public class AuthService {
         }
 
         return null;
+    }
+
+    /**
+     * Construye una excepción legible a partir de una respuesta de error.
+     *
+     * <p>Intenta extraer un mensaje útil desde una estructura {@link ApiResponse}.
+     * Si no es posible interpretar el contenido recibido, devuelve una excepción
+     * con el mensaje por defecto indicado.</p>
+     *
+     * @param responseBody cuerpo o mensaje recibido al producirse el error
+     * @param defaultMessage mensaje alternativo si no se puede extraer uno mejor
+     * @return excepción preparada para ser lanzada por el servicio
+     */
+    private RuntimeException buildApiException(String responseBody, String defaultMessage) {
+        try {
+            ApiResponse errorResponse = objectMapper.readValue(responseBody, ApiResponse.class);
+            String message = errorResponse.getMessage();
+
+            if (message != null && !message.isBlank()) {
+                return new RuntimeException(message);
+            }
+        } catch (Exception ignored) {
+            if (responseBody != null && !responseBody.isBlank()) {
+                return new RuntimeException(responseBody);
+            }
+        }
+
+        return new RuntimeException(defaultMessage);
     }
 }

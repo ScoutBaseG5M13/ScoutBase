@@ -1,131 +1,137 @@
 package scoutbase.club;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import scoutbase.common.ApiClient;
 import scoutbase.common.ApiResponse;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Servicio encargado de gestionar las operaciones relacionadas con clubes.
- *
- * <p>Proporciona métodos para obtener la lista de clubes desde el backend
- * y para crear nuevos clubes mediante peticiones HTTP.</p>
  */
 public class ClubService {
 
-    /**
-     * URL base del endpoint de clubes en el backend.
-     */
-    private static final String BASE_URL = "https://scoutbase-pro-sjz0.onrender.com/api/v1/clubs";
+    private static final String CLUBS_ENDPOINT = "/clubs";
+    private static final String USER_CLUBS_ENDPOINT = "/user-clubs";
 
-    /**
-     * Cliente HTTP encargado de realizar las peticiones a la API.
-     */
     private final ApiClient apiClient = new ApiClient();
-
-    /**
-     * Objeto utilizado para la serialización y deserialización de JSON.
-     */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    /**
-     * Obtiene la lista completa de clubes desde el backend.
-     *
-     * <p>Realiza una petición GET al endpoint de clubes, procesa la respuesta
-     * y convierte los datos recibidos en una lista de objetos {@link ClubDTO}.</p>
-     *
-     * @return lista de clubes
-     * @throws RuntimeException si ocurre un error durante la petición
-     *                          o la respuesta no es válida
-     */
     public List<ClubDTO> getAllClubs() {
         try {
-            String responseJson = apiClient.get(BASE_URL);
-
+            String responseJson = apiClient.get(CLUBS_ENDPOINT);
             ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
 
-            if (!response.isSuccess()) {
-                throw new RuntimeException(response.getMessage());
-            }
+            validateResponse(response, "Error obteniendo clubes");
 
-            JsonNode data = response.getData();
-
-            return objectMapper
-                    .readerForListOf(ClubDTO.class)
-                    .readValue(data);
+            return response.dataAs(new TypeReference<List<ClubDTO>>() {});
 
         } catch (Exception e) {
-            throw new RuntimeException("Error obteniendo clubs", e);
+            throw new RuntimeException("Error obteniendo clubes", e);
         }
     }
 
-    /**
-     * Crea un nuevo club con el nombre indicado.
-     *
-     * <p>Envía una petición POST al backend con el nombre del club.
-     * Este método no asigna administradores explícitamente.</p>
-     *
-     * @param name nombre del nuevo club
-     * @throws RuntimeException si ocurre un error durante la creación
-     */
-    public void createClub(String name) {
+    public List<ClubDTO> getClubsByUserClub(String userClubId) {
         try {
-            String jsonBody = """
-                {
-                  "name": "%s"
-                }
-                """.formatted(name);
+            String responseJson = apiClient.get(CLUBS_ENDPOINT + "/user-clubs/" + userClubId);
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
 
-            String responseJson = apiClient.post(BASE_URL, jsonBody);
+            validateResponse(response, "Error obteniendo clubes del UserClub");
+
+            return response.dataAs(new TypeReference<List<ClubDTO>>() {});
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo clubes del UserClub", e);
+        }
+    }
+
+    public ClubDTO getClubById(String clubId) {
+        try {
+            String responseJson = apiClient.get(CLUBS_ENDPOINT + "/" + clubId);
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+
+            validateResponse(response, "Error obteniendo club por ID");
+
+            return response.dataAs(ClubDTO.class);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo club por ID", e);
+        }
+    }
+
+    public ClubDTO createClub(String userClubId, String name) {
+        try {
+            Map<String, String> body = Map.of("name", name);
+            String jsonBody = objectMapper.writeValueAsString(body);
+
+            String responseJson = apiClient.post(
+                    USER_CLUBS_ENDPOINT + "/" + userClubId + "/clubs",
+                    jsonBody
+            );
 
             ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
 
-            if (!response.isSuccess()) {
-                throw new RuntimeException(response.getMessage());
-            }
+            validateResponse(response, "Error creando club");
+
+            return response.dataAs(ClubDTO.class);
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Error creando club", e);
         }
     }
 
-    /**
-     * Crea un nuevo club asignando un usuario administrador.
-     *
-     * <p>Envía una petición POST al backend incluyendo el identificador
-     * del usuario administrador, el nombre del club y una lista inicial
-     * vacía de equipos.</p>
-     *
-     * @param name nombre del nuevo club
-     * @param adminUserId identificador del usuario que será administrador del club
-     * @throws RuntimeException si ocurre un error durante la creación
-     */
-    public void createClub(String name, String adminUserId) {
+    public ClubDTO updateClub(String clubId, String name) {
         try {
-            String jsonBody = """
-                {
-                  "adminUserIds": ["%s"],
-                  "name": "%s",
-                  "teams": []
-                }
-                """.formatted(adminUserId, name);
+            Map<String, String> body = Map.of(
+                    "id", clubId,
+                    "name", name
+            );
 
-            System.out.println("CREATE CLUB BODY: " + jsonBody);
-
-            String responseJson = apiClient.post(BASE_URL, jsonBody);
+            String jsonBody = objectMapper.writeValueAsString(body);
+            String responseJson = apiClient.put(CLUBS_ENDPOINT + "/" + clubId, jsonBody);
 
             ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
 
-            if (!response.isSuccess()) {
-                throw new RuntimeException(response.getMessage());
-            }
+            validateResponse(response, "Error actualizando club");
+
+            return response.dataAs(ClubDTO.class);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error creando club", e);
+            throw new RuntimeException("Error actualizando club", e);
+        }
+    }
+
+    public void deleteClub(String clubId) {
+        try {
+            String responseJson = apiClient.delete(CLUBS_ENDPOINT + "/" + clubId);
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+
+            validateResponseWithoutData(response, "Error eliminando club");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error eliminando club", e);
+        }
+    }
+
+    private void validateResponse(ApiResponse response, String defaultMessage) {
+        validateResponseWithoutData(response, defaultMessage);
+
+        if (response.getData() == null || response.getData().isNull()) {
+            throw new RuntimeException(defaultMessage + ": respuesta sin datos");
+        }
+    }
+
+    private void validateResponseWithoutData(ApiResponse response, String defaultMessage) {
+        if (response == null) {
+            throw new RuntimeException(defaultMessage);
+        }
+
+        if (!response.isSuccess()) {
+            throw new RuntimeException(response.getMessage() != null
+                    ? response.getMessage()
+                    : defaultMessage);
         }
     }
 }

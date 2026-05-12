@@ -6,8 +6,12 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.util.StringConverter;
+import scoutbase.club.ClubDTO;
+import scoutbase.club.ClubService;
 import scoutbase.team.TeamDTO;
 import scoutbase.team.TeamService;
+import scoutbase.userClub.UserClubDTO;
+import scoutbase.userClub.UserClubService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,13 +21,17 @@ import java.util.stream.Collectors;
 /**
  * Controlador de la vista de gestión de jugadores.
  *
- * <p>Se encarga de cargar los jugadores visibles en la aplicación,
- * aplicar filtros por equipo y por texto, recargar la información
- * mostrada y permitir la creación de nuevos jugadores.</p>
+ * <p>Gestiona la carga, visualización, filtrado y creación de jugadores.</p>
  *
- * <p>También integra los datos obtenidos del backend con la caché local
- * de jugadores creados temporalmente para mantener la información visible
- * aunque el backend no devuelva aún todos los jugadores correctamente.</p>
+ * <p>La vista puede abrirse de dos formas:</p>
+ * <ul>
+ *     <li>Desde Clubs &gt; Teams &gt; Players, recibiendo un equipo concreto.</li>
+ *     <li>Desde el botón superior Jugadores, cargando automáticamente todos los equipos visibles.</li>
+ * </ul>
+ *
+ * <p>En la nueva arquitectura del backend, los jugadores se consultan mediante
+ * el endpoint {@code /players/teams/{id}} y se crean mediante
+ * {@code /teams/{id}/players}.</p>
  */
 public class PlayersController {
 
@@ -60,28 +68,43 @@ public class PlayersController {
     private final PlayerService playerService = new PlayerService();
 
     /**
-     * Servicio encargado de gestionar las operaciones relacionadas con equipos.
+     * Servicio encargado de obtener los UserClubs visibles para el usuario.
+     */
+    private final UserClubService userClubService = new UserClubService();
+
+    /**
+     * Servicio encargado de obtener clubes asociados a UserClub.
+     */
+    private final ClubService clubService = new ClubService();
+
+    /**
+     * Servicio encargado de obtener equipos asociados a clubes.
      */
     private final TeamService teamService = new TeamService();
 
     /**
-     * Lista de equipos cargados y disponibles para filtrar jugadores.
+     * Lista de equipos actualmente visibles para el usuario.
      */
     private List<TeamDTO> loadedTeams = new ArrayList<>();
 
     /**
-     * Lista de jugadores actualmente cargados en memoria.
+     * Lista de jugadores actualmente cargados desde backend.
      */
     private List<PlayerDTO> loadedPlayers = new ArrayList<>();
 
     /**
-     * Equipo seleccionado desde una navegación previa.
+     * Equipo seleccionado desde la navegación previa o desde el desplegable.
      */
-    private TeamDTO selectedTeamFromNavigation;
+    private TeamDTO selectedTeam;
 
     /**
-     * Inicializa el controlador configurando la tabla, el selector de equipos
-     * y cargando los datos iniciales.
+     * Evita recargas duplicadas cuando se asigna el equipo desde navegación.
+     */
+    private boolean loadingFromNavigation = false;
+
+    /**
+     * Inicializa el controlador configurando la tabla, el selector de equipo
+     * y cargando los equipos visibles si la vista se abre desde el menú superior.
      */
     @FXML
     public void initialize() {
@@ -92,18 +115,16 @@ public class PlayersController {
         positionColumn.setCellValueFactory(new PropertyValueFactory<>("position"));
 
         configureTeamComboBox();
-        loadTeams();
-        loadAllPlayersFromVisibleTeams();
+        loadVisibleTeamsAndPlayers();
     }
 
     /**
-     * Configura el comportamiento visual del selector de equipos.
-     *
-     * <p>Define cómo se representa cada equipo dentro del {@link ComboBox}
-     * mostrando únicamente su nombre.</p>
+     * Configura el comportamiento visual y funcional del selector de equipos.
      */
     private void configureTeamComboBox() {
-        if (teamFilterComboBox == null) return;
+        if (teamFilterComboBox == null) {
+            return;
+        }
 
         teamFilterComboBox.setConverter(new StringConverter<>() {
             @Override
@@ -116,72 +137,165 @@ public class PlayersController {
                 return null;
             }
         });
+
+        teamFilterComboBox.valueProperty().addListener((observable, oldTeam, newTeam) -> {
+            if (loadingFromNavigation) {
+                return;
+            }
+
+            selectedTeam = newTeam;
+
+            if (selectedTeam != null) {
+                loadPlayers();
+            } else {
+                loadAllPlayersFromLoadedTeams();
+            }
+        });
     }
 
     /**
-     * Establece un equipo seleccionado desde otra vista o navegación previa.
+     * Establece el equipo seleccionado desde la vista de equipos.
      *
-     * <p>Si el equipo existe entre los cargados en el selector, lo marca
-     * automáticamente y aplica los filtros correspondientes.</p>
+     * <p>Una vez recibido el equipo, lo muestra en el selector y carga
+     * automáticamente sus jugadores asociados.</p>
      *
-     * @param selectedTeam equipo que debe quedar seleccionado
+     * @param selectedTeam equipo seleccionado desde la navegación previa
      */
     public void setSelectedTeam(TeamDTO selectedTeam) {
-        this.selectedTeamFromNavigation = selectedTeam;
+        this.selectedTeam = selectedTeam;
 
         if (teamFilterComboBox != null && selectedTeam != null) {
-            for (TeamDTO team : teamFilterComboBox.getItems()) {
-                if (team.getId() != null && team.getId().equals(selectedTeam.getId())) {
-                    teamFilterComboBox.setValue(team);
-                    break;
-                }
-            }
+            loadingFromNavigation = true;
+            loadedTeams = new ArrayList<>(List.of(selectedTeam));
+            teamFilterComboBox.setItems(FXCollections.observableArrayList(loadedTeams));
+            teamFilterComboBox.setValue(selectedTeam);
+            loadingFromNavigation = false;
         }
 
-        applyFilters();
+        loadPlayers();
     }
 
     /**
-     * Carga la lista de equipos desde el backend y la asigna al selector.
+     * Carga todos los equipos visibles para el usuario actual y sus jugadores.
+     *
+     * <p>Este método se utiliza cuando la pantalla se abre desde el botón superior
+     * Jugadores y no se recibe un equipo previamente seleccionado.</p>
      */
-    private void loadTeams() {
+    private void loadVisibleTeamsAndPlayers() {
         try {
-            loadedTeams = teamService.getAllTeams();
+            loadedTeams = resolveVisibleTeams();
 
             if (teamFilterComboBox != null) {
                 teamFilterComboBox.setItems(FXCollections.observableArrayList(loadedTeams));
             }
 
+            if (loadedTeams.isEmpty()) {
+                loadedPlayers = new ArrayList<>();
+                playersTable.setItems(FXCollections.observableArrayList());
+                statusLabel.setText("No hay equipos visibles para cargar jugadores");
+                return;
+            }
+
+            loadAllPlayersFromLoadedTeams();
+
         } catch (Exception e) {
             e.printStackTrace();
-            statusLabel.setText("Error al cargar equipos");
+            loadedTeams = new ArrayList<>();
+            loadedPlayers = new ArrayList<>();
+            playersTable.setItems(FXCollections.observableArrayList());
+            statusLabel.setText("Error al cargar equipos visibles");
         }
     }
 
     /**
-     * Carga todos los jugadores visibles a partir de los equipos disponibles.
+     * Resuelve todos los equipos visibles recorriendo UserClubs, clubes y equipos.
      *
-     * <p>Para cada equipo, intenta obtener los jugadores desde el backend
-     * y combinarlos con los almacenados en la caché local, evitando duplicados.
-     * Finalmente actualiza la lista cargada y aplica los filtros activos.</p>
+     * @return lista de equipos visibles para el usuario autenticado
      */
-    private void loadAllPlayersFromVisibleTeams() {
+    private List<TeamDTO> resolveVisibleTeams() {
+        List<TeamDTO> teams = new ArrayList<>();
+
+        List<UserClubDTO> userClubs = userClubService.getMyUserClubs();
+
+        if (userClubs == null || userClubs.isEmpty()) {
+            return teams;
+        }
+
+        for (UserClubDTO userClub : userClubs) {
+            if (userClub == null || userClub.getId() == null || userClub.getId().isBlank()) {
+                continue;
+            }
+
+            List<ClubDTO> clubs = clubService.getClubsByUserClub(userClub.getId());
+
+            if (clubs == null || clubs.isEmpty()) {
+                continue;
+            }
+
+            for (ClubDTO club : clubs) {
+                if (club == null || club.getId() == null || club.getId().isBlank()) {
+                    continue;
+                }
+
+                List<TeamDTO> clubTeams = teamService.getTeamsByClubId(club.getId());
+
+                if (clubTeams != null && !clubTeams.isEmpty()) {
+                    teams.addAll(clubTeams);
+                }
+            }
+        }
+
+        return removeDuplicateTeams(teams);
+    }
+
+    /**
+     * Carga los jugadores asociados al equipo seleccionado.
+     */
+    private void loadPlayers() {
+        if (selectedTeam == null || selectedTeam.getId() == null || selectedTeam.getId().isBlank()) {
+            statusLabel.setText("No hay ningún equipo seleccionado");
+            return;
+        }
+
+        try {
+            loadedPlayers = playerService.getPlayersByTeamId(selectedTeam.getId());
+
+            for (PlayerDTO player : loadedPlayers) {
+                player.setTeamId(selectedTeam.getId());
+            }
+
+            applyFilters();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            loadedPlayers = new ArrayList<>();
+            playersTable.setItems(FXCollections.observableArrayList());
+            statusLabel.setText("Error al cargar jugadores");
+        }
+    }
+
+    /**
+     * Carga todos los jugadores de los equipos visibles ya cargados.
+     */
+    private void loadAllPlayersFromLoadedTeams() {
         List<PlayerDTO> allPlayers = new ArrayList<>();
 
         for (TeamDTO team : loadedTeams) {
-            try {
-                List<PlayerDTO> backendPlayers = playerService.getPlayersByTeamId(team.getId());
-                List<PlayerDTO> localPlayers = PlayerCache.getPlayersByTeamId(team.getId());
+            if (team == null || team.getId() == null || team.getId().isBlank()) {
+                continue;
+            }
 
-                for (PlayerDTO backendPlayer : backendPlayers) {
-                    backendPlayer.setTeamId(team.getId());
+            try {
+                List<PlayerDTO> teamPlayers = playerService.getPlayersByTeamId(team.getId());
+
+                for (PlayerDTO player : teamPlayers) {
+                    player.setTeamId(team.getId());
                 }
 
-                allPlayers.addAll(mergePlayers(backendPlayers, localPlayers));
+                allPlayers.addAll(teamPlayers);
 
             } catch (Exception e) {
-                List<PlayerDTO> localPlayers = PlayerCache.getPlayersByTeamId(team.getId());
-                allPlayers.addAll(localPlayers);
+                e.printStackTrace();
             }
         }
 
@@ -190,16 +304,19 @@ public class PlayersController {
     }
 
     /**
-     * Recarga la información de equipos y jugadores mostrada en la vista.
+     * Recarga manualmente los jugadores o todos los datos visibles.
      */
     @FXML
     private void onReloadClick() {
-        loadTeams();
-        loadAllPlayersFromVisibleTeams();
+        if (selectedTeam != null) {
+            loadPlayers();
+        } else {
+            loadVisibleTeamsAndPlayers();
+        }
     }
 
     /**
-     * Aplica manualmente los filtros configurados en la interfaz.
+     * Aplica manualmente el filtro de texto configurado en la interfaz.
      */
     @FXML
     private void onApplyFiltersClick() {
@@ -207,37 +324,34 @@ public class PlayersController {
     }
 
     /**
-     * Aplica los filtros de equipo y texto sobre la lista de jugadores cargados.
+     * Aplica el filtro de texto sobre la lista de jugadores cargados.
      *
-     * <p>Actualiza la tabla con los jugadores que coinciden con el equipo
-     * seleccionado y con el texto introducido en el campo de búsqueda.</p>
+     * <p>El filtrado compara el texto introducido con el nombre completo
+     * del jugador.</p>
      */
     private void applyFilters() {
-        TeamDTO selectedTeam = null;
-
-        if (teamFilterComboBox != null) {
-            selectedTeam = teamFilterComboBox.getValue();
-        }
-
-        if (selectedTeam == null) {
-            selectedTeam = selectedTeamFromNavigation;
-        }
-
         String searchText = "";
+
         if (searchField != null && searchField.getText() != null) {
             searchText = searchField.getText().trim().toLowerCase();
         }
 
-        final TeamDTO finalSelectedTeam = selectedTeam;
         final String finalSearchText = searchText;
+        final TeamDTO finalSelectedTeam = selectedTeam;
 
         List<PlayerDTO> filtered = loadedPlayers.stream()
                 .filter(player -> {
-                    if (finalSelectedTeam == null) return true;
-                    return finalSelectedTeam.getId().equals(player.getTeamId());
+                    if (finalSelectedTeam == null) {
+                        return true;
+                    }
+
+                    return finalSelectedTeam.getId() != null
+                            && finalSelectedTeam.getId().equals(player.getTeamId());
                 })
                 .filter(player -> {
-                    if (finalSearchText.isBlank()) return true;
+                    if (finalSearchText.isBlank()) {
+                        return true;
+                    }
 
                     String fullName = ((player.getName() == null ? "" : player.getName()) + " "
                             + (player.getSurname() == null ? "" : player.getSurname())).toLowerCase();
@@ -249,7 +363,7 @@ public class PlayersController {
         playersTable.setItems(FXCollections.observableArrayList(filtered));
 
         if (finalSelectedTeam != null) {
-            statusLabel.setText("Jugadores visibles del equipo: " + finalSelectedTeam.getName() + " (" + filtered.size() + ")");
+            statusLabel.setText("Jugadores del equipo: " + finalSelectedTeam.getName() + " (" + filtered.size() + ")");
         } else {
             statusLabel.setText("Jugadores visibles: " + filtered.size());
         }
@@ -258,23 +372,12 @@ public class PlayersController {
     /**
      * Muestra un formulario para crear un nuevo jugador en el equipo seleccionado.
      *
-     * <p>Recoge los datos desde un cuadro de diálogo, intenta crear el jugador
-     * mediante el servicio correspondiente y, si el backend no devuelve la
-     * información esperada, lo almacena localmente en caché como alternativa.</p>
+     * <p>El backend espera un {@code PlayerCreateRequest}. En la nueva versión
+     * de la API, este request utiliza {@code birthYear} en lugar de {@code age}.</p>
      */
     @FXML
     private void onAddPlayerClick() {
-        TeamDTO selectedTeam = null;
-
-        if (teamFilterComboBox != null) {
-            selectedTeam = teamFilterComboBox.getValue();
-        }
-
-        if (selectedTeam == null) {
-            selectedTeam = selectedTeamFromNavigation;
-        }
-
-        if (selectedTeam == null) {
+        if (selectedTeam == null || selectedTeam.getId() == null || selectedTeam.getId().isBlank()) {
             statusLabel.setText("Selecciona primero un equipo");
             return;
         }
@@ -292,7 +395,7 @@ public class PlayersController {
 
         TextField nameField = new TextField();
         TextField surnameField = new TextField();
-        TextField ageField = new TextField();
+        TextField birthYearField = new TextField();
         TextField emailField = new TextField();
         TextField numberField = new TextField();
         TextField positionField = new TextField();
@@ -304,8 +407,8 @@ public class PlayersController {
         grid.add(new Label("Apellido:"), 0, 1);
         grid.add(surnameField, 1, 1);
 
-        grid.add(new Label("Edad:"), 0, 2);
-        grid.add(ageField, 1, 2);
+        grid.add(new Label("Año nacimiento:"), 0, 2);
+        grid.add(birthYearField, 1, 2);
 
         grid.add(new Label("Email:"), 0, 3);
         grid.add(emailField, 1, 3);
@@ -323,90 +426,78 @@ public class PlayersController {
 
         Optional<ButtonType> result = dialog.showAndWait();
 
-        if (result.isPresent() && result.get() == createButtonType) {
-            try {
-                int age = Integer.parseInt(ageField.getText().trim());
-                int number = Integer.parseInt(numberField.getText().trim());
-                int priority = Integer.parseInt(priorityField.getText().trim());
+        if (result.isEmpty() || result.get() != createButtonType) {
+            return;
+        }
 
-                try {
-                    PlayerDTO newPlayer = playerService.createPlayer(
-                            nameField.getText().trim(),
-                            surnameField.getText().trim(),
-                            age,
-                            emailField.getText().trim(),
-                            number,
-                            positionField.getText().trim(),
-                            priority,
-                            selectedTeam.getId()
-                    );
+        try {
+            String name = nameField.getText().trim();
+            String surname = surnameField.getText().trim();
 
-                    PlayerCache.addPlayer(newPlayer, selectedTeam.getId());
-
-                } catch (Exception ex) {
-                    if (ex.getMessage() != null && ex.getMessage().contains("No value present")) {
-                        PlayerDTO localPlayer = playerService.createLocalPlayer(
-                                nameField.getText().trim(),
-                                surnameField.getText().trim(),
-                                age,
-                                emailField.getText().trim(),
-                                number,
-                                positionField.getText().trim(),
-                                priority,
-                                selectedTeam.getId()
-                        );
-
-                        PlayerCache.addPlayer(localPlayer, selectedTeam.getId());
-                    } else {
-                        throw ex;
-                    }
-                }
-
-                loadAllPlayersFromVisibleTeams();
-                statusLabel.setText("Jugador creado correctamente");
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                statusLabel.setText("Error al crear jugador");
+            if (name.isBlank() || surname.isBlank()) {
+                statusLabel.setText("Nombre y apellido son obligatorios");
+                return;
             }
+
+            int birthYear = parseOptionalInt(birthYearField.getText(), 0);
+            int number = parseOptionalInt(numberField.getText(), 0);
+            int priority = parseOptionalInt(priorityField.getText(), 0);
+
+            playerService.createPlayer(
+                    selectedTeam.getId(),
+                    name,
+                    surname,
+                    birthYear,
+                    emailField.getText().trim(),
+                    number,
+                    positionField.getText().trim(),
+                    priority
+            );
+
+            loadPlayers();
+            statusLabel.setText("Jugador creado correctamente");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Error al crear jugador");
         }
     }
 
     /**
-     * Combina los jugadores obtenidos del backend con los almacenados localmente,
-     * evitando duplicados por identificador.
+     * Elimina equipos duplicados por identificador.
      *
-     * @param backendPlayers jugadores recuperados desde el backend
-     * @param localPlayers jugadores almacenados en caché local
-     * @return lista combinada de jugadores sin duplicados
+     * @param teams lista de equipos a depurar
+     * @return lista sin equipos duplicados
      */
-    private List<PlayerDTO> mergePlayers(List<PlayerDTO> backendPlayers, List<PlayerDTO> localPlayers) {
-        List<PlayerDTO> merged = new ArrayList<>(backendPlayers);
+    private List<TeamDTO> removeDuplicateTeams(List<TeamDTO> teams) {
+        List<TeamDTO> uniqueTeams = new ArrayList<>();
 
-        for (PlayerDTO localPlayer : localPlayers) {
-            boolean exists = merged.stream()
-                    .anyMatch(player -> player.getId() != null && player.getId().equals(localPlayer.getId()));
+        for (TeamDTO team : teams) {
+            boolean exists = uniqueTeams.stream()
+                    .anyMatch(existing -> existing.getId() != null
+                            && existing.getId().equals(team.getId()));
 
             if (!exists) {
-                merged.add(localPlayer);
+                uniqueTeams.add(team);
             }
         }
 
-        return merged;
+        return uniqueTeams;
     }
 
     /**
-     * Elimina jugadores duplicados de una lista en función de su identificador.
+     * Elimina jugadores duplicados por identificador.
      *
      * @param players lista de jugadores a depurar
-     * @return lista de jugadores única sin elementos repetidos
+     * @return lista sin jugadores duplicados
      */
     private List<PlayerDTO> removeDuplicatePlayers(List<PlayerDTO> players) {
         List<PlayerDTO> uniquePlayers = new ArrayList<>();
 
         for (PlayerDTO player : players) {
             boolean exists = uniquePlayers.stream()
-                    .anyMatch(existing -> existing.getId() != null && existing.getId().equals(player.getId()));
+                    .anyMatch(existing -> existing.getId() != null
+                            && existing.getId().equals(player.getId()));
 
             if (!exists) {
                 uniquePlayers.add(player);
@@ -414,5 +505,23 @@ public class PlayersController {
         }
 
         return uniquePlayers;
+    }
+
+    /**
+     * Convierte un texto numérico a entero.
+     *
+     * <p>Si el texto está vacío o es nulo, devuelve el valor por defecto.
+     * Si el texto no representa un número válido, lanza una excepción.</p>
+     *
+     * @param value texto a convertir
+     * @param defaultValue valor por defecto si el texto está vacío
+     * @return número entero resultante
+     */
+    private int parseOptionalInt(String value, int defaultValue) {
+        if (value == null || value.trim().isBlank()) {
+            return defaultValue;
+        }
+
+        return Integer.parseInt(value.trim());
     }
 }

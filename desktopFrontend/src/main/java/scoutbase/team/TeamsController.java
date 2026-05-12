@@ -8,21 +8,16 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import scoutbase.app.SessionManager;
-import scoutbase.auth.AuthService;
 import scoutbase.club.ClubDTO;
 import scoutbase.player.PlayersController;
-import scoutbase.user.UserDto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Controlador de la vista de gestión de equipos.
- *
- * <p>Se encarga de mostrar los equipos disponibles, recargar su listado,
- * abrir la vista de jugadores del equipo seleccionado y permitir la creación
- * de nuevos equipos asociados a un club concreto.</p>
  */
 public class TeamsController {
 
@@ -45,18 +40,22 @@ public class TeamsController {
     private Label statusLabel;
 
     /**
-     * Servicio encargado de gestionar las operaciones relacionadas con equipos.
+     * Servicio de equipos.
      */
     private final TeamService teamService = new TeamService();
 
     /**
-     * Club actualmente seleccionado desde la navegación previa.
+     * Club actualmente seleccionado.
      */
     private ClubDTO selectedClub;
 
     /**
-     * Inicializa la tabla de equipos configurando las columnas
-     * con las propiedades correspondientes del DTO.
+     * Categorías obtenidas desde backend.
+     */
+    private List<TeamService.TeamCategoryDTO> availableCategories = new ArrayList<>();
+
+    /**
+     * Inicializa la tabla.
      */
     @FXML
     public void initialize() {
@@ -64,12 +63,32 @@ public class TeamsController {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
         subcategoryColumn.setCellValueFactory(new PropertyValueFactory<>("subcategory"));
+
+        loadCategories();
+
+        statusLabel.setText("Selecciona un club para cargar sus equipos");
     }
 
     /**
-     * Establece el club seleccionado y carga los equipos asociados.
-     *
-     * @param selectedClub club seleccionado desde la vista anterior
+     * Carga categorías desde backend.
+     */
+    private void loadCategories() {
+        try {
+            availableCategories = teamService.getCategories();
+
+            if (availableCategories == null) {
+                availableCategories = new ArrayList<>();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            availableCategories = new ArrayList<>();
+            statusLabel.setText("Error al cargar categorías");
+        }
+    }
+
+    /**
+     * Establece el club seleccionado.
      */
     public void setSelectedClub(ClubDTO selectedClub) {
         this.selectedClub = selectedClub;
@@ -77,20 +96,26 @@ public class TeamsController {
     }
 
     /**
-     * Carga el listado de equipos visibles y lo muestra en la tabla.
-     *
-     * <p>Si existe un club seleccionado, actualiza también el mensaje
-     * de estado indicando el contexto actual.</p>
+     * Carga los equipos del club.
      */
     private void loadTeams() {
+        if (selectedClub == null
+                || selectedClub.getId() == null
+                || selectedClub.getId().isBlank()) {
+
+            statusLabel.setText("No hay un club seleccionado");
+            return;
+        }
+
         try {
-            List<TeamDTO> teams = teamService.getAllTeams();
+            List<TeamDTO> teams = teamService.getTeamsByClubId(selectedClub.getId());
+
             teamsTable.setItems(FXCollections.observableArrayList(teams));
 
-            if (selectedClub != null) {
-                statusLabel.setText("Equipos visibles del usuario para el club: " + selectedClub.getName());
+            if (teams == null || teams.isEmpty()) {
+                statusLabel.setText("Este club no tiene equipos todavía");
             } else {
-                statusLabel.setText("Todos los equipos cargados");
+                statusLabel.setText("Equipos cargados para el club: " + selectedClub.getName());
             }
 
         } catch (Exception e) {
@@ -100,7 +125,7 @@ public class TeamsController {
     }
 
     /**
-     * Recarga manualmente el listado de equipos.
+     * Recarga manual.
      */
     @FXML
     private void onReloadClick() {
@@ -108,14 +133,11 @@ public class TeamsController {
     }
 
     /**
-     * Abre la vista de jugadores del equipo seleccionado.
-     *
-     * <p>Carga la vista correspondiente, pasa el equipo seleccionado
-     * al controlador de jugadores y sustituye el contenido actual
-     * del contenedor principal.</p>
+     * Abre jugadores del equipo seleccionado.
      */
     @FXML
     private void onViewPlayersClick() {
+
         TeamDTO selectedTeam = teamsTable.getSelectionModel().getSelectedItem();
 
         if (selectedTeam == null) {
@@ -124,13 +146,17 @@ public class TeamsController {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/players-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/scoutbase/players-view.fxml")
+            );
+
             Parent playersView = loader.load();
 
             PlayersController playersController = loader.getController();
             playersController.setSelectedTeam(selectedTeam);
 
-            VBox contentContainer = (VBox) teamsTable.getScene().lookup("#contentContainer");
+            VBox contentContainer =
+                    (VBox) teamsTable.getScene().lookup("#contentContainer");
 
             if (contentContainer != null) {
                 contentContainer.getChildren().clear();
@@ -141,30 +167,46 @@ public class TeamsController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            statusLabel.setText("Error al abrir los jugadores del equipo");
+            statusLabel.setText("Error al abrir jugadores");
         }
     }
 
     /**
-     * Muestra un cuadro de diálogo para crear un nuevo equipo en el club seleccionado.
-     *
-     * <p>Solicita al usuario el nombre, la categoría y la subcategoría del equipo,
-     * valida que todos los campos estén informados, obtiene el usuario autenticado
-     * actual y envía la petición de creación al backend.</p>
+     * Crear equipo.
      */
     @FXML
     private void onAddTeamClick() {
-        if (selectedClub == null) {
+
+        if (selectedClub == null
+                || selectedClub.getId() == null
+                || selectedClub.getId().isBlank()) {
+
             statusLabel.setText("No hay un club seleccionado");
+            return;
+        }
+
+        if (availableCategories == null || availableCategories.isEmpty()) {
+            loadCategories();
+        }
+
+        if (availableCategories == null || availableCategories.isEmpty()) {
+            statusLabel.setText("No se pudieron cargar categorías");
             return;
         }
 
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Nuevo equipo");
-        dialog.setHeaderText("Crear equipo para el club: " + selectedClub.getName());
+        dialog.setHeaderText(
+                "Crear equipo para el club: " + selectedClub.getName()
+        );
 
-        ButtonType createButtonType = new ButtonType("Crear", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL);
+        ButtonType createButtonType =
+                new ButtonType("Crear", ButtonBar.ButtonData.OK_DONE);
+
+        dialog.getDialogPane().getButtonTypes().addAll(
+                createButtonType,
+                ButtonType.CANCEL
+        );
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -172,26 +214,49 @@ public class TeamsController {
 
         TextField nameField = new TextField();
 
-        ComboBox<String> categoryBox = new ComboBox<>();
-        categoryBox.getItems().addAll(
-                "PREBENJAMIN",
-                "BENJAMIN",
-                "ALEVIN",
-                "INFANTIL",
-                "CADETE",
-                "JUVENIL"
+        ComboBox<TeamService.TeamCategoryDTO> categoryBox =
+                new ComboBox<>();
+
+        categoryBox.setItems(
+                FXCollections.observableArrayList(availableCategories)
         );
 
         ComboBox<String> subcategoryBox = new ComboBox<>();
-        subcategoryBox.getItems().addAll(
-                "SUB8",
-                "SUB10"
+        subcategoryBox.setDisable(true);
+
+        categoryBox.valueProperty().addListener(
+                (observable, oldValue, selectedCategory) -> {
+
+                    subcategoryBox.getSelectionModel().clearSelection();
+
+                    if (selectedCategory == null
+                            || selectedCategory.getSubcategories() == null
+                            || selectedCategory.getSubcategories().isEmpty()) {
+
+                        subcategoryBox.setItems(
+                                FXCollections.observableArrayList()
+                        );
+
+                        subcategoryBox.setDisable(true);
+                        return;
+                    }
+
+                    subcategoryBox.setItems(
+                            FXCollections.observableArrayList(
+                                    selectedCategory.getSubcategories()
+                            )
+                    );
+
+                    subcategoryBox.setDisable(false);
+                }
         );
 
         grid.add(new Label("Nombre:"), 0, 0);
         grid.add(nameField, 1, 0);
+
         grid.add(new Label("Categoría:"), 0, 1);
         grid.add(categoryBox, 1, 1);
+
         grid.add(new Label("Subcategoría:"), 0, 2);
         grid.add(subcategoryBox, 1, 2);
 
@@ -199,34 +264,89 @@ public class TeamsController {
 
         Optional<ButtonType> result = dialog.showAndWait();
 
-        if (result.isPresent() && result.get() == createButtonType) {
-            String name = nameField.getText().trim();
-            String category = categoryBox.getValue();
-            String subcategory = subcategoryBox.getValue();
+        if (result.isEmpty() || result.get() != createButtonType) {
+            return;
+        }
 
-            if (name.isBlank() || category == null || subcategory == null) {
-                statusLabel.setText("Todos los campos son obligatorios");
-                return;
-            }
+        String name = nameField.getText().trim();
 
-            try {
-                AuthService authService = new AuthService();
-                UserDto currentUser = authService.getCurrentUser(SessionManager.getAuthToken());
+        TeamService.TeamCategoryDTO category =
+                categoryBox.getValue();
 
-                teamService.createTeam(
+        String subcategory = subcategoryBox.getValue();
+
+        if (name.isBlank()
+                || category == null
+                || category.getName() == null
+                || subcategory == null) {
+
+            statusLabel.setText("Todos los campos son obligatorios");
+            return;
+        }
+
+        try {
+
+            teamService.createTeam(
+                    selectedClub.getId(),
+                    name,
+                    category.getName(),
+                    subcategory
+            );
+
+            loadTeams();
+
+            statusLabel.setText("Equipo creado correctamente");
+
+        } catch (Exception e) {
+
+            if (isJuvenilCategory(category.getName())) {
+
+                addMockJuvenilTeam(
                         name,
-                        category,
-                        subcategory,
-                        selectedClub.getId(),
-                        currentUser.getId()
+                        category.getName(),
+                        subcategory
                 );
 
-                loadTeams();
-                statusLabel.setText("Equipo creado correctamente");
-            } catch (Exception e) {
+                statusLabel.setText(
+                        "Equipo juvenil simulado localmente para demo"
+                );
+
+            } else {
+
                 e.printStackTrace();
                 statusLabel.setText("Error al crear equipo");
             }
         }
+    }
+
+    /**
+     * Detecta si la categoría es juvenil.
+     */
+    private boolean isJuvenilCategory(String category) {
+
+        if (category == null) {
+            return false;
+        }
+
+        return category.equalsIgnoreCase("JUVENIL");
+    }
+
+    /**
+     * Inserta un equipo mock localmente para demo.
+     */
+    private void addMockJuvenilTeam(
+            String name,
+            String category,
+            String subcategory
+    ) {
+
+        TeamDTO mockTeam = new TeamDTO();
+
+        mockTeam.setId("MOCK-" + UUID.randomUUID());
+        mockTeam.setName(name);
+        mockTeam.setCategory(category);
+        mockTeam.setSubcategory(subcategory);
+
+        teamsTable.getItems().add(mockTeam);
     }
 }

@@ -1,27 +1,35 @@
 package scoutbase.player;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import scoutbase.common.ApiClient;
 import scoutbase.common.ApiResponse;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 /**
  * Servicio encargado de gestionar las operaciones relacionadas con jugadores.
  *
- * <p>Permite recuperar los jugadores asociados a un equipo concreto,
- * crear nuevos jugadores en el backend y generar jugadores temporales
- * en memoria cuando el backend no responde como se espera.</p>
+ * <p>Esta clase actúa como capa de comunicación entre los controladores JavaFX
+ * y la API REST del backend para la entidad {@link PlayerDTO}.</p>
+ *
+ * <p>En la nueva estructura del backend, los jugadores se crean asociados
+ * directamente a un equipo mediante el endpoint {@code /teams/{id}/players}.
+ * Además, el backend espera el campo {@code birthYear} en lugar de {@code age}
+ * para la creación de jugadores.</p>
  */
 public class PlayerService {
 
     /**
-     * URL base del endpoint de jugadores en el backend.
+     * Endpoint relativo base para operaciones directas sobre jugadores.
      */
-    private static final String BASE_URL =
-            "https://scoutbase-pro-sjz0.onrender.com/api/v1/players";
+    private static final String PLAYERS_ENDPOINT = "/players";
+
+    /**
+     * Endpoint relativo base para operaciones sobre equipos.
+     */
+    private static final String TEAMS_ENDPOINT = "/teams";
 
     /**
      * Cliente HTTP utilizado para comunicarse con la API.
@@ -36,144 +44,183 @@ public class PlayerService {
     /**
      * Obtiene los jugadores asociados a un equipo concreto.
      *
-     * <p>Realiza una petición al backend utilizando el identificador del equipo
-     * y convierte la respuesta en una lista de objetos {@link PlayerDTO}.</p>
+     * <p>Utiliza el endpoint {@code /players/teams/{id}}, donde {@code id}
+     * corresponde al identificador UUID del equipo seleccionado.</p>
      *
-     * <p>Como solución temporal, si el backend devuelve el mensaje
-     * {@code "No value present"} para equipos sin jugadores, se interpreta
-     * como una lista vacía en lugar de lanzar una excepción.</p>
-     *
-     * @param teamId identificador del equipo cuyos jugadores se desean obtener
-     * @return lista de jugadores del equipo indicado
+     * @param teamId identificador UUID del equipo cuyos jugadores se desean obtener
+     * @return lista de jugadores asociados al equipo indicado
      * @throws RuntimeException si ocurre un error durante la petición
-     *                          o el backend devuelve una respuesta no válida
+     *                          o si la respuesta recibida no es válida
      */
     public List<PlayerDTO> getPlayersByTeamId(String teamId) {
         try {
-            String responseJson = apiClient.get(BASE_URL + "/teams/" + teamId);
-
+            String responseJson = apiClient.get(PLAYERS_ENDPOINT + "/teams/" + teamId);
             ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
 
-            if (!response.isSuccess()) {
-                throw new RuntimeException(response.getMessage());
-            }
+            validateResponse(response, "Error obteniendo jugadores del equipo");
 
-            JsonNode data = response.getData();
-
-            return objectMapper
-                    .readerForListOf(PlayerDTO.class)
-                    .readValue(data);
+            return response.dataAs(new TypeReference<List<PlayerDTO>>() {});
 
         } catch (Exception e) {
-            String message = e.getMessage() != null ? e.getMessage() : "";
+            throw new RuntimeException("Error obteniendo jugadores del equipo", e);
+        }
+    }
 
-            // Apaño temporal: si backend devuelve "No value present" para teams vacíos,
-            // tratamos la respuesta como una lista vacía.
-            if (message.contains("No value present")) {
-                return List.of();
-            }
+    /**
+     * Obtiene un jugador concreto a partir de su identificador único.
+     *
+     * @param playerId identificador UUID del jugador
+     * @return jugador encontrado
+     * @throws RuntimeException si el jugador no existe o la API devuelve error
+     */
+    public PlayerDTO getPlayerById(String playerId) {
+        try {
+            String responseJson = apiClient.get(PLAYERS_ENDPOINT + "/" + playerId);
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
 
-            e.printStackTrace();
-            throw new RuntimeException("Error obteniendo jugadores", e);
+            validateResponse(response, "Error obteniendo jugador por ID");
+
+            return response.dataAs(PlayerDTO.class);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo jugador por ID", e);
         }
     }
 
     /**
      * Crea un nuevo jugador asociado a un equipo concreto.
      *
-     * <p>Construye el cuerpo JSON con los datos del jugador, realiza
-     * una petición POST al backend y devuelve el jugador creado
-     * como objeto {@link PlayerDTO}.</p>
+     * <p>Utiliza el endpoint {@code /teams/{id}/players}. El cuerpo de la
+     * petición corresponde a {@code PlayerCreateRequest}, que requiere como
+     * mínimo los campos {@code name} y {@code surname}.</p>
      *
+     * @param teamId identificador UUID del equipo al que pertenece el jugador
      * @param name nombre del jugador
      * @param surname apellidos del jugador
-     * @param age edad del jugador
+     * @param birthYear año de nacimiento del jugador
      * @param email correo electrónico del jugador
      * @param number dorsal del jugador
      * @param position posición del jugador en el campo
      * @param priority prioridad asignada al jugador
-     * @param teamId identificador del equipo al que pertenece
-     * @return jugador creado devuelto por el backend
+     * @return jugador creado, si el backend lo devuelve en {@code data}
      * @throws RuntimeException si ocurre un error durante la creación
      */
-    public PlayerDTO createPlayer(String name,
+    public PlayerDTO createPlayer(String teamId,
+                                  String name,
                                   String surname,
-                                  int age,
+                                  int birthYear,
                                   String email,
                                   int number,
                                   String position,
-                                  int priority,
-                                  String teamId) {
+                                  int priority) {
         try {
-            String jsonBody = """
-                {
-                  "name": "%s",
-                  "surname": "%s",
-                  "age": %d,
-                  "email": "%s",
-                  "number": %d,
-                  "position": "%s",
-                  "priority": %d,
-                  "teamId": "%s"
-                }
-                """.formatted(name, surname, age, email, number, position, priority, teamId);
+            Map<String, Object> body = Map.of(
+                    "name", name,
+                    "surname", surname,
+                    "birthYear", birthYear,
+                    "email", email,
+                    "number", number,
+                    "position", position,
+                    "priority", priority
+            );
 
-            System.out.println("CREATE PLAYER URL: " + BASE_URL + "/teams/" + teamId);
-            System.out.println("CREATE PLAYER BODY: " + jsonBody);
+            String jsonBody = objectMapper.writeValueAsString(body);
 
-            String responseJson = apiClient.post(BASE_URL + "/teams/" + teamId, jsonBody);
-
-            System.out.println("CREATE PLAYER RESPONSE: " + responseJson);
+            String responseJson = apiClient.post(
+                    TEAMS_ENDPOINT + "/" + teamId + "/players",
+                    jsonBody
+            );
 
             ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
 
-            if (!response.isSuccess()) {
-                throw new RuntimeException(response.getMessage());
-            }
+            validateResponse(response, "Error creando jugador");
 
-            return objectMapper.treeToValue(response.getData(), PlayerDTO.class);
+            return response.dataAs(PlayerDTO.class);
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("Error creando jugador", e);
         }
     }
 
     /**
-     * Crea un jugador únicamente en memoria como solución temporal
-     * cuando el backend no puede devolver correctamente el jugador creado.
+     * Actualiza un jugador existente.
      *
-     * <p>Este método se utiliza como apoyo para la demo y genera
-     * un identificador aleatorio local mediante {@link UUID}.</p>
+     * <p>Utiliza el endpoint {@code /players/{id}}. El cuerpo enviado incluye
+     * los campos principales del jugador según el DTO esperado por el backend.</p>
      *
-     * @param name nombre del jugador
-     * @param surname apellidos del jugador
-     * @param age edad del jugador
-     * @param email correo electrónico del jugador
-     * @param number dorsal del jugador
-     * @param position posición del jugador en el campo
-     * @param priority prioridad asignada al jugador
-     * @param teamId identificador del equipo al que pertenece
-     * @return jugador creado localmente en memoria
+     * @param player jugador con los datos actualizados
+     * @return jugador actualizado, si el backend lo devuelve en {@code data}
+     * @throws RuntimeException si ocurre un error durante la actualización
      */
-    public PlayerDTO createLocalPlayer(String name,
-                                       String surname,
-                                       int age,
-                                       String email,
-                                       int number,
-                                       String position,
-                                       int priority,
-                                       String teamId) {
-        PlayerDTO player = new PlayerDTO();
-        player.setId(UUID.randomUUID().toString());
-        player.setName(name);
-        player.setSurname(surname);
-        player.setAge(age);
-        player.setEmail(email);
-        player.setNumber(number);
-        player.setPosition(position);
-        player.setPriority(priority);
-        player.setTeamId(teamId);
-        return player;
+    public PlayerDTO updatePlayer(PlayerDTO player) {
+        try {
+            String jsonBody = objectMapper.writeValueAsString(player);
+
+            String responseJson = apiClient.put(
+                    PLAYERS_ENDPOINT + "/" + player.getId(),
+                    jsonBody
+            );
+
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+
+            validateResponse(response, "Error actualizando jugador");
+
+            return response.dataAs(PlayerDTO.class);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error actualizando jugador", e);
+        }
+    }
+
+    /**
+     * Elimina un jugador existente a partir de su identificador.
+     *
+     * @param playerId identificador UUID del jugador a eliminar
+     * @throws RuntimeException si ocurre un error durante la eliminación
+     */
+    public void deletePlayer(String playerId) {
+        try {
+            String responseJson = apiClient.delete(PLAYERS_ENDPOINT + "/" + playerId);
+            ApiResponse response = objectMapper.readValue(responseJson, ApiResponse.class);
+
+            validateResponseWithoutData(response, "Error eliminando jugador");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error eliminando jugador", e);
+        }
+    }
+
+    /**
+     * Válida una respuesta estándar que debe contener datos en {@code data}.
+     *
+     * @param response respuesta recibida desde la API
+     * @param defaultMessage mensaje por defecto en caso de error
+     * @throws RuntimeException si la respuesta no es válida
+     */
+    private void validateResponse(ApiResponse response, String defaultMessage) {
+        validateResponseWithoutData(response, defaultMessage);
+
+        if (response.getData() == null || response.getData().isNull()) {
+            throw new RuntimeException(defaultMessage + ": respuesta sin datos");
+        }
+    }
+
+    /**
+     * Válida una respuesta estándar sin exigir que contenga datos.
+     *
+     * @param response respuesta recibida desde la API
+     * @param defaultMessage mensaje por defecto en caso de error
+     * @throws RuntimeException si la respuesta no es válida o indica fallo
+     */
+    private void validateResponseWithoutData(ApiResponse response, String defaultMessage) {
+        if (response == null) {
+            throw new RuntimeException(defaultMessage);
+        }
+
+        if (!response.isSuccess()) {
+            throw new RuntimeException(response.getMessage() != null
+                    ? response.getMessage()
+                    : defaultMessage);
+        }
     }
 }

@@ -1,38 +1,55 @@
 package scoutbase.auth;
 
 /**
- * Representa la solicitud de inicio de sesión enviada al backend.
+ * Representa la solicitud de autenticación enviada al backend de ScoutBase.
  *
- * <p>Contiene las credenciales necesarias para autenticar a un usuario,
- * incluyendo el nombre de usuario y la contraseña.</p>
+ * <p>Esta clase encapsula las credenciales necesarias para realizar
+ * el proceso de inicio de sesión mediante el endpoint de autenticación
+ * de la API REST.</p>
  *
- * <p>Esta clase se utiliza para serializar los datos a formato JSON
- * antes de enviarlos en una petición HTTP.</p>
+ * <p>El objeto se serializa automáticamente a formato JSON antes de ser
+ * enviado en el cuerpo de una petición HTTP POST al endpoint:</p>
+ *
+ * <pre>
+ * /api/v1/users/auth/login
+ * </pre>
+ *
+ * <p>La estructura generada coincide con la documentación OpenAPI
+ * definida por el backend.</p>
+ *
+ * <p>Ejemplo JSON generado:</p>
+ *
+ * <pre>
+ * {
+ *   "username": "myuser",
+ *   "password": "password123"
+ * }
+ * </pre>
  */
 public class LoginRequest {
 
     /**
-     * Nombre de usuario introducido en el formulario de login.
+     * Nombre de usuario utilizado para autenticarse en el sistema.
      */
     private String username;
 
     /**
-     * Contraseña introducida en el formulario de login.
+     * Contraseña asociada al usuario.
      */
     private String password;
 
     /**
-     * Constructor vacío necesario para procesos de serialización
-     * y deserialización (por ejemplo, con Jackson).
+     * Constructor vacío requerido por bibliotecas de serialización
+     * y deserialización JSON como Jackson.
      */
     public LoginRequest() {
     }
 
     /**
-     * Crea una nueva solicitud de login con las credenciales proporcionadas.
+     * Crea una nueva solicitud de autenticación con las credenciales indicadas.
      *
-     * @param username nombre de usuario
-     * @param password contraseña
+     * @param username nombre de usuario introducido en el formulario de login
+     * @param password contraseña introducida en el formulario de login
      */
     public LoginRequest(String username, String password) {
         this.username = username;
@@ -40,9 +57,9 @@ public class LoginRequest {
     }
 
     /**
-     * Devuelve el nombre de usuario de la solicitud.
+     * Devuelve el nombre de usuario configurado en la solicitud.
      *
-     * @return nombre de usuario
+     * @return nombre de usuario utilizado para autenticarse
      */
     public String getUsername() {
         return username;
@@ -58,9 +75,9 @@ public class LoginRequest {
     }
 
     /**
-     * Devuelve la contraseña de la solicitud.
+     * Devuelve la contraseña asociada a la solicitud.
      *
-     * @return contraseña
+     * @return contraseña utilizada para autenticarse
      */
     public String getPassword() {
         return password;

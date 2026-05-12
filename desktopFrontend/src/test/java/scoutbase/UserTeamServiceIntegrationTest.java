@@ -10,40 +10,33 @@ import scoutbase.team.TeamDTO;
 import scoutbase.team.TeamService;
 import scoutbase.userClub.UserClubDTO;
 import scoutbase.userClub.UserClubService;
+import scoutbase.userTeam.UserTeamDTO;
+import scoutbase.userTeam.UserTeamService;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test de integración para {@link TeamService}.
+ * Test de integración para comprobar la resolución de UserTeams.
  *
- * <p>Comprueba que se pueden obtener equipos asociados
- * a un club desde el backend.</p>
- *
- * <p>Este test DEPENDE de que la API esté activa.</p>
+ * <p>Valida que, a partir de un UserClub y un Team existente, el sistema
+ * puede resolver un UserTeam asociado.</p>
  */
-public class TeamServiceIntegrationTest {
+public class UserTeamServiceIntegrationTest {
 
     /**
-     * Verifica que se pueden cargar equipos a partir
-     * de un club asociado al UserClub autenticado.
+     * Comprueba que se puede obtener o resolver un UserTeam asociado a un equipo.
      *
-     * @throws Exception si falla el login o alguna petición HTTP
+     * @throws Exception si falla el login o alguna petición a backend
      */
     @Test
-    void shouldGetTeamsByClubSuccessfully() throws Exception {
-
+    void shouldResolveUserTeamSuccessfully() throws Exception {
         AuthService authService = new AuthService();
         ApiResponse loginResponse = authService.login("john_doe", "password123");
         String token = authService.extractToken(loginResponse);
 
-        SessionManager.saveSession(
-                token,
-                loginResponse.getSessionId(),
-                "john_doe",
-                null
-        );
+        SessionManager.saveSession(token, loginResponse.getSessionId(), "john_doe", null);
 
         UserClubService userClubService = new UserClubService();
         UserClubDTO userClub = userClubService.getDefaultUserClub();
@@ -60,5 +53,12 @@ public class TeamServiceIntegrationTest {
         List<TeamDTO> teams = teamService.getTeamsByClubId(clubs.get(0).getId());
 
         assertNotNull(teams, "La lista de equipos no debería ser null");
+        assertFalse(teams.isEmpty(), "Debe existir al menos un equipo");
+
+        UserTeamService userTeamService = new UserTeamService();
+        UserTeamDTO userTeam = userTeamService.getOrCreateUserTeamForTeam(userClub.getId(), teams.get(0));
+
+        assertNotNull(userTeam, "El UserTeam resuelto no debería ser null");
+        assertNotNull(userTeam.getId(), "El UserTeam debería tener ID");
     }
 }

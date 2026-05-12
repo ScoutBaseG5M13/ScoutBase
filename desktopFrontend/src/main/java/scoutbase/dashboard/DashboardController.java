@@ -13,11 +13,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import scoutbase.club.ClubDTO;
-import scoutbase.club.ClubService;
-import scoutbase.team.TeamDTO;
-import scoutbase.team.TeamService;
 import scoutbase.app.SessionManager;
+import scoutbase.club.ClubsController;
+import scoutbase.userClub.UserClubDTO;
+import scoutbase.userClub.UserClubService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,12 +25,13 @@ import java.util.List;
 /**
  * Controlador de la vista principal del dashboard.
  *
- * <p>Gestiona la pantalla principal de la aplicación una vez que el usuario
- * ha iniciado sesión, mostrando información contextual, estadísticas básicas
- * y accesos a las distintas secciones del sistema.</p>
+ * <p>Gestiona la pantalla principal de ScoutBase Desktop una vez que el usuario
+ * ha iniciado sesión, mostrando información contextual, accesos rápidos y
+ * navegación hacia las distintas secciones funcionales.</p>
  *
- * <p>También adapta la interfaz según el rol del usuario autenticado
- * y permite cambiar entre tema oscuro y claro.</p>
+ * <p>También permite alternar entre tema oscuro y claro, cargar vistas internas
+ * dentro del contenedor principal y resolver el UserClub activo para las pantallas
+ * que dependen de este contexto.</p>
  */
 public class DashboardController {
 
@@ -46,15 +46,15 @@ public class DashboardController {
     private static final String LIGHT_THEME = "/scoutbase/light_theme.css";
 
     /**
-     * Indica si el tema oscuro está actualmente activo.
+     * Indica si el tema oscuro está activo actualmente.
      */
     private boolean darkThemeActive = true;
 
     @FXML
-    private Label appTitleLabel;
+    private Label userInfoLabel;
 
     @FXML
-    private Label userInfoLabel;
+    private Label appTitleLabel;
 
     @FXML
     private Button themeToggleButton;
@@ -64,9 +64,6 @@ public class DashboardController {
 
     @FXML
     private Button clubesButton;
-
-    @FXML
-    private Button informesButton;
 
     @FXML
     private Button estadisticasButton;
@@ -81,33 +78,23 @@ public class DashboardController {
     private VBox contentContainer;
 
     /**
-     * Servicio encargado de obtener información de clubes.
+     * Servicio encargado de obtener los UserClubs disponibles para el usuario autenticado.
      */
-    private final ClubService clubService = new ClubService();
+    private final UserClubService userClubService = new UserClubService();
 
     /**
-     * Servicio encargado de obtener información de equipos.
-     */
-    private final TeamService teamService = new TeamService();
-
-    /**
-     * Inicializa la vista del dashboard con los datos del usuario autenticado.
-     *
-     * <p>Carga la información de sesión, configura el menú según el rol
-     * del usuario y establece el texto inicial del botón de cambio de tema.</p>
+     * Inicializa la vista del dashboard con los datos de sesión actuales.
      */
     @FXML
     public void initialize() {
         loadUserInfo();
-        configureDashboardByRole();
+        configureDashboardMenu();
         themeToggleButton.setText("Modo claro");
+        loadHome();
     }
 
     /**
-     * Muestra en pantalla el nombre y el rol del usuario autenticado.
-     *
-     * <p>Si no existe un usuario identificado en sesión, se muestra
-     * un texto indicativo en la interfaz.</p>
+     * Muestra en pantalla el usuario autenticado y su rol global si existe.
      */
     private void loadUserInfo() {
         String username = SessionManager.getUsername();
@@ -119,76 +106,32 @@ public class DashboardController {
         }
 
         if (role != null && !role.isBlank()) {
-            String cleanRole = role.replace("ROLE_", "");
-            userInfoLabel.setText(username + " (" + cleanRole + ")");
+            userInfoLabel.setText(username + " (" + role.replace("ROLE_", "") + ")");
         } else {
             userInfoLabel.setText(username);
         }
     }
 
     /**
-     * Configura el dashboard según el rol del usuario autenticado.
+     * Configura la visibilidad común de los botones principales del dashboard.
      *
-     * <p>En función del rol almacenado en sesión, ajusta la visibilidad
-     * de las opciones del menú y carga la vista de inicio correspondiente.</p>
+     * <p>No se ocultan secciones por rol global en frontend, ya que los permisos
+     * reales dependen de la jerarquía del sistema: SUPERADMIN, administradores
+     * de club y roles contextuales dentro de clubes o equipos.</p>
      */
-    private void configureDashboardByRole() {
-        String role = SessionManager.getRole();
-
-        if (isAdmin(role)) {
-            configureAdminMenu();
-            loadAdminHome();
-        } else {
-            configureUserMenu();
-            loadUserHome();
-        }
-    }
-
-    /**
-     * Comprueba si el rol corresponde a un administrador.
-     *
-     * @param role rol del usuario autenticado
-     * @return {@code true} si el rol corresponde a un administrador;
-     * {@code false} en caso contrario
-     */
-    private boolean isAdmin(String role) {
-        if (role == null || role.isBlank()) {
-            return false;
-        }
-
-        String cleanRole = role.replace("ROLE_", "").trim().toUpperCase();
-        return cleanRole.equals("ADMIN");
-    }
-
-    /**
-     * Configura la visibilidad del menú para administradores.
-     */
-    private void configureAdminMenu() {
+    private void configureDashboardMenu() {
         setButtonVisible(jugadoresButton, true);
         setButtonVisible(clubesButton, true);
-        setButtonVisible(informesButton, true);
         setButtonVisible(estadisticasButton, true);
         setButtonVisible(scoutsButton, true);
         setButtonVisible(usuariosButton, true);
     }
 
     /**
-     * Configura la visibilidad del menú para usuarios normales.
-     */
-    private void configureUserMenu() {
-        setButtonVisible(jugadoresButton, true);
-        setButtonVisible(clubesButton, true);
-        setButtonVisible(informesButton, true);
-        setButtonVisible(estadisticasButton, true);
-        setButtonVisible(scoutsButton, true);
-        setButtonVisible(usuariosButton, true);
-    }
-
-    /**
-     * Muestra u oculta un botón y evita que deje hueco visual cuando está oculto.
+     * Muestra u oculta un botón del menú.
      *
      * @param button botón a modificar
-     * @param visible indica si el botón debe mostrarse o no
+     * @param visible indica si debe mostrarse
      */
     private void setButtonVisible(Button button, boolean visible) {
         button.setVisible(visible);
@@ -196,9 +139,9 @@ public class DashboardController {
     }
 
     /**
-     * Marca visualmente el botón activo del menú de navegación.
+     * Marca visualmente el botón activo del menú.
      *
-     * @param activeButton botón que debe quedar marcado como activo
+     * @param activeButton botón activo
      */
     private void setActiveButton(Button activeButton) {
         for (Button button : getMenuButtons()) {
@@ -211,159 +154,33 @@ public class DashboardController {
     }
 
     /**
-     * Devuelve la lista de botones de navegación disponibles en el menú.
+     * Devuelve los botones principales del menú.
      *
-     * @return lista de botones del menú actualmente gestionados
+     * @return lista de botones de navegación
      */
     private List<Button> getMenuButtons() {
         List<Button> buttons = new ArrayList<>();
         buttons.add(jugadoresButton);
         buttons.add(clubesButton);
-        buttons.add(informesButton);
-
-        if (estadisticasButton.isManaged()) {
-            buttons.add(estadisticasButton);
-        }
-        if (scoutsButton.isManaged()) {
-            buttons.add(scoutsButton);
-        }
-        if (usuariosButton.isManaged()) {
-            buttons.add(usuariosButton);
-        }
-
+        buttons.add(estadisticasButton);
+        buttons.add(scoutsButton);
+        buttons.add(usuariosButton);
         return buttons;
     }
 
     /**
-     * Vuelve a la pantalla principal correspondiente al rol del usuario autenticado.
-     *
-     * <p>Desmarca cualquier botón activo y recarga la vista inicial
-     * del dashboard según el rol actual del usuario.</p>
+     * Carga la pantalla inicial del dashboard.
      */
-    @FXML
-    private void onInicioClick() {
-        setActiveButton(null);
-
-        if (isAdmin(SessionManager.getRole())) {
-            loadAdminHome();
-        } else {
-            loadUserHome();
-        }
-    }
-
-    /**
-     * Alterna entre el tema oscuro y el tema claro de la interfaz.
-     *
-     * @param event evento generado al pulsar el botón de cambio de tema
-     */
-    @FXML
-    private void onToggleThemeClick(ActionEvent event) {
-        Scene scene = ((Node) event.getSource()).getScene();
-        scene.getStylesheets().clear();
-
-        if (darkThemeActive) {
-            scene.getStylesheets().add(
-                    getClass().getResource(LIGHT_THEME).toExternalForm()
-            );
-            darkThemeActive = false;
-            themeToggleButton.setText("Modo oscuro");
-        } else {
-            scene.getStylesheets().add(
-                    getClass().getResource(DARK_THEME).toExternalForm()
-            );
-            darkThemeActive = true;
-            themeToggleButton.setText("Modo claro");
-        }
-    }
-
-    /**
-     * Carga la pantalla principal para administradores con estadísticas
-     * y accesos rápidos relevantes.
-     */
-    private void loadAdminHome() {
+    private void loadHome() {
         contentContainer.getChildren().clear();
 
-        DashboardStats stats = loadDashboardStats();
+        String username = SessionManager.getUsername() != null
+                ? SessionManager.getUsername()
+                : "usuario";
 
-        Label title = new Label("Panel de administración");
-        title.getStyleClass().add("dashboard-title");
-
-        Label subtitle = new Label("Resumen general del sistema");
-        subtitle.getStyleClass().add("section-subtitle");
-
-        HBox cardsRow = new HBox(15);
-        cardsRow.getChildren().addAll(
-                createStatCard("Usuarios en sesión", "1"),
-                createStatCard("Jugadores visibles", String.valueOf(stats.totalPlayers)),
-                createStatCard("Clubes registrados", String.valueOf(stats.totalClubs)),
-                createStatCard("Equipos disponibles", String.valueOf(stats.totalTeams))
-        );
-
-        String currentUser = SessionManager.getUsername() != null ? SessionManager.getUsername() : "desconocido";
-        String currentRole = SessionManager.getRole() != null && !SessionManager.getRole().isBlank()
+        String role = SessionManager.getRole() != null && !SessionManager.getRole().isBlank()
                 ? SessionManager.getRole().replace("ROLE_", "")
-                : "SIN ROL";
-
-        VBox activityBox = createInfoBox(
-                "Actividad reciente",
-                "• Inicio de sesión correcto como " + currentUser + "\n" +
-                        "• Rol detectado: " + currentRole + "\n" +
-                        "• Clubs cargados: " + stats.totalClubs + "\n" +
-                        "• Equipos cargados: " + stats.totalTeams
-        );
-
-        VBox quickActionsBox = new VBox(10);
-        quickActionsBox.getStyleClass().add("info-box");
-        quickActionsBox.setPrefWidth(350);
-
-        Label quickTitle = new Label("Acciones rápidas");
-        quickTitle.getStyleClass().add("panel-title");
-
-        Button createUserBtn = new Button("Abrir usuarios");
-        Button addPlayerBtn = new Button("Abrir jugadores");
-        Button registerClubBtn = new Button("Abrir clubes");
-        Button openScoutsBtn = new Button("Abrir scouts");
-
-        styleActionButton(createUserBtn);
-        styleActionButton(addPlayerBtn);
-        styleActionButton(registerClubBtn);
-        styleActionButton(openScoutsBtn);
-
-        createUserBtn.setOnAction(this::onUsuariosClick);
-        addPlayerBtn.setOnAction(this::onJugadoresClick);
-        registerClubBtn.setOnAction(this::onClubesClick);
-        openScoutsBtn.setOnAction(this::onScoutsClick);
-
-        quickActionsBox.getChildren().addAll(
-                quickTitle,
-                createUserBtn,
-                addPlayerBtn,
-                registerClubBtn,
-                openScoutsBtn
-        );
-
-        HBox bottomRow = new HBox(20, activityBox, quickActionsBox);
-
-        contentContainer.getChildren().addAll(title, subtitle, cardsRow, bottomRow);
-    }
-
-    /**
-     * Carga la pantalla principal para usuarios normales con estadísticas
-     * y accesos rápidos relevantes.
-     */
-    private void loadUserHome() {
-        contentContainer.getChildren().clear();
-
-        DashboardStats stats = loadDashboardStats();
-
-        String username = SessionManager.getUsername();
-        if (username == null || username.isBlank()) {
-            username = "usuario";
-        }
-
-        String cleanRole = SessionManager.getRole() != null && !SessionManager.getRole().isBlank()
-                ? SessionManager.getRole().replace("ROLE_", "")
-                : "SIN ROL";
+                : "SIN ROL GLOBAL";
 
         Label title = new Label("Panel principal");
         title.getStyleClass().add("dashboard-title");
@@ -373,97 +190,201 @@ public class DashboardController {
 
         HBox cardsRow = new HBox(15);
         cardsRow.getChildren().addAll(
-                createStatCard("Clubes visibles", String.valueOf(stats.totalClubs)),
-                createStatCard("Equipos visibles", String.valueOf(stats.totalTeams)),
-                createStatCard("Jugadores visibles", String.valueOf(stats.totalPlayers)),
-                createStatCard("Rol actual", cleanRole)
+                createStatCard("Usuario", username),
+                createStatCard("Rol global", role),
+                createStatCard("Sesión", SessionManager.isLoggedIn() ? "Activa" : "Inactiva")
         );
 
-        VBox activityBox = createInfoBox(
-                "Mi actividad reciente",
-                "• Sesión iniciada como " + username + "\n" +
-                        "• Clubs cargados: " + stats.totalClubs + "\n" +
-                        "• Equipos cargados: " + stats.totalTeams + "\n" +
-                        "• Jugadores detectados: " + stats.totalPlayers
+        VBox infoBox = createInfoBox(
+                "Estado del sistema",
+                "• Sesión iniciada correctamente\n" +
+                        "• Token JWT cargado en sesión\n" +
+                        "• API configurada con endpoints /api/v1\n" +
+                        "• UserClub cargado automáticamente para la vista de clubes\n" +
+                        "• Los permisos específicos dependen del club/equipo seleccionado"
         );
 
-        VBox quickActionsBox = new VBox(10);
-        quickActionsBox.getStyleClass().add("info-box");
-        quickActionsBox.setPrefWidth(350);
-
-        Label quickTitle = new Label("Accesos rápidos");
-        quickTitle.getStyleClass().add("panel-title");
-
-        Button openPlayersBtn = new Button("Ver jugadores");
-        Button openClubsBtn = new Button("Ver clubes");
-        Button openScoutsBtn = new Button("Ver scouts");
-        Button openUsersBtn = new Button("Ver usuarios");
-
-        styleActionButton(openPlayersBtn);
-        styleActionButton(openClubsBtn);
-        styleActionButton(openScoutsBtn);
-        styleActionButton(openUsersBtn);
-
-        openPlayersBtn.setOnAction(this::onJugadoresClick);
-        openClubsBtn.setOnAction(this::onClubesClick);
-        openScoutsBtn.setOnAction(this::onScoutsClick);
-        openUsersBtn.setOnAction(this::onUsuariosClick);
-
-        quickActionsBox.getChildren().addAll(
-                quickTitle,
-                openPlayersBtn,
-                openClubsBtn,
-                openScoutsBtn,
-                openUsersBtn
-        );
-
-        HBox bottomRow = new HBox(20, activityBox, quickActionsBox);
-
-        contentContainer.getChildren().addAll(title, subtitle, cardsRow, bottomRow);
+        contentContainer.getChildren().addAll(title, subtitle, cardsRow, infoBox);
     }
 
     /**
-     * Obtiene estadísticas básicas reales a partir de los servicios disponibles.
-     *
-     * @return objeto con las estadísticas calculadas para el dashboard
+     * Vuelve a la pantalla principal del dashboard.
      */
-    private DashboardStats loadDashboardStats() {
-        DashboardStats stats = new DashboardStats();
-
-        try {
-            List<ClubDTO> clubs = clubService.getAllClubs();
-            stats.totalClubs = clubs != null ? clubs.size() : 0;
-        } catch (Exception e) {
-            stats.totalClubs = 0;
-        }
-
-        try {
-            List<TeamDTO> teams = teamService.getAllTeams();
-            stats.totalTeams = teams != null ? teams.size() : 0;
-
-            int totalPlayers = 0;
-            if (teams != null) {
-                for (TeamDTO team : teams) {
-                    if (team.getPlayers() != null) {
-                        totalPlayers += team.getPlayers().size();
-                    }
-                }
-            }
-            stats.totalPlayers = totalPlayers;
-        } catch (Exception e) {
-            stats.totalTeams = 0;
-            stats.totalPlayers = 0;
-        }
-
-        return stats;
+    @FXML
+    private void onInicioClick() {
+        setActiveButton(null);
+        loadHome();
     }
 
     /**
-     * Crea una tarjeta estadística reutilizable para mostrar información resumida.
+     * Alterna entre tema oscuro y tema claro.
      *
-     * @param titleText texto descriptivo de la tarjeta
-     * @param valueText valor principal mostrado en la tarjeta
-     * @return contenedor visual con el contenido de la tarjeta
+     * @param event evento generado al pulsar el botón de cambio de tema
+     */
+    @FXML
+    private void onToggleThemeClick(ActionEvent event) {
+        Scene scene = ((Node) event.getSource()).getScene();
+        scene.getStylesheets().clear();
+
+        if (darkThemeActive) {
+            scene.getStylesheets().add(getClass().getResource(LIGHT_THEME).toExternalForm());
+            darkThemeActive = false;
+            themeToggleButton.setText("Modo oscuro");
+        } else {
+            scene.getStylesheets().add(getClass().getResource(DARK_THEME).toExternalForm());
+            darkThemeActive = true;
+            themeToggleButton.setText("Modo claro");
+        }
+    }
+
+    /**
+     * Cierra la sesión actual y vuelve a la pantalla de login.
+     *
+     * @param event evento generado al pulsar el botón de cerrar sesión
+     */
+    @FXML
+    private void onLogoutClick(ActionEvent event) {
+        SessionManager.clear();
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/login-view.fxml"));
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root, 900, 600);
+            scene.getStylesheets().add(getClass().getResource(DARK_THEME).toExternalForm());
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("ScoutBase - Login");
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Carga la vista de jugadores.
+     *
+     * @param event evento generado al pulsar la opción de jugadores
+     */
+    @FXML
+    private void onJugadoresClick(ActionEvent event) {
+        setActiveButton(jugadoresButton);
+        loadFXML("/scoutbase/players-view.fxml", "Gestión de jugadores");
+    }
+
+    /**
+     * Carga la vista de clubes.
+     *
+     * @param event evento generado al pulsar la opción de clubes
+     */
+    @FXML
+    private void onClubesClick(ActionEvent event) {
+        setActiveButton(clubesButton);
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/clubs-view.fxml"));
+            Parent clubsView = loader.load();
+
+            ClubsController controller = loader.getController();
+
+            String userClubId = resolveDefaultUserClubId();
+            if (userClubId != null) {
+                controller.setSelectedUserClubId(userClubId);
+            }
+
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(clubsView);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            loadPlaceholderSection("Gestión de clubes", "No se pudo cargar la vista de clubes.");
+        }
+    }
+
+    /**
+     * Muestra la sección de estadísticas.
+     *
+     * @param event evento generado al pulsar la opción de estadísticas
+     */
+    @FXML
+    private void onEstadisticasClick(ActionEvent event) {
+        setActiveButton(estadisticasButton);
+        loadFXML("/scoutbase/stats-view.fxml", "Estadísticas");
+    }
+
+    /**
+     * Carga la vista de scouts.
+     *
+     * @param event evento generado al pulsar la opción de scouts
+     */
+    @FXML
+    private void onScoutsClick(ActionEvent event) {
+        setActiveButton(scoutsButton);
+        loadFXML("/scoutbase/scouts-view.fxml", "Gestión de scouts");
+    }
+
+    /**
+     * Carga la vista de usuarios.
+     *
+     * @param event evento generado al pulsar la opción de usuarios
+     */
+    @FXML
+    private void onUsuariosClick(ActionEvent event) {
+        setActiveButton(usuariosButton);
+        loadFXML("/scoutbase/users-view.fxml", "Gestión de usuarios");
+    }
+
+    /**
+     * Carga un archivo FXML dentro del contenedor central del dashboard.
+     *
+     * @param fxmlPath ruta del archivo FXML
+     * @param fallbackTitle título alternativo si falla la carga
+     */
+    private void loadFXML(String fxmlPath, String fallbackTitle) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent view = loader.load();
+
+            contentContainer.getChildren().clear();
+            contentContainer.getChildren().add(view);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            loadPlaceholderSection(fallbackTitle, "No se pudo cargar la vista solicitada.");
+        }
+    }
+
+    /**
+     * Resuelve el UserClub por defecto del usuario autenticado.
+     *
+     * @return identificador UUID del UserClub, o {@code null} si no existe ninguno
+     */
+    private String resolveDefaultUserClubId() {
+        try {
+            UserClubDTO defaultUserClub = userClubService.getDefaultUserClub();
+
+            if (defaultUserClub == null
+                    || defaultUserClub.getId() == null
+                    || defaultUserClub.getId().isBlank()) {
+                return null;
+            }
+
+            return defaultUserClub.getId();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Crea una tarjeta estadística reutilizable.
+     *
+     * @param titleText título de la tarjeta
+     * @param valueText valor mostrado
+     * @return tarjeta visual
      */
     private VBox createStatCard(String titleText, String valueText) {
         Label title = new Label(titleText);
@@ -484,11 +405,11 @@ public class DashboardController {
     }
 
     /**
-     * Crea un bloque informativo reutilizable con título y contenido.
+     * Crea un bloque informativo reutilizable.
      *
      * @param titleText título del bloque
      * @param contentText contenido del bloque
-     * @return contenedor visual con el bloque informativo
+     * @return bloque visual
      */
     private VBox createInfoBox(String titleText, String contentText) {
         Label title = new Label(titleText);
@@ -499,8 +420,8 @@ public class DashboardController {
         content.getStyleClass().add("panel-text");
 
         VBox box = new VBox(10, title, content);
-        box.setPrefWidth(350);
-        box.setMinHeight(220);
+        box.setPrefWidth(500);
+        box.setMinHeight(180);
         box.getStyleClass().add("info-box");
 
         HBox.setHgrow(box, Priority.ALWAYS);
@@ -508,24 +429,10 @@ public class DashboardController {
     }
 
     /**
-     * Aplica un estilo base a los botones de acciones rápidas.
-     *
-     * @param button botón al que se le aplicará el estilo
-     */
-    private void styleActionButton(Button button) {
-        button.setPrefWidth(180);
-        button.setPrefHeight(34);
-        button.getStyleClass().add("quick-action-button");
-    }
-
-    /**
      * Carga una sección provisional en el contenedor central.
      *
-     * <p>Se utiliza como alternativa cuando una vista aún no está implementada
-     * o cuando no ha podido cargarse correctamente.</p>
-     *
-     * @param titleText título principal de la sección
-     * @param descriptionText descripción secundaria
+     * @param titleText título de la sección
+     * @param descriptionText descripción de la sección
      */
     private void loadPlaceholderSection(String titleText, String descriptionText) {
         contentContainer.getChildren().clear();
@@ -538,186 +445,5 @@ public class DashboardController {
         description.getStyleClass().add("section-subtitle");
 
         contentContainer.getChildren().addAll(title, description);
-    }
-
-    /**
-     * Cierra la sesión actual, elimina los datos almacenados
-     * y vuelve a la pantalla de inicio de sesión.
-     *
-     * @param event evento generado al pulsar el botón de cerrar sesión
-     */
-    @FXML
-    private void onLogoutClick(ActionEvent event) {
-        SessionManager.clear();
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/login-view.fxml"));
-            Parent root = loader.load();
-
-            Scene scene = new Scene(root, 900, 600);
-            scene.getStylesheets().add(
-                    getClass().getResource("/scoutbase/dark_theme.css").toExternalForm()
-            );
-
-            Stage stage = (Stage) ((Node) event.getSource())
-                    .getScene()
-                    .getWindow();
-
-            stage.setScene(scene);
-            stage.setTitle("Scoutbase - Login");
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("Error al volver a la pantalla de login");
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Carga la vista de gestión de jugadores en el contenedor principal.
-     *
-     * @param event evento generado al pulsar la opción de jugadores
-     */
-    @FXML
-    private void onJugadoresClick(ActionEvent event) {
-        setActiveButton(jugadoresButton);
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/players-view.fxml"));
-            Parent playersView = loader.load();
-
-            contentContainer.getChildren().clear();
-            contentContainer.getChildren().add(playersView);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            loadPlaceholderSection(
-                    "Gestión de jugadores",
-                    "No se pudo cargar la vista de jugadores."
-            );
-        }
-    }
-
-    /**
-     * Carga la vista de gestión de clubes en el contenedor principal.
-     *
-     * @param event evento generado al pulsar la opción de clubes
-     */
-    @FXML
-    private void onClubesClick(ActionEvent event) {
-        setActiveButton(clubesButton);
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/clubs-view.fxml"));
-            Parent clubsView = loader.load();
-
-            contentContainer.getChildren().clear();
-            contentContainer.getChildren().add(clubsView);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            loadPlaceholderSection(
-                    "Gestión de clubes",
-                    "No se pudo cargar la vista de clubes."
-            );
-        }
-    }
-
-    /**
-     * Muestra la sección de gestión de informes.
-     *
-     * @param event evento generado al pulsar la opción de informes
-     */
-    @FXML
-    private void onInformesClick(ActionEvent event) {
-        setActiveButton(informesButton);
-        loadPlaceholderSection(
-                "Gestión de informes",
-                "Aquí se mostrará el listado de informes, su creación, consulta y administración."
-        );
-    }
-
-    /**
-     * Muestra la sección de estadísticas del sistema.
-     *
-     * @param event evento generado al pulsar la opción de estadísticas
-     */
-    @FXML
-    private void onEstadisticasClick(ActionEvent event) {
-        setActiveButton(estadisticasButton);
-        loadPlaceholderSection(
-                "Estadísticas del sistema",
-                "Aquí se mostrarán métricas globales del sistema, resúmenes de actividad y datos agregados."
-        );
-    }
-
-    /**
-     * Carga la vista de gestión de scouts en el contenedor principal.
-     *
-     * @param event evento generado al pulsar la opción de scouts
-     */
-    @FXML
-    private void onScoutsClick(ActionEvent event) {
-        setActiveButton(scoutsButton);
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/scouts-view.fxml"));
-            Parent scoutsView = loader.load();
-
-            contentContainer.getChildren().clear();
-            contentContainer.getChildren().add(scoutsView);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            loadPlaceholderSection(
-                    "Gestión de scouts",
-                    "No se pudo cargar la vista de scouts."
-            );
-        }
-    }
-
-    /**
-     * Carga la vista de gestión de usuarios en el contenedor principal.
-     *
-     * @param event evento generado al pulsar la opción de usuarios
-     */
-    @FXML
-    private void onUsuariosClick(ActionEvent event) {
-        setActiveButton(usuariosButton);
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scoutbase/users-view.fxml"));
-            Parent usersView = loader.load();
-
-            contentContainer.getChildren().clear();
-            contentContainer.getChildren().add(usersView);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            loadPlaceholderSection(
-                    "Gestión de usuarios",
-                    "No se pudo cargar la vista de usuarios."
-            );
-        }
-    }
-
-    /**
-     * Clase interna utilizada para encapsular estadísticas básicas del dashboard.
-     */
-    private static class DashboardStats {
-
-        /**
-         * Número total de clubes disponibles.
-         */
-        private int totalClubs;
-
-        /**
-         * Número total de equipos disponibles.
-         */
-        private int totalTeams;
-
-        /**
-         * Número total de jugadores detectados a partir de los equipos cargados.
-         */
-        private int totalPlayers;
     }
 }
