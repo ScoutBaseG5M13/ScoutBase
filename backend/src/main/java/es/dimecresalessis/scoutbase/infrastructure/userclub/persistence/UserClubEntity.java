@@ -33,7 +33,7 @@ public class UserClubEntity extends CommonEntity {
 
     @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(nullable = false, columnDefinition = "uuid ARRAY")
-    private List<UUID> adminUserIds = Collections.emptyList();;
+    private List<UUID> adminUserIds = Collections.emptyList();
 
     @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(columnDefinition = "uuid ARRAY")
