@@ -4,6 +4,7 @@ import es.dimecresalessis.scoutbase.domain.shared.domain.CategoryEnum;
 import es.dimecresalessis.scoutbase.domain.shared.domain.SubcategoryEnum;
 import lombok.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ public class Team {
     private String name;
     private CategoryEnum category;
     private SubcategoryEnum subcategory;
-    private List<UUID> players;
+    private List<UUID> players = Collections.emptyList();
 
     @Builder
     public Team(UUID id, String name, CategoryEnum category, SubcategoryEnum subcategory, List<UUID> players, UUID clubId) {
@@ -25,7 +26,7 @@ public class Team {
         this.name = name;
         this.category = category;
         this.subcategory = subcategory;
-        this.players = players;
+        this.players = players != null ? players : Collections.emptyList();
     }
 
     public void matchWithObject(Team incoming) {

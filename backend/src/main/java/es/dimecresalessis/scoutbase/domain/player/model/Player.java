@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ public class Player {
     private int number;
     private PositionEnum position;
     private int priority;
-    private List<UUID> stats;
+    private List<UUID> stats = Collections.emptyList();
 
     @Builder
     public Player(UUID id, UUID teamId, String name, String surname, int birthYear, String email,
@@ -36,7 +37,7 @@ public class Player {
         this.number = number;
         this.position = position;
         this.priority = priority;
-        this.stats = stats;
+        this.stats = stats != null ? stats : Collections.emptyList();
     }
 
     public void matchWithObject(Player incoming) {

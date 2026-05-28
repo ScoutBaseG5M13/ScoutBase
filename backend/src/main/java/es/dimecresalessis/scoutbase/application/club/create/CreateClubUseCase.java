@@ -52,9 +52,6 @@ public class CreateClubUseCase {
         clubRepository.save(club);
         logger.info("[CREATE] Created Club with id '{}'", club.getId());
 
-        if (userClub.get().getManagedClubs() == null || userClub.get().getManagedClubs().isEmpty()) {
-            userClub.get().setManagedClubs(new ArrayList<>());
-        }
         userClub.get().getManagedClubs().add(club.getId());
         userClubRepository.save(userClub.get());
         logger.info("[UPDATE] Updated UserClub '{}' and added the Club {}", userClubId, club.getId());

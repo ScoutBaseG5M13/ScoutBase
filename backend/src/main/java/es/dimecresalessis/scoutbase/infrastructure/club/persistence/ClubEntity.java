@@ -12,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,8 +32,8 @@ public class ClubEntity extends CommonEntity {
     private String name;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = true, columnDefinition = "uuid ARRAY")
-    private List<UUID> teams;
+    @Column(columnDefinition = "uuid ARRAY")
+    private List<UUID> teams = Collections.emptyList();
 
     @Column(nullable = false)
     private UUID userClub;
