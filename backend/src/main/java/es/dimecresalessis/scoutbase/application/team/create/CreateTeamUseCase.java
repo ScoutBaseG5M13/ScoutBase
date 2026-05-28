@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,9 +55,6 @@ public class CreateTeamUseCase {
         teamRepository.save(team);
         logger.info("[CREATE] Created Team '{}'", team.getId());
 
-        if (club.get().getTeams() == null || club.get().getTeams().isEmpty()) {
-            club.get().setTeams(new ArrayList<>());
-        }
         club.get().getTeams().add(team.getId());
         clubRepository.save(club.get());
         logger.info("[UPDATE] Updated Club '{}' and added the Team {}", team.getId(), club.get().getId());

@@ -6,10 +6,14 @@ import es.dimecresalessis.scoutbase.domain.userclub.exception.UserClubException;
 import es.dimecresalessis.scoutbase.domain.userclub.model.UserClub;
 import es.dimecresalessis.scoutbase.domain.userclub.repository.UserClubRepository;
 import es.dimecresalessis.scoutbase.domain.user.model.User;
+import es.dimecresalessis.scoutbase.domain.userteam.exception.UserTeamException;
+import es.dimecresalessis.scoutbase.domain.userteam.model.UserTeam;
+import es.dimecresalessis.scoutbase.domain.userteam.repository.UserTeamRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -20,6 +24,7 @@ import java.util.UUID;
 public class FindUserClubByUserTeamUseCase {
 
     private final UserClubRepository userClubRepository;
+    private final UserTeamRepository userTeamRepository;
 
     /**
      * Executes the search for a specific {@link UserClub} that contains a given team ID.
@@ -29,10 +34,12 @@ public class FindUserClubByUserTeamUseCase {
      * @throws UserClubException If no club is found that matches the provided team ID.
      */
     public UserClub execute(UUID teamId) {
-        List<UserClub> userClubs = userClubRepository.findAll();
-        return userClubs.stream()
-                .filter(c -> c.getUserTeams() != null && c.getUserTeams().contains(teamId))
-                .findFirst()
-                .orElseThrow(() -> new UserClubException(ErrorEnum.NO_USER_CLUB_HAS_BEEN_FOUND));
+        UserTeam userTeam = userTeamRepository.findById(teamId)
+                .orElseThrow(() -> new UserTeamException(ErrorEnum.USER_TEAM_NOT_FOUND, teamId.toString()));
+        Optional<UserClub> userClub = userClubRepository.findById(userTeam.getUserClub());
+        if (userClub.isPresent()) {
+            return userClub.get();
+        }
+        throw new UserClubException(ErrorEnum.NO_USER_CLUB_HAS_BEEN_FOUND);
     }
 }

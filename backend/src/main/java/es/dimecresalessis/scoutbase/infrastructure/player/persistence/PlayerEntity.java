@@ -7,6 +7,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,6 +44,6 @@ public class PlayerEntity extends CommonEntity {
     private int priority;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(nullable = true, columnDefinition = "uuid ARRAY")
-    private List<UUID> stats;
+    @Column(columnDefinition = "uuid ARRAY")
+    private List<UUID> stats = Collections.emptyList();
 }

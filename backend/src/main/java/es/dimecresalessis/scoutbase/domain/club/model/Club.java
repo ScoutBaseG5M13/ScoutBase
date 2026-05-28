@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,14 +16,14 @@ public class Club {
 
     private UUID id;
     private String name;
-    private List<UUID> teams;
+    private List<UUID> teams = Collections.emptyList();
     private UUID userClub;
 
     @Builder
     public Club(UUID id, String name, List<UUID> teams, UUID userClub) {
         this.id = (id == null) ? UUID.randomUUID() : id;
         this.name = name;
-        this.teams = teams;
+        this.teams = teams != null ? teams : Collections.emptyList();
         this.userClub = userClub;
     }
 

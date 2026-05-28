@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-
 /**
  * Use case for creating a {@link UserTeam}.
  */
@@ -47,9 +45,7 @@ public class CreateUserTeamUseCase {
 
         userTeamRepository.save(userTeam);
         logger.info("[CREATE] Created Team '{}'", userTeam.getId());
-        if (userClub.getUserTeams() == null || userClub.getUserTeams().isEmpty()) {
-            userClub.setUserTeams(new ArrayList<>());
-        }
+
         userClub.getUserTeams().add(userTeam.getId());
         userClubRepository.save(userClub);
         logger.info("[UPDATE] Updated Club '{}' and added the Team {}", userTeam.getId(), userClub.getId());
