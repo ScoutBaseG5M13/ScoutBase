@@ -186,7 +186,9 @@ public class TeamController {
     @GetMapping(Routes.CATEGORIES)
     @Operation(summary = "Gets all categories", description = "Get all CategoryEnum")
     public ResponseEntity<ApiResponse<List<CategoryEnumDTO>>> getCategories() {
-        List<CategoryEnumDTO> categories = Arrays.stream(CategoryEnum.values()).map(categoryMapper::domainToDTO).toList();
+        List<CategoryEnumDTO> categories = Arrays.stream(CategoryEnum.values())
+                .map(categoryMapper::domainToDTO)
+                .toList();
         return handleResponse(categories).ok();
     }
 

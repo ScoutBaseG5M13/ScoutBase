@@ -22,7 +22,7 @@ public interface CategoryMapper {
     @Named("toSubcategoryDTOList")
     default List<String> toSubcategoryDTOList(List<SubcategoryEnum> subcategories) {
         return subcategories.stream()
-                .map(SubcategoryEnum::getSubcategoryName)
+                .map(SubcategoryEnum::name)
                 .toList();
     }
 }
